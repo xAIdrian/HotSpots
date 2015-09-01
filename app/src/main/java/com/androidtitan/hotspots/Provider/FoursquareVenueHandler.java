@@ -29,6 +29,7 @@ import java.util.List;
 public class FoursquareVenueHandler {
     private static String TAG = "FoursquareVenueHandler";
 
+    //test
     DatabaseHelper databaseHelper;
     VenueProvider venueProvider;
 
