@@ -1,0 +1,76 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:descendantFocusability="blocksDescendants"
+    android:focusableInTouchMode="false">
+
+    <RelativeLayout
+        android:id="@+id/landing_header"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_alignParentTop="true"
+        android:clipToPadding="false"
+        android:clipChildren="false">
+        <!-- Or we could try setting the height of the layour to 150 -->
+
+        <!-- ImageView.  It will be seen behind our Filter -->
+        <ImageView
+            android:id="@+id/backhround_img"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/chicago"
+            android:scaleType="centerCrop"/>
+
+        <TextView
+            android:id="@+id/welcome_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:background="@color/colorTransparentPrimary"
+            android:text="@string/landing_welcome"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"/>
+
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/champion_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/landing_header"
+        android:clickable="true"
+        android:drawSelectorOnTop="true"
+        android:focusable="true" />
+
+    <TextView
+        android:id="@+id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:gravity="center"
+        android:padding="30dp"
+        android:text="@string/emptyListview"
+        android:textColor="@color/colorDivider"
+        android:visibility="gone"/>
+
+    <!-- Shadow -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:layout_below="@id/landing_header"
+        android:background="@drawable/dropshadow" />
+
+    <ImageButton
+        android:id="@+id/submitImageButton"
+        android:layout_margin="15dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:src="@drawable/icon_submit"
+        android:background="@drawable/circle"
+        android:focusable="true"/>
+
+
+</RelativeLayout>
+

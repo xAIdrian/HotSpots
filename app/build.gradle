@@ -1,0 +1,39 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
+    defaultConfig {
+        applicationId 'com.androidtitan.hotspots'
+        minSdkVersion 15
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets { main { java.srcDirs = ['src/main/java', 'src/test/java/'] } }
+    productFlavors {
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile files('src/main/res/libs/swipeactionadapter-1.4.3.jar')
+    compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'com.google.android.gms:play-services:7.5.0'
+}
+
+/*
+If we wanted to be selective with our Google Play Services in order to limit the size of our application,
+we would use these compilers:
+
+Google Location, Activity Recognition, and Places	com.google.android.gms:play-services-location:7.5.0
+Google Maps	                                        com.google.android.gms:play-services-maps:7.5.0
+
+We will experiment with this later when we are sure what we need for this app
+ */

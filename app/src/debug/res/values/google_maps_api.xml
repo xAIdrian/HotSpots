@@ -1,0 +1,18 @@
+<resources>
+    <!--
+    TODO: Before you run your application, you need a Google Maps API key.
+
+    To get one, follow this link, follow the directions and press "Create" at the end:
+
+https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=6D:D0:DA:ED:87:CF:66:8D:16:8F:58:DF:34:25:AC:8B:F8:33:15:F9%3Bcom.androidtitan.trooptracker.Activity
+
+    You can also add your credentials to an existing key, using this line:
+    6D:D0:DA:ED:87:CF:66:8D:16:8F:58:DF:34:25:AC:8B:F8:33:15:F9;com.androidtitan.trooptracker.Activity
+
+    Once you have your key (it starts with "AIza"), replace the "google_maps_key"
+    string in this file.
+    -->
+    <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
+        AIzaSyCoThx7YmDUtoTSbH7b5EaPW175ujtyfZI
+    </string>
+</resources>
