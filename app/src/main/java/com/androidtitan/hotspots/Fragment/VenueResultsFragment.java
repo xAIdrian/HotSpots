@@ -16,6 +16,8 @@ import android.widget.SimpleCursorAdapter;
 
 import com.androidtitan.hotspots.Activity.MapsActivity;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
+import com.androidtitan.hotspots.Data.LocationBundle;
+import com.androidtitan.hotspots.Provider.FoursquareHandler;
 import com.androidtitan.hotspots.Provider.VenueProvider;
 import com.androidtitan.hotspots.R;
 
@@ -25,7 +27,9 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
 
     DatabaseHelper databaseHelper;
 
-    String locationName;
+    LocationBundle focusLocation;
+//    String locationName;
+    int locationIndex;
 
     private static final String[] PROJECTION = new String[] {
             VenueProvider.InterfaceConstants.id,
@@ -48,7 +52,13 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         super.onCreate(savedInstanceState);
         databaseHelper = DatabaseHelper.getInstance(getActivity());
 
-        locationName = getArguments().getString(MapsActivity.venueFragmentString);
+        locationIndex = getArguments().getInt(MapsActivity.venueFragmentLocIndex);
+        focusLocation = databaseHelper.getLocationBundle(locationIndex);
+
+        if(databaseHelper.getAllVenuesFromLocation(focusLocation).size() == 0) {
+            new FoursquareHandler(getActivity(), focusLocation.getLatlng().latitude,
+                    focusLocation.getLatlng().longitude, locationIndex);
+        }
 
         String[] dataColumns = { VenueProvider.InterfaceConstants.venue_name };
         int[] viewItems = { R.id.nameTextView };
@@ -95,9 +105,9 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-        Log.e(TAG, "pre-cursorLoader locationName: " + locationName);
+        Log.e(TAG, "pre-cursorLoader locationName: " + focusLocation.getLocalName());
 
-        return new CursorLoader(getActivity(), Uri.parse(VenueProvider.base_CONTENT_URI + locationName ), //+ "/" + locationName
+        return new CursorLoader(getActivity(), Uri.parse(VenueProvider.base_CONTENT_URI + focusLocation.getLocalName() ),
                 PROJECTION, null, null, null);
     }
 

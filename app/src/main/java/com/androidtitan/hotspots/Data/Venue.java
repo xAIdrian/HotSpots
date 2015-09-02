@@ -9,11 +9,14 @@ public class Venue {
     private String venueIdString;
     private float rating;
 
+    private long location_id;
+
     public Venue() {
         this.name = "";
         this.city = "";
         this.setCategory("");
         this.venueIdString = "";
+
     }
 
     public String getCity() {
@@ -68,6 +71,14 @@ public class Venue {
 
     public void setRating(float rating) {
         this.rating = rating;
+    }
+
+    public long getLocation_id() {
+        return location_id;
+    }
+
+    public void setLocation_id(long location_id) {
+        this.location_id = location_id;
     }
 }
 

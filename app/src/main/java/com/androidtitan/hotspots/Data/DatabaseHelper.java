@@ -46,10 +46,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
    //venues table
     public static final String KEY_VENUE_NAME = "venue_name";
-    private static final String KEY_VENUE_CITY = "venue_city";
-    private static final String KEY_VENUE_CATEGORY = "venue_category";
-    private static final String KEY_VENUE_STRING = "venue_string";
-    private static final String KEY_VENUE_RATING = "venue_rating";
+    public static final String KEY_VENUE_CITY = "venue_city";
+    public static final String KEY_VENUE_CATEGORY = "venue_category";
+    public static final String KEY_VENUE_STRING = "venue_string";
+    public static final String KEY_VENUE_RATING = "venue_rating";
+    public static final String KEY_VENUE_LOCATION_ID = "assignedLocation";
 
     //coordinates_venues table
     public static final String KEY_COORDS_ID = "coords_id";
@@ -76,12 +77,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //Venues Table
     private static final String CREATE_TABLE_VENUES = "CREATE TABLE " + TABLE_VENUES
-            + "(" + KEY_ID + " INTEGER PRIMARY KEY, "
+            + "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + KEY_VENUE_NAME + " TEXT,"
             + KEY_VENUE_CITY + " TEXT,"
             + KEY_VENUE_CATEGORY + " TEXT, "
             + KEY_VENUE_STRING + " TEXT,"
-            + KEY_VENUE_RATING + " REAL" + ")";
+            + KEY_VENUE_RATING + " REAL, "
+            + KEY_VENUE_LOCATION_ID + " INTEGER" + ")";
 
 
     //Venue-Location Table
@@ -321,6 +323,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_VENUE_CATEGORY, venue.getCategory());
         values.put(KEY_VENUE_STRING, venue.getVenueIdString());
         values.put(KEY_VENUE_RATING, venue.getRating());
+        values.put(KEY_VENUE_LOCATION_ID, venue.getLocation_id());
 
         //insert row
         long venue_id = database.insert(TABLE_VENUES, null, values);
@@ -367,6 +370,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         v.setCategory(cursor.getString(cursor.getColumnIndex(KEY_VENUE_CATEGORY)));
         v.setVenueIdString(cursor.getString(cursor.getColumnIndex(KEY_VENUE_STRING)));
         v.setRating(cursor.getFloat(cursor.getColumnIndex(KEY_VENUE_RATING)));
+        v.setLocation_id(cursor.getInt(cursor.getColumnIndex(KEY_VENUE_LOCATION_ID)));
 
         return v;
     }
@@ -391,6 +395,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 v.setCategory(cursor.getString(cursor.getColumnIndex(KEY_VENUE_CATEGORY)));
                 v.setVenueIdString(cursor.getString(cursor.getColumnIndex(KEY_VENUE_STRING)));
                 v.setRating(cursor.getFloat(cursor.getColumnIndex(KEY_VENUE_RATING)));
+                v.setLocation_id(cursor.getInt(cursor.getColumnIndex(KEY_VENUE_LOCATION_ID)));
 
                 allVenues.add(v);
 
@@ -427,6 +432,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 v.setCategory(cursor.getString(cursor.getColumnIndex(KEY_VENUE_CATEGORY)));
                 v.setVenueIdString(cursor.getString(cursor.getColumnIndex(KEY_VENUE_STRING)));
                 v.setRating(cursor.getFloat(cursor.getColumnIndex(KEY_VENUE_RATING)));
+                v.setLocation_id(cursor.getInt(cursor.getColumnIndex(KEY_VENUE_LOCATION_ID)));
 
                 venuesByLoc.add(v);
 
@@ -447,6 +453,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_VENUE_CATEGORY, venue.getCategory());
         values.put(KEY_VENUE_STRING, venue.getVenueIdString());
         values.put(KEY_VENUE_RATING, venue.getRating());
+        values.put(KEY_VENUE_LOCATION_ID, venue.getLocation_id());
 
         //updating row
         return database.update(TABLE_VENUES, values, KEY_ID + " = ?", new String[] { String.valueOf(venue.getId()) });
@@ -486,6 +493,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 v.setCategory(cursor.getString(cursor.getColumnIndex(KEY_VENUE_CATEGORY)));
                 v.setVenueIdString(cursor.getString(cursor.getColumnIndex(KEY_VENUE_STRING)));
                 v.setRating(cursor.getFloat(cursor.getColumnIndex(KEY_VENUE_RATING)));
+                v.setLocation_id(cursor.getInt(cursor.getColumnIndex(KEY_VENUE_LOCATION_ID)));
 
                 Log.e("DBHprintVenuesLocation", cursor.getInt(cursor.getColumnIndex(KEY_ID)) +
                         " name: " + cursor.getString(cursor.getColumnIndex(KEY_VENUE_NAME)) + ", city: " +
@@ -513,6 +521,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 v.setCategory(cursor.getString(cursor.getColumnIndex(KEY_VENUE_CATEGORY)));
                 v.setVenueIdString(cursor.getString(cursor.getColumnIndex(KEY_VENUE_STRING)));
                 v.setRating(cursor.getFloat(cursor.getColumnIndex(KEY_VENUE_RATING)));
+                v.setLocation_id(cursor.getInt(cursor.getColumnIndex(KEY_VENUE_LOCATION_ID)));
 
                 Log.e("DBHprintALLvenues", cursor.getInt(cursor.getColumnIndex(KEY_ID)) +
                         " name: " + cursor.getString(cursor.getColumnIndex(KEY_VENUE_NAME)) + ", city: " +

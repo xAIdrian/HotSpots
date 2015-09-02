@@ -25,7 +25,6 @@ import android.widget.Toast;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.LocationBundle;
 import com.androidtitan.hotspots.Fragment.VenueResultsFragment;
-import com.androidtitan.hotspots.Provider.FoursquareHandler;
 import com.androidtitan.hotspots.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -54,7 +53,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private DatabaseHelper databaseHelper;
     private VenueResultsFragment venueFragment;
     private String venueFragmentTag = "venueFragment";
-    public static final String venueFragmentString = "venueFragString";
+    public static final String venueFragmentLocIndex = "venueFragString";
 
     private GoogleMap map; // Might be null if Google Play services APK is not available.
     private GoogleMapOptions options = new GoogleMapOptions();
@@ -190,7 +189,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //this is our Critical Logic
         isLocked = focusLocation.getIsLocationLocked();
         hasVisitedMaps = focusLocation.getVisistedMap();
-                Log.e(TAG, "hasVisitedMaps: " + hasVisitedMaps);
 
         if (!isLocked) {
             //they've already been here
@@ -244,8 +242,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
 
-                Log.e(TAG, "initial FABstatus: " + FABstatus);
-
                 final LocationManager manager = (LocationManager)
                         getSystemService(Context.LOCATION_SERVICE);
                 lastLocation = LocationServices.FusedLocationApi.getLastLocation(
@@ -291,9 +287,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             }, slideOut.getDuration());
 
                         }
+                            Log.e("!!!!!!!!!!!!!", "All Venues");
+                            databaseHelper.printVenuesTable();
+                            Log.e("!!!!!!!!!!!!!", "Venues By Location");
+                            databaseHelper.printVenuesByLocation(focusLocation);
+                            Log.e("!!!!!!!!!!!!!", "Linking Table");
+                            databaseHelper.printLinkingTable();
+
                             break;
 
-                        case 1: //ADD fab
+                        case 1: //ADD FAB
 
                             markConfirmLayout.setVisibility(View.VISIBLE);
                             markConfirmCancel.setVisibility(View.VISIBLE);
@@ -326,42 +329,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                             break;
 
-                        case 2:
-                            //navigate to Yelp/Foursquare API or display dialog
-                            /*final AlertDialog.Builder fourSquareDialog = new AlertDialog.Builder(MapsActivity.this);
+                        case 2: //SUBMIT fab
 
-                            aDawg.setTitle("You are Super Cool!")
-                                    .setMessage("There are 37 locations nearby with an" +
-                                            "average rating of 7.6.\nGreat Job!")
-                                    .setPositiveButton("All Venues", new DialogInterface.OnClickListener() {
-
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            databaseHelper.printVenuesTable();
-                                            dialog.dismiss();
-                                        }
-                                    })
-                                    .setNegativeButton("Your Venues", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            databaseHelper.printVenuesByLocation(focusLocation);
-                                            //databaseHelper.printLinkingTable();
-                                            dialog.dismiss();
-                                        }
-                                    });
-                            aDawg.show();
-*/
-                            databaseHelper.printVenuesByLocation(focusLocation);
-
-                            if(!isLocked) {
-                                new FoursquareHandler(MapsActivity.this, focusLocation.getLatlng().latitude,
-                                        focusLocation.getLatlng().longitude, locationIndex);
-
-                            }
-
+//MapsActivity.this, focusLocation.getLatlng().latitude,
+                            // focusLocation.getLatlng().longitude, locationIndex
 
                             Bundle venueBundle = new Bundle();
-                            venueBundle.putString(venueFragmentString, focusLocation.getLocalName());
+
+                            venueBundle.putInt(venueFragmentLocIndex, locationIndex);
+
+
                             FragmentTransaction fragTran = getFragmentManager().beginTransaction();
                             venueFragment.setArguments(venueBundle);
                             fragTran.add(R.id.container, venueFragment, venueFragmentTag)
@@ -384,7 +361,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                             break;
 
-                        case 3:
+                        case 3: //BACK-SUBMIT fab
 
                             getFragmentManager().popBackStack();
 
@@ -520,7 +497,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onConnected(Bundle bundle) {
-        Log.e("APIclientConnected?", "Connection Suspended!");
         slidein = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slidin_bottom);
         slideOut = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slideout_bottom);
         leftSlideIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slidein_left);
@@ -681,7 +657,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (setLatLang != null) {
             starterLocation = setLatLang;
-            Log.e(TAG, "setLatLang !- null:" + starterLocation);
 
         } else {
 
@@ -694,7 +669,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 zoom = CameraUpdateFactory.zoomTo(10);
             } else {
                 starterLocation = focusLocation.getLatlng();
-                Log.e(TAG, "setLatLng == null" + starterLocation);
 
             }
         }
@@ -778,7 +752,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
             else {
-                Log.e(TAG, "lockeractivityelsestatemeny");
             }
 
         } else {
@@ -869,7 +842,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
                             //delete actions
                             LocationBundle tempLoc = soldierLocations.get(locationIndex);
-                            Log.e("MAdeleteAlertDialog", tempLoc.getLocalName());
                             databaseHelper.deleteLocation(tempLoc);
 
                             soldierLocations = databaseHelper.getAllLocationsBySoldier(focusSoldier);

@@ -24,8 +24,6 @@ public class VenueProvider extends ContentProvider {
     public static final String AUTHORITY = "com.androidtitan.hotspots.Provider.VenueProvider";
     public static final String BASE_PATH = DatabaseHelper.TABLE_VENUES;
 
-    private String uriMatcherInput = "";
-
     public static String base_CONTENT_URI = "content://" + AUTHORITY
             + "/" + BASE_PATH + "/";
 
@@ -126,13 +124,55 @@ public class VenueProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
+        int uriType = uriMatcher.match(uri);
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
-        long id = 0;
-        switch(uriMatcher.match(uri)) {
+        long insertId = 0;
+        switch(uriType) {
             case GET_ONE:
 
-                //id = database.insert(DatabaseHelper.TABLE_VENUES, null, values);
+                insertId = database.insert(DatabaseHelper.TABLE_VENUES, null, values);
+
+                break;
+
+            case GET_ALL:
+                break;
+
+            case GET_SELECT:
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unknown URI: " + uri);
+        }
+
+        Log.e(TAG,"KEY_ID " + uri.getLastPathSegment()
+                + " KEY_LOCATION_ID " + values.getAsLong(DatabaseHelper.KEY_VENUE_LOCATION_ID));
+        databaseHelper.assignVenueToLocation(Long.valueOf(uri.getLastPathSegment()),
+                values.getAsLong(DatabaseHelper.KEY_VENUE_LOCATION_ID));
+
+        getContext().getContentResolver().notifyChange(uri, null);
+        return Uri.parse(DatabaseHelper.TABLE_VENUES + "/" + insertId);
+
+    }
+
+    @Override
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+
+        return 0;
+    }
+
+    @Override
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        int uriType = uriMatcher.match(uri);
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
+
+        int updateId = 0;
+
+        switch(uriType) {
+            case GET_ONE:
+
+                updateId = database.update(DatabaseHelper.TABLE_VENUES, values, null, null);
+
                 break;
 
             case GET_ALL:
@@ -146,20 +186,7 @@ public class VenueProvider extends ContentProvider {
         }
 
         getContext().getContentResolver().notifyChange(uri, null);
-        return Uri.parse(DatabaseHelper.TABLE_VENUES + "/" + id);
-
-    }
-
-    @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
-
-        return 0;
-    }
-
-    @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        getContext().getContentResolver().notifyChange(uri, null);
-        return Integer.valueOf(uri.getLastPathSegment());
+        return updateId;
     }
 
     /*

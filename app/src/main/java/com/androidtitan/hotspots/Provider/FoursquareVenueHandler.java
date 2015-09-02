@@ -1,6 +1,8 @@
 package com.androidtitan.hotspots.Provider;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -144,15 +146,12 @@ public class FoursquareVenueHandler {
                     if(innerJObject.has("rating")) {
                         String rating = innerJObject.getString("rating");
 
-                        focusVenue.setRating(Float.parseFloat((rating)));
-                        databaseHelper.updateVenue(focusVenue);
-                        venueProvider.update(Uri.parse(VenueProvider.base_CONTENT_URI + focusVenue.getId()),
-                                null, null, null);
+/**/                        focusVenue.setRating(Float.parseFloat((rating)));
 
-                        //Log.e(TAG, focusVenue.getName() + " : " + focusVenue.getRating());
+                        createrHandler(focusVenue);
+
                     }
                     else {
-                        //Log.e(TAG, "no rating");
                     }
                 }
 
@@ -161,6 +160,26 @@ public class FoursquareVenueHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+    }
+
+    public void createrHandler(Venue venue) {
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        //try/catch?
+        values.put(DatabaseHelper.KEY_ID, venue.getId());
+        values.put(DatabaseHelper.KEY_VENUE_NAME, venue.getName());
+        values.put(DatabaseHelper.KEY_VENUE_CITY, venue.getCity());
+        values.put(DatabaseHelper.KEY_VENUE_CATEGORY, venue.getCategory());
+        values.put(DatabaseHelper.KEY_VENUE_STRING, venue.getVenueIdString());
+        values.put(DatabaseHelper.KEY_VENUE_RATING, venue.getRating());
+        values.put(DatabaseHelper.KEY_VENUE_LOCATION_ID, venue.getLocation_id());
+
+        //insert row
+        context.getContentResolver().update(Uri.parse(VenueProvider.base_CONTENT_URI + focusVenue.getId()), values,
+                null, null);
 
     }
 

@@ -1,6 +1,8 @@
 package com.androidtitan.hotspots.Provider;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -30,6 +32,8 @@ public class FoursquareHandler {
     DatabaseHelper databaseHelper;
     VenueProvider venueProvider;
 
+    int venueIndexOverride;
+
     public static final String CLIENT_ID = "CE1BU4JLX2UL5ESYMNKRO14QBOMDCKXONG55XUCBX1MEAPRW";
     public static final String CLIENT_SECRET = "NQ01XNIA4CM0WID0QWML5LSSCU1UU4QDUBFVGUZHNIESGEVT";
 
@@ -48,6 +52,8 @@ public class FoursquareHandler {
         this.longitude = String.valueOf(longitude);
         this.location_id = location_id;
         locationHandle = databaseHelper.getAllLocations().get(location_id);
+
+        this.venueIndexOverride = databaseHelper.getAllVenues().size();
 
         new fourquare().execute();
     }
@@ -80,7 +86,6 @@ public class FoursquareHandler {
                 // all things went right
                 parseFoursquare(tempString);
 
-                Log.e(TAG, "size: " + databaseHelper.getAllVenuesFromLocation(locationHandle));
                 //now we are getting the rating for each...
                 for(Venue freshVenue : databaseHelper.getAllVenuesFromLocation(locationHandle)) {
                     new FoursquareVenueHandler(context, freshVenue.getId());
@@ -136,14 +141,17 @@ public class FoursquareHandler {
                     JSONArray jsonArray = jsonObject.getJSONObject("response").getJSONArray("venues");
 
                     for (int i = 0; i < jsonArray.length(); i++) {
+
                         Venue poi = new Venue();
+/**/                        poi.setLocation_id(location_id);
+
                         if (jsonArray.getJSONObject(i).has("name")) {
                             poi.setName(jsonArray.getJSONObject(i).getString("name"));
 
                             if (jsonArray.getJSONObject(i).has("location")) {
                                 if (jsonArray.getJSONObject(i).getJSONObject("location").has("address")) {
                                     if (jsonArray.getJSONObject(i).getJSONObject("location").has("city")) {
-                                        poi.setCity(jsonArray.getJSONObject(i).getJSONObject("location").getString("city"));
+    /**/                                    poi.setCity(jsonArray.getJSONObject(i).getJSONObject("location").getString("city"));
                                     }
 
                                     ////////////////////////////
@@ -151,22 +159,24 @@ public class FoursquareHandler {
                                     //we will use this for another URI query and get more detailed information on the venue!!!
                                     if (jsonArray.getJSONObject(i).has("id")) {
                                         //Log.e(TAG, "realVenueId: " + jsonArray.getJSONObject(i).getString("id"));
-                                        poi.setVenueIdString(jsonArray.getJSONObject(i).getString("id"));
+/**/                                        poi.setVenueIdString(jsonArray.getJSONObject(i).getString("id"));
                                     }
 
                                     //////////////////////////
                                     if (jsonArray.getJSONObject(i).has("categories")) {
                                         if (jsonArray.getJSONObject(i).getJSONArray("categories").length() > 0) {
                                             if (jsonArray.getJSONObject(i).getJSONArray("categories").getJSONObject(0).has("icon")) {
-                                                poi.setCategory(jsonArray.getJSONObject(i).getJSONArray("categories").getJSONObject(0).getString("name"));
+/**/                                                poi.setCategory(jsonArray.getJSONObject(i).getJSONArray("categories").getJSONObject(0).getString("name"));
                                             }
                                         }
                                     }
 
                                     //todo: uri & ContentValues
 
-                                    databaseHelper.createVenue(poi, location_id);
-                                    venueProvider.insert(Uri.parse(VenueProvider.base_CONTENT_URI + poi.getId()), null);
+                                    venueIndexOverride ++;
+ /**/                                   poi.setId(venueIndexOverride);
+                                    creater(poi);
+
                                     //databaseHelper.assignVenueToLocation();
 
                                     //todo:
@@ -188,9 +198,30 @@ public class FoursquareHandler {
 
     }
 
-    public void setJSONvenueRating(Venue poi) {
 
+    public void creater(Venue venue) {
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
+
+        long id = 0;
+        ContentValues values = new ContentValues();
+
+        Log.e(TAG, venueProvider.base_CONTENT_URI + venue.getId());
+
+        //try/catch?
+        //values.put(DatabaseHelper.KEY_ID, venue.getId());
+        values.put(DatabaseHelper.KEY_VENUE_NAME, venue.getName());
+        values.put(DatabaseHelper.KEY_VENUE_CITY, venue.getCity());
+        values.put(DatabaseHelper.KEY_VENUE_CATEGORY, venue.getCategory());
+        values.put(DatabaseHelper.KEY_VENUE_STRING, venue.getVenueIdString());
+        values.put(DatabaseHelper.KEY_VENUE_RATING, venue.getRating());
+        values.put(DatabaseHelper.KEY_VENUE_LOCATION_ID, venue.getLocation_id());
+
+
+        //insert row
+        context.getContentResolver().insert(Uri.parse(venueProvider.base_CONTENT_URI + venueIndexOverride), values);
 
     }
+
+
 }
 
