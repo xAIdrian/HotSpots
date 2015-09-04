@@ -51,9 +51,9 @@ public class ChampionCursorAdapter extends SimpleCursorAdapter {
 
         Cursor myCursor = c;
 
-        int nameColumn = myCursor.getColumnIndex(DatabaseHelper.KEY_LOCAL);
-        int latColumn = myCursor.getColumnIndex(DatabaseHelper.KEY_LATITUDE);
-        int longColumn = myCursor.getColumnIndex(DatabaseHelper.KEY_LONGITUDE);
+        int nameColumn = myCursor.getColumnIndex(DatabaseHelper.KEY_LOCAL_NAME);
+        //int latColumn = myCursor.getColumnIndex(DatabaseHelper.KEY_LATITUDE);
+        //int longColumn = myCursor.getColumnIndex(DatabaseHelper.KEY_LONGITUDE);
         int lockedColumn = myCursor.getColumnIndex(DatabaseHelper.KEY_LOCKED);
 
         String firstName = myCursor.getString(nameColumn);

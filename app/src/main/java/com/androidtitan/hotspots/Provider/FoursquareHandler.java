@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 
+import com.androidtitan.hotspots.Activity.MapsActivity;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.LocationBundle;
 import com.androidtitan.hotspots.Data.Venue;
@@ -87,12 +88,21 @@ public class FoursquareHandler {
                 parseFoursquare(tempString);
 
                 //now we are getting the rating for each...
+
                 for(Venue freshVenue : databaseHelper.getAllVenuesFromLocation(locationHandle)) {
                     new FoursquareVenueHandler(context, freshVenue.getId());
                 }
             }
-        }
+            Log.e(TAG, "onPostExecute!");
+            ((MapsActivity) context).fragmentAction();
 
+
+
+           /* FragmentManager fm = ((MapsActivity) context).getFragmentManager();
+            VenueResultsFragment venueFrag=(VenueResultsFragment)fm.findFragmentByTag(((MapsActivity) context).venueFragmentTag);
+            venueFrag.yourScore();*/
+
+        }
     }
 
 
@@ -143,7 +153,7 @@ public class FoursquareHandler {
                     for (int i = 0; i < jsonArray.length(); i++) {
 
                         Venue poi = new Venue();
-/**/                        poi.setLocation_id(location_id);
+/**/                        poi.setLocation_id(location_id + 1);
 
                         if (jsonArray.getJSONObject(i).has("name")) {
                             poi.setName(jsonArray.getJSONObject(i).getString("name"));
@@ -174,7 +184,7 @@ public class FoursquareHandler {
                                     //todo: uri & ContentValues
 
                                     venueIndexOverride ++;
- /**/                                   poi.setId(venueIndexOverride);
+ /**/                                   //poi.setId(venueIndexOverride);
                                     creater(poi);
 
                                     //databaseHelper.assignVenueToLocation();
@@ -205,7 +215,7 @@ public class FoursquareHandler {
         long id = 0;
         ContentValues values = new ContentValues();
 
-        Log.e(TAG, venueProvider.base_CONTENT_URI + venue.getId());
+//        Log.e(TAG, venueProvider.base_CONTENT_URI + venue.getId());
 
         //try/catch?
         //values.put(DatabaseHelper.KEY_ID, venue.getId());

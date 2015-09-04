@@ -8,16 +8,18 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
 import com.androidtitan.hotspots.Activity.MapsActivity;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.LocationBundle;
-import com.androidtitan.hotspots.Provider.FoursquareHandler;
+import com.androidtitan.hotspots.Data.Venue;
 import com.androidtitan.hotspots.Provider.VenueProvider;
 import com.androidtitan.hotspots.R;
 
@@ -27,25 +29,27 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
 
     DatabaseHelper databaseHelper;
 
-    LocationBundle focusLocation;
-//    String locationName;
-    int locationIndex;
+    private Bundle providerBundle;
+    private LocationBundle focusLocation;
+    private int locationIndex;
 
-    private static final String[] PROJECTION = new String[] {
+    private TextView scoreView;
+
+    boolean proceedBoolean = true;
+
+    private static final String[] PROJECTION = new String[]{
             VenueProvider.InterfaceConstants.id,
             VenueProvider.InterfaceConstants.venue_name,
             VenueProvider.InterfaceConstants.venue_city,
             VenueProvider.InterfaceConstants.venue_category,
             VenueProvider.InterfaceConstants.venue_id_string,
-            VenueProvider.InterfaceConstants.venue_rating};
+            VenueProvider.InterfaceConstants.venue_rating
+    };
 
     private static final int LOADER_ID = 1;
 
     private LoaderManager.LoaderCallbacks<Cursor> callBacks;
     private SimpleCursorAdapter adapter;
-
-    private int startID;
-    private int endID;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,13 +57,9 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         databaseHelper = DatabaseHelper.getInstance(getActivity());
 
         locationIndex = getArguments().getInt(MapsActivity.venueFragmentLocIndex);
-        focusLocation = databaseHelper.getLocationBundle(locationIndex);
+        focusLocation = databaseHelper.getAllLocations().get(locationIndex);
 
-        if(databaseHelper.getAllVenuesFromLocation(focusLocation).size() == 0) {
-            new FoursquareHandler(getActivity(), focusLocation.getLatlng().latitude,
-                    focusLocation.getLatlng().longitude, locationIndex);
-        }
-
+        // getLoaderManager().restartLoader(LOADER_ID, providerBundle, callBacks);
         String[] dataColumns = { VenueProvider.InterfaceConstants.venue_name };
         int[] viewItems = { R.id.nameTextView };
 
@@ -70,10 +70,8 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
 
         callBacks = this;
 
-        LoaderManager lm = getLoaderManager();
-        lm.initLoader(LOADER_ID, null, callBacks);
-
-
+        getLoaderManager().initLoader(LOADER_ID, null, callBacks);
+        //makeProviderBundle(PROJECTION, VenueProvider.InterfaceConstants.venue_name, null, null);
     }
 
     @Override
@@ -81,6 +79,18 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_venue_results, container, false);
+
+        scoreView = (TextView) v.findViewById(R.id.scoreText);
+        new Handler().postDelayed(new Runnable() {
+            public void run() {
+
+                yourScore();
+
+            }
+        }, 2000);
+
+        Log.e(TAG, "onCreateView");
+
 
         return v;
     }
@@ -104,25 +114,27 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.e(TAG, "onCreateLoader");
 
-        Log.e(TAG, "pre-cursorLoader locationName: " + focusLocation.getLocalName());
-
-        return new CursorLoader(getActivity(), Uri.parse(VenueProvider.base_CONTENT_URI + focusLocation.getLocalName() ),
+        return new CursorLoader(getActivity(),
+                Uri.parse(VenueProvider.base_CONTENT_URI + focusLocation.getLocalName()),
                 PROJECTION, null, null, null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        Log.e(TAG, "onLoadFinished: " + cursor.getCount());
+
         switch (loader.getId()) {
             case LOADER_ID:
-
                 adapter.swapCursor(cursor);
                 break;
-        }
+            }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+        Log.e(TAG, "onLoaderReset");
 
         adapter.swapCursor(null);
     }
@@ -130,9 +142,16 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
 
     /////////// custom methods ////////////////////////////
 
-    public void startNendIds() {
-        //startID = databaseHelper.getAllVenuesFromLocation()
-
+    //I can see this being useful when we want to handle an orientation change
+    public void makeProviderBundle(String[] projection, String selection, String[] selectionArgs, String sortOrder){
+    /*this is a convenience method to pass it arguments
+     * to pass into myBundle which in turn is passed
+     * into the Cursor loader to query the smartcal.db*/
+        providerBundle = new Bundle();
+        providerBundle.putStringArray("projection", projection);
+        providerBundle.putString("selection", selection);
+        providerBundle.putStringArray("selectionArgs", selectionArgs);
+        if(sortOrder != null) providerBundle.putString("sortOrder", sortOrder);
     }
 
     //this method will go through all of the venues associated to this location and score the location
@@ -140,5 +159,30 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         //maybe more will be added
     public void yourScore() {
 
+
+        int divisor = 0;
+        int dividend = 0;
+
+        for(Venue v : databaseHelper.getAllVenuesFromLocation(focusLocation)) {
+            divisor ++;
+            dividend += v.getRating();
+        }
+        scoreView.setText(String.valueOf(dividend / divisor));
     }
+
+        //Log.e(TAG, String.valueOf(databaseHelper.getAllVenuesFromLocation(focusLocation)));
+
+     /*       if (cursor != null)
+                cursor.moveToFirst();
+
+            do {
+
+                Log.e(TAG, "divisor : " + divisor);
+                dividend += cursor.getInt(cursor.getColumnIndex(DatabaseHelper.KEY_VENUE_RATING));
+                Log.e(TAG, "dividend : " + dividend);
+            } while (cursor.moveToNext());
+
+            scoreView.setText(String.valueOf(dividend / divisor));
+        }*/
+
 }

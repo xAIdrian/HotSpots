@@ -33,7 +33,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String KEY_ID = "_id";
 
     //coordinates table
-    public static final String KEY_LOCAL = "local";
+    public static final String KEY_LOCAL_NAME = "local";
     public static final String KEY_LATITUDE = "latitude";
     public static final String KEY_LONGITUDE = "longitude";
     public static final String KEY_LOCKED = "locationLocked";
@@ -61,8 +61,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //Coordinates Table
     private static final String CREATE_TABLE_COORDINATES = "CREATE TABLE " + TABLE_COORDINATES
-            + "(" + KEY_ID + " INTEGER PRIMARY KEY, "
-            + KEY_LOCAL + " TEXT,"
+            + "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + KEY_LOCAL_NAME + " TEXT,"
             + KEY_LATITUDE + " DOUBLE PRECISION,"
             + KEY_LONGITUDE + " DOUBLE PRECISION, "
             + KEY_LOCKED + " BIT, "
@@ -70,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //Random Coordinates Table
     private static final String CREATE_TABLE_STARTER_COORDS = "CREATE TABLE " + TABLE_STARTER_COORDS
-            + "(" + KEY_ID + " INTEGER PRIMARY KEY, "
+            + "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + KEY_STARTER_LOCAL + " TEXT,"
             + KEY_STARTER_LATITUDE + " DOUBLE PRECISION,"
             + KEY_STARTER_LONGITUDE + " DOUBLE PRECISION" + ")";
@@ -88,7 +88,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //Venue-Location Table
     private static final String CREATE_TABLE_COORDINATES_VENUES = "CREATE TABLE " + TABLE_COORDINATES_VENUES
-            + "(" + KEY_ID + " INTEGER PRIMARY KEY,"
+            + "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + KEY_COORDS_ID + " INTEGER, "
             + KEY_VENUES_ID + " INTEGER" + ")";
 
@@ -147,7 +147,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase database = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_LOCAL, locBun.getLocalName());
+        values.put(KEY_LOCAL_NAME, locBun.getLocalName());
         try {
             values.put(KEY_LATITUDE, locBun.getLatlng().latitude);
             values.put(KEY_LONGITUDE, locBun.getLatlng().longitude);
@@ -175,7 +175,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do {
                 LocationBundle locBun = new LocationBundle();
                 locBun.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID)));
-                locBun.setLocalName(cursor.getString(cursor.getColumnIndex(KEY_LOCAL)));
+                locBun.setLocalName(cursor.getString(cursor.getColumnIndex(KEY_LOCAL_NAME)));
                 locBun.setLatlng(new LatLng(cursor.getDouble(cursor.getColumnIndex(KEY_LATITUDE)),
                         cursor.getDouble(cursor.getColumnIndex(KEY_LONGITUDE))));
                 locBun.setIsLocationLockedDatabase(cursor.getInt(cursor.getColumnIndex(KEY_LOCKED)));
@@ -203,7 +203,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         LocationBundle locBundle = new LocationBundle();
         locBundle.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID)));
-        locBundle.setLocalName(cursor.getString(cursor.getColumnIndex(KEY_LOCAL)));
+        locBundle.setLocalName(cursor.getString(cursor.getColumnIndex(KEY_LOCAL_NAME)));
         locBundle.setLatlng(new LatLng(cursor.getDouble(cursor.getColumnIndex(KEY_LATITUDE)),
                 cursor.getDouble(cursor.getColumnIndex(KEY_LONGITUDE))));
         locBundle.setIsLocationLockedDatabase(cursor.getInt(cursor.getColumnIndex(KEY_LOCKED)));
@@ -219,7 +219,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase database = this.getWritableDatabase();
         //prepping/formatting data for update(replace) row
         ContentValues values = new ContentValues();
-        values.put(KEY_LOCAL, locBun.getLocalName());
+        values.put(KEY_LOCAL_NAME, locBun.getLocalName());
         values.put(KEY_LATITUDE, locBun.getLatlng().latitude);
         values.put(KEY_LONGITUDE, locBun.getLatlng().longitude);
         values.put(KEY_LOCKED, locBun.getIsLocationLockedDatabase());
@@ -239,10 +239,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         //delete all of it's associated Venues.
             //add a boolean parameter to make this optional later???
-        List<Venue> ourLocationsVenues = getAllVenuesFromLocation(locBun);
+        //todo:::
+        /*List<Venue> ourLocationsVenues = getAllVenuesFromLocation(locBun);
         for(Venue venue : ourLocationsVenues) {
             deleteVenue(venue.getId());
-        }
+        }*/
 
         database.delete(TABLE_COORDINATES,
                 KEY_ID + " =?", new String[]{ String.valueOf(locBun.getId()) });
@@ -266,14 +267,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do {
                 LocationBundle locationBundle = new LocationBundle();
                 locationBundle.setId(cursor.getLong(cursor.getColumnIndex(KEY_ID)));
-                locationBundle.setLocalName(cursor.getString(cursor.getColumnIndex(KEY_LOCAL)));
+                locationBundle.setLocalName(cursor.getString(cursor.getColumnIndex(KEY_LOCAL_NAME)));
                 locationBundle.setLatlng(new LatLng(cursor.getDouble(cursor.getColumnIndex(KEY_LATITUDE)),
                         cursor.getDouble(cursor.getColumnIndex(KEY_LONGITUDE))));
                 locationBundle.setIsLocationLockedDatabase(cursor.getInt(cursor.getColumnIndex(KEY_LOCKED)));
                 locationBundle.setVisitedMapDatabase(cursor.getInt(cursor.getColumnIndex(KEY_VISITED)));
                 //logging
                 Log.i("DBHprintAllCoordinates", cursor.getLong(cursor.getColumnIndex(KEY_ID)) + " "
-                        + cursor.getString(cursor.getColumnIndex(KEY_LOCAL)) + ": "
+                        + cursor.getString(cursor.getColumnIndex(KEY_LOCAL_NAME)) + ": "
                         + cursor.getDouble(cursor.getColumnIndex(KEY_LATITUDE)) + ", "
                         + cursor.getDouble(cursor.getColumnIndex(KEY_LONGITUDE)));
 
@@ -406,22 +407,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
+    //todo
     public List<Venue> getAllVenuesFromLocation(LocationBundle locationBundle) {
         SQLiteDatabase database = getReadableDatabase();
+/*
+        long locationId= locationBundle.getId();
 
-        String localName = locationBundle.getLocalName();
+
+        String selectionQuery = "SELECT * FROM " + TABLE_VENUES + " WHERE " + KEY_VENUE_LOCATION_ID
+                + " = ?";
+
+        Cursor cursor = database.rawQuery(selectionQuery,
+                new String[] { String.valueOf(locationId) });*/
         List<Venue> venuesByLoc = new ArrayList<Venue>();
 
-        String selectionQuery = "SELECT * FROM " + TABLE_VENUES + " td, "
-                + TABLE_COORDINATES + " tg, " + TABLE_COORDINATES_VENUES + " tt WHERE tg."
-                + KEY_LOCAL + " = '" + localName + "'" + " AND tg." + KEY_ID
-                + " = " + "tt." + KEY_COORDS_ID + " AND td." + KEY_ID + " = "
-                + "tt." + KEY_VENUES_ID;
-        //select * from venues tv, coordinates tc, coordinates_venues tt where tc._id = location_id
-            //  and tc._id = tt.coords_id and tv._id = tt.venues_id
-        Log.e(TAG, selectionQuery);
+        String starterQuery = "SELECT * FROM " + DatabaseHelper.TABLE_COORDINATES + " WHERE "
+                + DatabaseHelper.KEY_LOCAL_NAME + " = ?";
+        Cursor cursor = database.rawQuery(starterQuery,
+                new String[] { locationBundle.getLocalName() });
 
-        Cursor cursor = database.rawQuery(selectionQuery, null);
+        if(cursor != null)
+            cursor.moveToFirst();
+
+        long locationId = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.KEY_ID));
+        String selectionString = "SELECT * FROM " + DatabaseHelper.TABLE_VENUES + " WHERE "
+                + DatabaseHelper.KEY_VENUE_LOCATION_ID + " = ?";
+        cursor = database.rawQuery(selectionString,
+                new String[]{String.valueOf(locationId)});
 
         if(cursor.moveToFirst()) {
             do {
@@ -448,6 +460,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
 
+        values.put(KEY_ID, venue.getId()); //todo
         values.put(KEY_VENUE_NAME, venue.getName());
         values.put(KEY_VENUE_CITY, venue.getCity());
         values.put(KEY_VENUE_CATEGORY, venue.getCategory());
@@ -467,20 +480,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //takes a parameter that can be used to get a set of venues by location.
     //to get all input a negative number
+
     public void printVenuesByLocation(LocationBundle locationBundle) {
         SQLiteDatabase database = getReadableDatabase();
 
-        String localName = locationBundle.getLocalName();
+        long locationId = locationBundle.getId();
 
-        String selectionQuery = "SELECT * FROM " + TABLE_VENUES + " td, "
+        String selectionQuery = "SELECT * FROM " + TABLE_VENUES + " WHERE " + KEY_VENUE_LOCATION_ID
+                + " = " + locationId;
+
+        /*String selectionQuery = "SELECT * FROM " + TABLE_VENUES + " td, "
                 + TABLE_COORDINATES + " tg, " + TABLE_COORDINATES_VENUES + " tt WHERE tg."
-                + KEY_LOCAL + " = '" + localName + "'" + " AND tg." + KEY_ID
+                + KEY_LOCAL_NAME + " = '" + localName + "'" + " AND tg." + KEY_ID
                 + " = " + "tt." + KEY_COORDS_ID + " AND td." + KEY_ID + " = "
-                + "tt." + KEY_VENUES_ID;
+                + "tt." + KEY_VENUES_ID;*/
 
         Log.e(TAG, selectionQuery);
 
         Cursor cursor = database.rawQuery(selectionQuery, null);
+
+        //Log.e(TAG, "getAllVenuesFromLocation ::: " + cursor.getCount());
 
 //        Log.e(TAG, String.valueOf(cursor.getString(cursor.getColumnIndex(KEY_VENUE_NAME)).isEmpty()));
 
@@ -495,15 +514,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 v.setRating(cursor.getFloat(cursor.getColumnIndex(KEY_VENUE_RATING)));
                 v.setLocation_id(cursor.getInt(cursor.getColumnIndex(KEY_VENUE_LOCATION_ID)));
 
-                Log.e("DBHprintVenuesLocation", cursor.getInt(cursor.getColumnIndex(KEY_ID)) +
+                /*Log.e("DBHprintVenuesLocation", cursor.getInt(cursor.getColumnIndex(KEY_ID)) +
                         " name: " + cursor.getString(cursor.getColumnIndex(KEY_VENUE_NAME)) + ", city: " +
                     cursor.getString(cursor.getColumnIndex(KEY_VENUE_CITY))+ ", cat: " +
                     cursor.getString(cursor.getColumnIndex(KEY_VENUE_CATEGORY))+ ", venueID: " +
                     cursor.getString(cursor.getColumnIndex(KEY_VENUE_STRING)) + ", rating: " +
                     cursor.getFloat(cursor.getColumnIndex(KEY_VENUE_RATING)));
-
+*/
             } while (cursor.moveToNext()); //so long as the cursor is not at the end keep adding Venues
         }
+
     }
 
     public void printVenuesTable() {
@@ -528,7 +548,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         cursor.getString(cursor.getColumnIndex(KEY_VENUE_CITY)) + ", cat: " +
                         cursor.getString(cursor.getColumnIndex(KEY_VENUE_CATEGORY)) + ", venueID: " +
                         cursor.getString(cursor.getColumnIndex(KEY_VENUE_STRING)) + ", rating: " +
-                        cursor.getFloat(cursor.getColumnIndex(KEY_VENUE_RATING)));
+                        cursor.getFloat(cursor.getColumnIndex(KEY_VENUE_RATING)) + ", Location ID: " +
+                        cursor.getLong(cursor.getColumnIndex(KEY_VENUE_LOCATION_ID)));
 
             } while (cursor.moveToNext()); //so long as the cursor is not at the end keep adding Venues
         }

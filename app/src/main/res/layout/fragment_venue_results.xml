@@ -7,12 +7,13 @@
     android:background="#B3000000"
     tools:context="com.androidtitan.hotspots.Fragment.VenueResultsFragment">
 
-    <TextView
+    <TextView android:id="@+id/scoreText"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="@string/hello_blank_fragment"
+        android:textSize="48dp"
+        android:textStyle="bold"
         android:textColor="@android:color/white"/>
 
     <ListView android:id="@android:id/list"

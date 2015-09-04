@@ -7,7 +7,6 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.util.Log;
 
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 
@@ -19,7 +18,6 @@ public class VenueProvider extends ContentProvider {
     public static final String TAG = "VenueProvider";
 
     DatabaseHelper databaseHelper;
-    String locationId;
 
     public static final String AUTHORITY = "com.androidtitan.hotspots.Provider.VenueProvider";
     public static final String BASE_PATH = DatabaseHelper.TABLE_VENUES;
@@ -69,39 +67,58 @@ public class VenueProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
 
-        databaseHelper = DatabaseHelper.getInstance(getContext());
+        databaseHelper = new DatabaseHelper(getContext());
         return true;
     }
 
+    //todo: could we call our DATABASEHELPER methods here instead of calling a rawQuery???
+        //yes we can.  Let's do it at some point.
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+
+        Cursor queryCursor;
+
         switch(uriMatcher.match(uri)) {
             case GET_ALL:
 
-                return databaseHelper.getReadableDatabase().rawQuery("SELECT * FROM " + DatabaseHelper.TABLE_VENUES, null);
+                queryCursor = databaseHelper.getReadableDatabase().rawQuery("SELECT * FROM "
+                        + DatabaseHelper.TABLE_VENUES, null);
+                break;
 
             case GET_ONE:
 
-                return databaseHelper.getReadableDatabase().rawQuery("SELECT * FROM " + DatabaseHelper.TABLE_VENUES
-                    + " WHERE " + DatabaseHelper.KEY_ID + " = " + uri.getLastPathSegment(), null);
-
+                queryCursor = databaseHelper.getReadableDatabase().rawQuery("SELECT * FROM "
+                        + DatabaseHelper.TABLE_VENUES
+                        + " WHERE " + DatabaseHelper.KEY_ID + " = " + uri.getLastPathSegment(), null);
+                break;
 
             case GET_SELECT:
 
-                String selectionQuery = "SELECT * FROM " + DatabaseHelper.TABLE_VENUES + " td, "
-                        + DatabaseHelper.TABLE_COORDINATES + " tg, " + DatabaseHelper.TABLE_COORDINATES_VENUES + " tt WHERE tg."
-                        + DatabaseHelper.KEY_LOCAL + " = ? AND tg." + DatabaseHelper.KEY_ID
-                        + " = " + "tt." + DatabaseHelper.KEY_COORDS_ID + " AND td." + DatabaseHelper.KEY_ID + " = "
-                        + "tt." + DatabaseHelper.KEY_VENUES_ID;
+                String starterQuery = "SELECT * FROM " + DatabaseHelper.TABLE_COORDINATES + " WHERE "
+                        + DatabaseHelper.KEY_LOCAL_NAME + " = ?";
+                queryCursor = databaseHelper.getReadableDatabase().rawQuery(starterQuery,
+                        new String[] { uri.getLastPathSegment() });
 
-                Log.e(TAG, "selectionQuery: " + selectionQuery);
-                return databaseHelper.getReadableDatabase().rawQuery(selectionQuery,
-                        new String[] { String.valueOf(uri.getLastPathSegment()) });
+                if(queryCursor != null)
+                    queryCursor.moveToFirst();
+
+                long locationId = queryCursor.getLong(queryCursor.getColumnIndex(DatabaseHelper.KEY_ID));
+                String selectionString = "SELECT * FROM " + DatabaseHelper.TABLE_VENUES + " WHERE "
+                        + DatabaseHelper.KEY_VENUE_LOCATION_ID + " = ?";
+                queryCursor = databaseHelper.getReadableDatabase().rawQuery(selectionString,
+                        new String[] { String.valueOf(locationId) });
+
+                break;
 
             default:
                 throw new IllegalArgumentException("Unknown Uri:" + uri);
-
         }
+
+        // Tell the cursor what uri to watch, so it knows when its source data changes
+
+        queryCursor.setNotificationUri(getContext().getContentResolver(), Uri.parse(base_CONTENT_URI));
+        return queryCursor;
+
     }
 
     @Override
@@ -145,16 +162,21 @@ public class VenueProvider extends ContentProvider {
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
 
-        Log.e(TAG,"KEY_ID " + uri.getLastPathSegment()
+        /*Log.e(TAG, "KEY_ID " + uri.getLastPathSegment()
                 + " KEY_LOCATION_ID " + values.getAsLong(DatabaseHelper.KEY_VENUE_LOCATION_ID));
+                */
+
         databaseHelper.assignVenueToLocation(Long.valueOf(uri.getLastPathSegment()),
                 values.getAsLong(DatabaseHelper.KEY_VENUE_LOCATION_ID));
 
-        getContext().getContentResolver().notifyChange(uri, null);
-        return Uri.parse(DatabaseHelper.TABLE_VENUES + "/" + insertId);
+
+        getContext().getContentResolver().notifyChange(Uri.parse(base_CONTENT_URI), null);
+        return uri;
+        //return Uri.parse(DatabaseHelper.TABLE_VENUES + "/" + insertId);
 
     }
 
+    //todo:::
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
 
@@ -185,11 +207,8 @@ public class VenueProvider extends ContentProvider {
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
 
-        getContext().getContentResolver().notifyChange(uri, null);
+        getContext().getContentResolver().notifyChange(Uri.parse(base_CONTENT_URI), null);
         return updateId;
     }
 
-    /*
-    As of API level 11 there is a method ContentResolver.call(Uri, String, String, Bundle) which provides extra flexibility.
-     */
 }

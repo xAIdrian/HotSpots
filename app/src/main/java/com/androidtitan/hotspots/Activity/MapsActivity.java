@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.LocationBundle;
 import com.androidtitan.hotspots.Fragment.VenueResultsFragment;
+import com.androidtitan.hotspots.Provider.FoursquareHandler;
 import com.androidtitan.hotspots.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -52,7 +53,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private DatabaseHelper databaseHelper;
     private VenueResultsFragment venueFragment;
-    private String venueFragmentTag = "venueFragment";
+    public String venueFragmentTag = "venueFragment";
     public static final String venueFragmentLocIndex = "venueFragString";
 
     private GoogleMap map; // Might be null if Google Play services APK is not available.
@@ -287,12 +288,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             }, slideOut.getDuration());
 
                         }
-                            Log.e("!!!!!!!!!!!!!", "All Venues");
+                            /*Log.e("!!!!!!!!!!!!!", "All Venues");
                             databaseHelper.printVenuesTable();
                             Log.e("!!!!!!!!!!!!!", "Venues By Location");
                             databaseHelper.printVenuesByLocation(focusLocation);
                             Log.e("!!!!!!!!!!!!!", "Linking Table");
-                            databaseHelper.printLinkingTable();
+                            databaseHelper.printLinkingTable();*/
 
                             break;
 
@@ -327,6 +328,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 }
                             });
 
+
                             break;
 
                         case 2: //SUBMIT fab
@@ -334,30 +336,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //MapsActivity.this, focusLocation.getLatlng().latitude,
                             // focusLocation.getLatlng().longitude, locationIndex
 
-                            Bundle venueBundle = new Bundle();
+                            if (databaseHelper.getAllVenuesFromLocation(focusLocation).size() == 0) {
+                                new FoursquareHandler(MapsActivity.this, focusLocation.getLatlng().latitude,
+                                        focusLocation.getLatlng().longitude, locationIndex);
+                            }
+                            else {
+                                fragmentAction();
+                            }
 
-                            venueBundle.putInt(venueFragmentLocIndex, locationIndex);
 
-
-                            FragmentTransaction fragTran = getFragmentManager().beginTransaction();
-                            venueFragment.setArguments(venueBundle);
-                            fragTran.add(R.id.container, venueFragment, venueFragmentTag)
-                                    .addToBackStack(venueFragmentTag).commit();
-
-                            FABstatus ++;
-
-                            //animation
-                            actionButton.startAnimation(slideOut);
-                            actionButton.setVisibility(View.GONE);
-
-                            handler.postDelayed(new Runnable() {
-                                public void run() {
-                                    actionButton.setImageResource(R.drawable.left_arrow);
-                                    actionButton.setVisibility(View.VISIBLE);
-                                    actionButton.startAnimation(slidein);
-
-                                }
-                            }, slideOut.getDuration());
+                            //where fragmentAction will be
 
                             break;
 
@@ -766,116 +754,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return focusLocation.getLocalName();
     }
 
+    public void fragmentAction() {
+        Bundle venueBundle = new Bundle();
+
+        venueBundle.putInt(venueFragmentLocIndex, locationIndex);
+
+        FragmentTransaction fragTran = getFragmentManager().beginTransaction();
+        venueFragment.setArguments(venueBundle);
+        fragTran.add(R.id.container, venueFragment, venueFragmentTag)
+                .addToBackStack(venueFragmentTag).commit();
+
+        FABstatus ++;
+
+        //animation
+        actionButton.startAnimation(slideOut);
+        actionButton.setVisibility(View.GONE);
+
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                actionButton.setImageResource(R.drawable.left_arrow);
+                actionButton.setVisibility(View.VISIBLE);
+                actionButton.startAnimation(slidein);
+
+            }
+        }, slideOut.getDuration());
+        databaseHelper.printVenuesByLocation(focusLocation);
+    }
 }
-
-
-
-
-//////////// METHOD BANK ///////////////////////////
-
-/*
-        We're going to need these methods for:
-        VIEWING RESULTS and ROUND REVIEW
-
-        topLayout = (RelativeLayout) findViewById(R.id.topLayout);
-        prevArrow = (ImageView) findViewById(R.id.previousMark);
-        nextArrow = (ImageView) findViewById(R.id.nextMark);
-
-        topLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!isEditOpen) {
-                    editView.setVisibility(View.VISIBLE);
-                    isEditOpen = true;
-
-
-                } else {
-                    editView.setVisibility(View.GONE);
-                    isEditOpen = false;
-                }
-            }
-        });
-
-                nextArrow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (soldierLocationsSize > 0) {
-                    locationIndex++;
-                    if (locationIndex >= soldierLocationsSize) {
-                        locationIndex = 0;
-                        postAdditionActivities(soldierLocations.get(locationIndex), null);
-                        cameraLocation(false, locationIndex, null);
-                    } else {
-                        postAdditionActivities(soldierLocations.get(locationIndex), null);
-                        cameraLocation(false, locationIndex, null);
-                    }
-                }
-            }
-        });
-
-        prevArrow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (soldierLocationsSize > 0) {
-                    locationIndex--;
-                    if (locationIndex < 0) {
-                        locationIndex = soldierLocationsSize - 1;
-                        cameraLocation(false, locationIndex, null);
-                        postAdditionActivities(soldierLocations.get(locationIndex), null);
-                    } else {
-                        postAdditionActivities(soldierLocations.get(locationIndex), null);
-                        cameraLocation(false, locationIndex, null);
-                    }
-                }
-            }
-        });
-*/
-
-/*
-    DELETE FUNCTIONALITY
-
-        if (soldierLocationsSize > 0) {
-            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Delete this location?")
-                    .setCancelable(false)
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
-                            //delete actions
-                            LocationBundle tempLoc = soldierLocations.get(locationIndex);
-                            databaseHelper.deleteLocation(tempLoc);
-
-                            soldierLocations = databaseHelper.getAllLocationsBySoldier(focusSoldier);
-                            locationIndex--;
-
-                            if (locationIndex > soldierLocationsSize
-                                    || locationIndex < soldierLocationsSize) {
-                                cameraLocation(true, -1, null);
-                            } else {
-                                cameraLocation(false, 0, null);
-                            }
-                        }
-
-                    })
-                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
-                            dialog.cancel();
-                        }
-                    });
-            final AlertDialog alert = builder.create();
-            alert.show();
-        }
-        else {
-            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("No locations to delete...")
-                    .setCancelable(false)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
-                            dialog.cancel();
-                        }
-                    });
-            final AlertDialog alert = builder.create();
-            alert.show();
-        }
-
-    */
-

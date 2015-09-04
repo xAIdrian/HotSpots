@@ -168,14 +168,12 @@ public class FoursquareVenueHandler {
 
         ContentValues values = new ContentValues();
 
-        //try/catch?
-        values.put(DatabaseHelper.KEY_ID, venue.getId());
-        values.put(DatabaseHelper.KEY_VENUE_NAME, venue.getName());
-        values.put(DatabaseHelper.KEY_VENUE_CITY, venue.getCity());
-        values.put(DatabaseHelper.KEY_VENUE_CATEGORY, venue.getCategory());
-        values.put(DatabaseHelper.KEY_VENUE_STRING, venue.getVenueIdString());
+//        values.put(DatabaseHelper.KEY_VENUE_NAME, venue.getName());
+//        values.put(DatabaseHelper.KEY_VENUE_CITY, venue.getCity());
+//        values.put(DatabaseHelper.KEY_VENUE_CATEGORY, venue.getCategory());
+//        values.put(DatabaseHelper.KEY_VENUE_STRING, venue.getVenueIdString());
         values.put(DatabaseHelper.KEY_VENUE_RATING, venue.getRating());
-        values.put(DatabaseHelper.KEY_VENUE_LOCATION_ID, venue.getLocation_id());
+//        values.put(DatabaseHelper.KEY_VENUE_LOCATION_ID, venue.getLocation_id());
 
         //insert row
         context.getContentResolver().update(Uri.parse(VenueProvider.base_CONTENT_URI + focusVenue.getId()), values,
