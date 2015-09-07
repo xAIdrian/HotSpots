@@ -1,7 +1,7 @@
 package com.androidtitan.hotspots.Activity;
 
 import android.app.AlertDialog;
-import android.app.FragmentTransaction;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,7 +24,9 @@ import android.widget.Toast;
 
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.LocationBundle;
+import com.androidtitan.hotspots.Fragment.AdderFragment;
 import com.androidtitan.hotspots.Fragment.VenueResultsFragment;
+import com.androidtitan.hotspots.Interface.AdderInterface;
 import com.androidtitan.hotspots.Provider.FoursquareHandler;
 import com.androidtitan.hotspots.R;
 import com.google.android.gms.common.ConnectionResult;
@@ -43,8 +45,46 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.Random;
 
+/*
+COMPLETED???
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
+- //Replace the careful lock in dialog with a transparent splash...for only the FIRST time
+        remove the 'INITIAL_VISIT' column form location_table
+        we need to reconsider the FAB action "switch statement" without the inital location logic
+- Make MapsActivity the Launcher Activity
+        remove the 'focusLocation' variable and change it's creation to after the add button.
+        we need to add a 'LOCATION_FINAL_RATING' column for our location table. this will be for "View all locations"
+        our zoom needs to be closer when we start and when we get the location
+        -we will need to name the location after it is created and the coordinates set.
+        this can be done just by launching the ADDERACTIVITY
+        we will need to pass the same variables on creation that we passed from the listview for camera purposes
+
+ */
+
+
+
+/*
+TODO:::
+
+-Things will continue as usual...but...UPGRADED from here to get to the VENUE functionality
+        VENUE:
+            map coordinates (direction?)
+
+        We need to make the "Venue Fragment" exciting!!!
+        * Custom Cursor Adapter. include direction, distance, and category
+        * Implicit intent to FourSquare app for review OR to google maps for direction.
+
+-> NAVIGATION DRAWER.
+        Top half is going to be past stats
+        View All past locations and their associated rankings.  View them on the map
+        View all past venues.  Provide more information (View all of them on the map?)
+
+REFACTOR. WE NEED TO BE MORE OBJECT ORIENTED
+    PUT REPEATED TASKS INTO A FUNCITON e.g. ANIMATIONS
+ */
+
+
+public class MapsActivity extends FragmentActivity implements AdderInterface, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String TAG = "MapActivity";
 
@@ -53,16 +93,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private DatabaseHelper databaseHelper;
     private VenueResultsFragment venueFragment;
+    private AdderFragment adderFragment;
     public String venueFragmentTag = "venueFragment";
+    public String adderFragmentTag = "adderFragment";
     public static final String venueFragmentLocIndex = "venueFragString";
+    public static final String adderFragmentLatitude = "adderFragLat";
+    public static final String adderFragmentLongitude = "adderFragLng";
 
-    private GoogleMap map; // Might be null if Google Play services APK is not available.
+    private GoogleMap map; // NULL if Google Play services APK is not available.
     private GoogleMapOptions options = new GoogleMapOptions();
     private GoogleApiClient googleAPIclient;
 
     private LocationBundle focusLocation;
-    private Location tempLocation;
-    private static String focusLocationName;
+    //private Location tempLocation;
 
     private Handler handler;
 
@@ -85,14 +128,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private double currentLongitude;
 
     private int locationIndex = -1;
-    private boolean hasVisitedMaps;
 
     private int FABstatus = 0; //0=location 1=add   2=submit
 
     private boolean isLocationAdded = false; //use this to control yo dialogs
     private boolean isLocked = false;
-
-
 
 
     @Override
@@ -102,34 +142,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (savedInstanceState != null) {
 
-            hasVisitedMaps = savedInstanceState.getBoolean(SAVED_INITIAL_BOOL);
             isLocationAdded = savedInstanceState.getBoolean(SAVED_DIALOG_BOOL);
         }
 
         databaseHelper = DatabaseHelper.getInstance(this);
         venueFragment = new VenueResultsFragment();
-
+        adderFragment = new AdderFragment();
 
         Intent intent = getIntent();
         locationIndex = intent.getIntExtra(ChampionActivity.SELECTION_TO_MAP, -1);
 
-        focusLocation = databaseHelper.getAllLocations().get(locationIndex);
-        focusLocationName = focusLocation.getLocalName();
-
-        tempLocation = new Location("tempLocation");
-        try {
-            tempLocation.setLatitude(focusLocation.getLatlng().latitude);
-            tempLocation.setLongitude(focusLocation.getLatlng().longitude);
-        } catch (NullPointerException e) {
-            Log.e(TAG, String.valueOf(e));
-        }
-
-        setUpMapIfNeeded();
 
         //our handle for our MapFragment
         MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        setUpMapIfNeeded();
 
         buildGoogleApiClient();
         options.mapType(GoogleMap.MAP_TYPE_NORMAL)
@@ -140,6 +169,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         map.getUiSettings().setZoomControlsEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(false);
         map.setMyLocationEnabled(true);
+
+        //camera
+        if (locationIndex > -1) {
+            focusLocation = databaseHelper.getLocationBundle(locationIndex);
+
+            if (!focusLocation.getLatlng().equals(new LatLng(0.0, 0.0))) { //if there is something present
+            /*this currently gets the first location in their many saved locations...
+            eventually we want to be able to 'page' through all of them
+            */
+                cameraLocation(false, -1, null);
+            }
+
+            isLocked = focusLocation.getIsLocationLocked();
+
+
+            try {
+                //tempLocation = new Location("tempLocation");
+                //tempLocation.setLatitude(focusLocation.getLatlng().latitude);
+                //tempLocation.setLongitude(focusLocation.getLatlng().longitude);
+
+                //focusLocation.getLatlng().latitude;
+                //focusLocation.getLatlng().longitude;
+            } catch (NullPointerException e) {
+                Log.e(TAG, "Blank MAPS: " + String.valueOf(e));
+            }
+        } else {
+            cameraLocation(true, -1, null);
+        }
+
 
         //place markers for every saved location
         for (LocationBundle bund : databaseHelper.getAllLocations()) {
@@ -157,19 +215,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
-        //Location.distanceBetween(focusLocation.getLatlng().latitude, focusLocation.getLatlng().longitude,
-        //tempLocation.getLatitude(), tempLocation.getLongitude(), );
-        if (!focusLocation.getLatlng().equals(new LatLng(0.0, 0.0))) { //if there is something present
-            /*this currently gets the first location in their many saved locations...
-            eventually we want to be able to 'page' through all of them
-            */
-            cameraLocation(false, -1, null);
-        } else {
-            cameraLocation(true, -1, null);
-        }
-
-
-        databaseHelper.printCoordinatesTable();
+        //databaseHelper.printLocationsTable();
 
         //initializations
 
@@ -188,31 +234,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //if we've used all of our locations then we lock-it up
         //this is our Critical Logic
-        isLocked = focusLocation.getIsLocationLocked();
-        hasVisitedMaps = focusLocation.getVisistedMap();
+        //todo: we might get rid of locking
 
         if (!isLocked) {
-            //they've already been here
-            if (!hasVisitedMaps) {
-                final AlertDialog.Builder aDawg = new AlertDialog.Builder(MapsActivity.this);
 
-                aDawg.setTitle(R.string.careful)
-                        .setMessage(R.string.initial_instruction)
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                focusLocation.setVisitedMap(true);
-                                databaseHelper.updateLocationBundle(focusLocation);
-
-                                dialog.dismiss();
-                            }
-                        });
-                aDawg.show();
-            } else {
-
-
-            }
 
         } else {
             isLocationAdded = true;
@@ -250,7 +275,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 final AlertDialog.Builder aDawg = new AlertDialog.Builder(MapsActivity.this);
 
-                if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) { //if GPS is turned off
                     buildAlertMessageNoGps();
                 } else {
 
@@ -258,36 +283,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                         case 0: //LOCATION fab
 
-                        if (lastLocation != null) {
+                            if (lastLocation != null) {
 
-                            currentLatitude = lastLocation.getLatitude();
-                            currentLongitude = lastLocation.getLongitude();
-                            lastLatLang = new LatLng(currentLatitude, currentLongitude);
+                                currentLatitude = lastLocation.getLatitude();
+                                currentLongitude = lastLocation.getLongitude();
+                                lastLatLang = new LatLng(currentLatitude, currentLongitude);
 
-                            Log.e("MAlocationGetter", "Location Found! " + currentLatitude + ", " + currentLongitude);
+                                Log.e("MAlocationGetter", "Location Found! " + currentLatitude + ", " + currentLongitude);
 
-                            //camera
-                            cameraLocation(false, -1, lastLatLang);
+                                //camera
+                                cameraLocation(false, -1, lastLatLang);
 
-                            FABstatus ++;
+                                FABstatus++;
 
-                            actionButton.startAnimation(slideOut);
-                            actionButton.setVisibility(View.GONE);
+                                actionButton.startAnimation(slideOut);
+                                actionButton.setVisibility(View.GONE);
 
-                            //handler is being used for the return action
-                            handler.postDelayed(new Runnable() {
-                                public void run() {
-                                    actionButton.setImageResource(R.drawable.icon_add);
-                                    actionButton.setVisibility(View.VISIBLE);
-                                    actionButton.startAnimation(slidein);
+                                //handler is being used for the return action
+                                handler.postDelayed(new Runnable() {
+                                    public void run() {
+                                        actionButton.setImageResource(R.drawable.icon_add);
+                                        actionButton.setVisibility(View.VISIBLE);
+                                        actionButton.startAnimation(slidein);
 
-                                    backer.startAnimation(leftSlideIn);
-                                    backer.setVisibility(View.VISIBLE);
+                                        backer.startAnimation(leftSlideIn);
+                                        backer.setVisibility(View.VISIBLE);
 
-                                }
-                            }, slideOut.getDuration());
+                                    }
+                                }, slideOut.getDuration());
 
-                        }
+                            }
                             /*Log.e("!!!!!!!!!!!!!", "All Venues");
                             databaseHelper.printVenuesTable();
                             Log.e("!!!!!!!!!!!!!", "Venues By Location");
@@ -318,13 +343,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 }
                             });
 
+                            //todo: this is where we are going to create our Location
                             markConfirmMark.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    focusLocation.setLatlng(new LatLng(currentLatitude, currentLongitude));
-                                    databaseHelper.updateLocationBundle(focusLocation);
+                                    //pass location information to frag
+                                    //focusLocation = new LocationBundle("tempLocation");
 
-                                    postAdditionActivities(focusLocation);
+                                    //focusLocation.setLatlng(new LatLng(currentLatitude, currentLongitude));
+                                    //databaseHelper.updateLocationBundle(focusLocation);
+
+
+                                    Bundle adderBundle = new Bundle();
+
+                                    adderBundle.putDouble(adderFragmentLatitude, currentLatitude);
+                                    adderBundle.putDouble(adderFragmentLongitude, currentLongitude);
+
+                                    toggleFragment(adderFragment, adderFragmentTag);
+
+                                    /*FragmentTransaction fragTran = getFragmentManager().beginTransaction();
+                                    adderFragment.setArguments(adderBundle);
+                                    fragTran.add(R.id.container, adderFragment, adderFragmentTag)
+                                            .addToBackStack(adderFragmentTag).commit();*/
+
+                                    actionButton.startAnimation(slideOut);
+                                    actionButton.setVisibility(View.GONE);
+                                    backer.startAnimation(leftSlideOut);
+                                    backer.setVisibility(View.GONE);
+
+                                    markConfirmLayout.startAnimation(slideOut);
+                                    markConfirmCancel.startAnimation(slideOut);
+                                    markConfirmMark.startAnimation(slideOut);
+                                    markConfirmLayout.setVisibility(View.GONE);
+                                    markConfirmCancel.setVisibility(View.GONE);
+                                    markConfirmMark.setVisibility(View.GONE);
+
                                 }
                             });
 
@@ -333,14 +386,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                         case 2: //SUBMIT fab
 
-//MapsActivity.this, focusLocation.getLatlng().latitude,
-                            // focusLocation.getLatlng().longitude, locationIndex
-
                             if (databaseHelper.getAllVenuesFromLocation(focusLocation).size() == 0) {
+                                Log.e(TAG, "!!!!!!!! ::: ");
                                 new FoursquareHandler(MapsActivity.this, focusLocation.getLatlng().latitude,
-                                        focusLocation.getLatlng().longitude, locationIndex);
-                            }
-                            else {
+                                        focusLocation.getLatlng().longitude, focusLocation.getId());
+                            } else {
                                 fragmentAction();
                             }
 
@@ -353,7 +403,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                             getFragmentManager().popBackStack();
 
-                            FABstatus --;
+                            FABstatus--;
 
                             actionButton.startAnimation(slideOut);
                             actionButton.setVisibility(View.GONE);
@@ -382,7 +432,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         backer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(FABstatus == 1) {
+                if (FABstatus == 1) {
                     actionButton.startAnimation(slideOut);
                     actionButton.setVisibility(View.GONE);
 
@@ -408,6 +458,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+
     }
 
 
@@ -468,8 +519,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-
-        savedInstanceState.putBoolean(SAVED_INITIAL_BOOL, hasVisitedMaps);
         savedInstanceState.putBoolean(SAVED_DIALOG_BOOL, isLocationAdded);
     }
 
@@ -482,7 +531,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-
     @Override
     public void onConnected(Bundle bundle) {
         slidein = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slidin_bottom);
@@ -492,11 +540,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         handler = new Handler();
 
-        if (!focusLocation.getLatlng().equals(new LatLng(0.0, 0.0)) && !isLocked) {
-            actionButton.setVisibility(View.GONE);
-            FABstatus = 2;
+        if (locationIndex > -1) {
+            if (!focusLocation.getLatlng().equals(new LatLng(0.0, 0.0)) && !isLocked) {
+                actionButton.setVisibility(View.GONE);
+                FABstatus = 2;
+            } //else { previous handler location }
         } else {
-
             handler.postDelayed(new Runnable() {
                 public void run() {
 
@@ -543,11 +592,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onBackPressed() {
 
-        if(venueFragment.isVisible()) {
+        if (venueFragment.isVisible() || adderFragment.isVisible()) {
 
             getFragmentManager().popBackStack();
 
-            FABstatus --;
+            FABstatus--;
 
             actionButton.startAnimation(slideOut);
             actionButton.setVisibility(View.GONE);
@@ -561,12 +610,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }, slideOut.getDuration());
 
-        }
-        else {
+        } else {
 
-            Intent intent = new Intent(MapsActivity.this, ChampionActivity.class);
-            startActivity(intent);
+            //do nothing
         }
+    }
+
+    @Override
+    public void onMapReturn() {
+        //this will show our new FAB
+        getFragmentManager().popBackStack();
+        postAdditionActivities(databaseHelper.getAllLocations().get(databaseHelper.getAllLocations().size() - 1));
+        databaseHelper.printLocationsTable();
+
+    }
+
+    @Override
+    public void quitToMap() {
+        getFragmentManager().popBackStack();
+
+        actionButton.setImageResource(R.drawable.icon_add);
+        actionButton.setVisibility(View.VISIBLE);
+        actionButton.startAnimation(slidein);
     }
 
 
@@ -627,9 +692,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // nextInt is normally exclusive of the top value,
         // so add 1 to make it inclusive
-        int randomNum = rand.nextInt((max - min) + 1) + min;
-
-        return randomNum;
+        return rand.nextInt((max - min) + 1) + min;
     }
 
     //directs the user to a location on the map
@@ -641,20 +704,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         LatLng starterLocation;
-        CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
+        CameraUpdate zoom = CameraUpdateFactory.zoomTo(12);
 
         if (setLatLang != null) {
             starterLocation = setLatLang;
 
         } else {
 
-            if (isRandom == true) {
+            if (isRandom) {
                 int rando = randInt(1, 4);
                 starterLocation = databaseHelper.getStarterLocationBundle(rando).getLatlng();
                 //add marker
+
                 map.addMarker(new MarkerOptions()
                         .position(databaseHelper.getStarterLocationBundle(rando).getLatlng()));
-                zoom = CameraUpdateFactory.zoomTo(10);
+                zoom = CameraUpdateFactory.zoomTo(12);
             } else {
                 starterLocation = focusLocation.getLatlng();
 
@@ -691,6 +755,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //this will be removed eventually...the dialog at least
     public void postAdditionActivities(LocationBundle locationBundle) {
 
+        focusLocation = locationBundle;
 
         map.addMarker(new MarkerOptions()
                 .title(locationBundle.getLocalName())
@@ -714,6 +779,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         markConfirmCancel.setVisibility(View.GONE);
         markConfirmMark.setVisibility(View.GONE);
 
+        //todo: reasses the WHY we have locking...
         handler.postDelayed(new Runnable() {
             public void run() {
                 lockingAction();
@@ -725,8 +791,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void lockingAction() {
 
 
-        if(!isLocked) {
-            if(isLocationAdded) {
+        if (!isLocked) {
+            if (isLocationAdded) {
 
                 Toast.makeText(MapsActivity.this, "Locked-in", Toast.LENGTH_SHORT).show();
 
@@ -738,8 +804,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 actionButton.setVisibility(View.VISIBLE);
                 actionButton.startAnimation(slidein);
 
-            }
-            else {
             }
 
         } else {
@@ -757,14 +821,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void fragmentAction() {
         Bundle venueBundle = new Bundle();
 
-        venueBundle.putInt(venueFragmentLocIndex, locationIndex);
+        venueBundle.putLong(venueFragmentLocIndex, focusLocation.getId());
 
-        FragmentTransaction fragTran = getFragmentManager().beginTransaction();
+        toggleFragment(venueFragment, venueFragmentTag);
+
+        /*FragmentTransaction fragTran = getFragmentManager().beginTransaction();
         venueFragment.setArguments(venueBundle);
         fragTran.add(R.id.container, venueFragment, venueFragmentTag)
-                .addToBackStack(venueFragmentTag).commit();
+                .addToBackStack(venueFragmentTag).commit();*/
 
-        FABstatus ++;
+        FABstatus++;
 
         //animation
         actionButton.startAnimation(slideOut);
@@ -778,6 +844,48 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         }, slideOut.getDuration());
+
         databaseHelper.printVenuesByLocation(focusLocation);
     }
+
+    //todo: note: this will replace our addFragment code that we have in two seperate instances
+    private void toggleFragment(Fragment frag, String fragTag) {
+
+        if(frag != null) {
+            getFragmentManager().popBackStack();
+        }
+        else {
+            getFragmentManager().beginTransaction()
+                    .setCustomAnimations(R.anim.fragment_slide_up, R.anim.fragment_slide_down)
+                    .add(R.id.container, frag, fragTag).addToBackStack(null).commit();
+        }
+
+    }
 }
+
+
+    /*//this method will check to see if we have visited this fragment before...for this user
+    //if it is then we will display the instruction splash screen.
+    public boolean isFirstTime() {
+        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+        boolean ranBefore = preferences.getBoolean("RanBefore", false);
+        if (!ranBefore) {
+
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("RanBefore", true);
+            editor.commit();
+            topLevelLayout.setVisibility(View.VISIBLE);
+            topLevelLayout.setOnTouchListener(new View.OnTouchListener(){
+
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    topLevelLayout.setVisibility(View.INVISIBLE);
+                    return false;
+                }
+
+            });
+
+
+        }
+        return ranBefore;
+    }*/

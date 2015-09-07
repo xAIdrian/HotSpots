@@ -42,17 +42,17 @@ public class FoursquareHandler {
 
     private String latitude;
     private String longitude;
-    private int location_id;
+    private long location_id;
     private LocationBundle locationHandle;
 
 
-    public FoursquareHandler(Context context, double latitude, double longitude, int location_id){
+    public FoursquareHandler(Context context, double latitude, double longitude, long location_id){
         this.context=context;
         databaseHelper = DatabaseHelper.getInstance(context);
         this.latitude = String.valueOf(latitude);
         this.longitude = String.valueOf(longitude);
         this.location_id = location_id;
-        locationHandle = databaseHelper.getAllLocations().get(location_id);
+        locationHandle = databaseHelper.getLocationBundle(location_id);
 
         this.venueIndexOverride = databaseHelper.getAllVenues().size();
 
@@ -153,7 +153,7 @@ public class FoursquareHandler {
                     for (int i = 0; i < jsonArray.length(); i++) {
 
                         Venue poi = new Venue();
-/**/                        poi.setLocation_id(location_id + 1);
+/**/                        poi.setLocation_id(location_id);
 
                         if (jsonArray.getJSONObject(i).has("name")) {
                             poi.setName(jsonArray.getJSONObject(i).getString("name"));

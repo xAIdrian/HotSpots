@@ -295,9 +295,9 @@ public class ChampionListFragment extends Fragment {
         //Cursor cursor;
 
         if (receivedIndex == -1) {
-            cursor = db.rawQuery("SELECT * FROM coordinates", null);
+            cursor = db.rawQuery("SELECT * FROM locations", null);
         } else {
-            cursor = db.rawQuery("SELECT * FROM coordinates", null);
+            cursor = db.rawQuery("SELECT * FROM locations", null);
         }
 
         return cursor;

@@ -94,7 +94,7 @@ public class VenueProvider extends ContentProvider {
 
             case GET_SELECT:
 
-                String starterQuery = "SELECT * FROM " + DatabaseHelper.TABLE_COORDINATES + " WHERE "
+                String starterQuery = "SELECT * FROM " + DatabaseHelper.TABLE_LOCATIONS + " WHERE "
                         + DatabaseHelper.KEY_LOCAL_NAME + " = ?";
                 queryCursor = databaseHelper.getReadableDatabase().rawQuery(starterQuery,
                         new String[] { uri.getLastPathSegment() });

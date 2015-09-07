@@ -8,7 +8,6 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,11 +30,11 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
 
     private Bundle providerBundle;
     private LocationBundle focusLocation;
-    private int locationIndex;
+    private long locationIndex;
 
     private TextView scoreView;
 
-    boolean proceedBoolean = true;
+    int selection;
 
     private static final String[] PROJECTION = new String[]{
             VenueProvider.InterfaceConstants.id,
@@ -56,8 +55,10 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         super.onCreate(savedInstanceState);
         databaseHelper = DatabaseHelper.getInstance(getActivity());
 
-        locationIndex = getArguments().getInt(MapsActivity.venueFragmentLocIndex);
-        focusLocation = databaseHelper.getAllLocations().get(locationIndex);
+        locationIndex = getArguments().getLong(MapsActivity.venueFragmentLocIndex);
+        focusLocation = databaseHelper.getLocationBundle(locationIndex);
+
+        Log.e(TAG, "locationIndex: " + locationIndex + ", focusLocation: " + focusLocation.getLocalName());
 
         // getLoaderManager().restartLoader(LOADER_ID, providerBundle, callBacks);
         String[] dataColumns = { VenueProvider.InterfaceConstants.venue_name };
@@ -81,16 +82,6 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         View v = inflater.inflate(R.layout.fragment_venue_results, container, false);
 
         scoreView = (TextView) v.findViewById(R.id.scoreText);
-        new Handler().postDelayed(new Runnable() {
-            public void run() {
-
-                yourScore();
-
-            }
-        }, 2000);
-
-        Log.e(TAG, "onCreateView");
-
 
         return v;
     }
@@ -123,13 +114,14 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        Log.e(TAG, "onLoadFinished: " + cursor.getCount());
 
         switch (loader.getId()) {
             case LOADER_ID:
                 adapter.swapCursor(cursor);
                 break;
             }
+        Log.e(TAG, "onLoadFinished: " + cursor.getCount());
+        yourScore();
     }
 
     @Override
@@ -167,7 +159,12 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
             divisor ++;
             dividend += v.getRating();
         }
-        scoreView.setText(String.valueOf(dividend / divisor));
+        int xRated = dividend / divisor;
+        scoreView.setText(String.valueOf(xRated));
+
+        focusLocation.setLocationRating(xRated);
+        databaseHelper.updateLocationBundle(focusLocation);
+
     }
 
         //Log.e(TAG, String.valueOf(databaseHelper.getAllVenuesFromLocation(focusLocation)));

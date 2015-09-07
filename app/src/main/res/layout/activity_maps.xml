@@ -3,9 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="#FFFFFF"
-    tools:context="com.androidtitan.hotspots.Activity.LockInMapsActivity">
-
+    android:background="#FFFFFF">
 
     <fragment android:id="@+id/map"
         android:name="com.google.android.gms.maps.MapFragment"
@@ -108,5 +106,37 @@
             android:textStyle="bold"/>
 
         </LinearLayout>
+
+    <!--
+    Transparent splash screen
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#88FFFFFF"
+        android:id="@+id/top_layout">
+
+        <TextView android:id="@+id/carefulInstruction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:layout_marginTop="32dp"
+            android:gravity="center"
+            android:clickable="false"
+            android:text="@string/careful"
+            android:textSize="@dimen/abc_text_size_headline_material"
+            android:textStyle="bold"/>
+
+        <TextView android:id="@+id/instructions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/carefulInstruction"
+            android:padding="16dp"
+            android:gravity="center"
+            android:clickable="false"
+            android:text="@string/initial_instruction"
+            android:textSize="@dimen/abc_text_size_large_material"/>
+
+    </RelativeLayout>-->
 
 </RelativeLayout>

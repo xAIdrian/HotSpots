@@ -1,4 +1,5 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.androidtitan.hotspots.JavaCustoms.SlidingRelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/left_layer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -32,18 +33,6 @@
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/titletextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="15dp"
-            android:layout_weight="8"
-            android:gravity="end"
-            android:padding="5dp"
-            android:text="@string/add_soldier"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/colorPrimaryText" />
-
     </LinearLayout>
 
     <LinearLayout
@@ -75,7 +64,7 @@
                 android:textStyle="bold" />
 
             <EditText
-                android:id="@+id/firstName_edit"
+                android:id="@+id/name_edit"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
@@ -87,6 +76,16 @@
                 android:inputType="textCapSentences"
                 android:singleLine="true"
                 android:selectAllOnFocus="true"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/name_edit"
+                android:paddingTop="16dp"
+                android:gravity="center"
+                android:text="you only get one!"
+                android:textColor="@color/colorDivider"/>
+
             </RelativeLayout>
 
         <RelativeLayout
@@ -98,47 +97,20 @@
 
         </RelativeLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-
-        </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/bottomConfirm"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_alignParentBottom="true"
-            android:orientation="horizontal"
-            android:paddingBottom="10dp"
-            android:weightSum="2">
-
-            <TextView
-                android:id="@+id/deleteBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="@string/delete"
-                android:textColor="@color/colorCrush" />
+    <ImageButton
+        android:id="@+id/floatingActionImageButton"
+        android:layout_margin="15dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:src="@drawable/icon_add"
+        android:background="@drawable/circle"
+        android:focusable="true"/>
 
 
-            <TextView
-                android:id="@+id/submit_button"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="@string/add"
-                android:textColor="#4CAF50"
-                android:textStyle="bold"/>
 
-        </LinearLayout>
-
-</RelativeLayout>
+</com.androidtitan.hotspots.JavaCustoms.SlidingRelativeLayout>
 

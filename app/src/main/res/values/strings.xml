@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Hot Spots</string>
+    <string name="app_name">HotSpot</string>
 
     <string name="hello_world">Hello world! I think you are missing something…</string>
     <string name="action_settings">Settings</string>

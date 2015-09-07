@@ -7,12 +7,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 
-import com.androidtitan.hotspots.R;
 import com.androidtitan.hotspots.Fragment.AdderFragment;
-import com.androidtitan.hotspots.Interface.AdderInterface;
+import com.androidtitan.hotspots.R;
 
-//ToDo: receive whether this is a SOLDIER or DIVISION
-public class AdderActivity extends FragmentActivity implements AdderInterface {
+//ToDo: THIS IS GETTING PHASED OUT
+public class AdderActivity extends FragmentActivity {
     private final String ADD_FRAG_TAG = "adderTag";
 
     public static final String CURSOR_UPDATE = "cursorUpdateFromAdder";
@@ -49,14 +48,14 @@ public class AdderActivity extends FragmentActivity implements AdderInterface {
         //onOrientationChange Block
         if (savedInstanceState != null) {
             //savedInstanceState, fragment may exist. Look up the instance that already exists by tag
-            adderFragment = (AdderFragment) getSupportFragmentManager().findFragmentByTag(ADD_FRAG_TAG);
+            adderFragment = (AdderFragment) getFragmentManager().findFragmentByTag(ADD_FRAG_TAG);
         } else if (adderFragment == null) {
             adderFragment = new AdderFragment();
         }
         if (!adderFragment.isInLayout()) {
             fragMag = getSupportFragmentManager();
             fragTran = fragMag.beginTransaction();
-            fragTran.addToBackStack(null).replace(R.id.landingContainer, adderFragment, ADD_FRAG_TAG).commit();
+            //todo: fragTran.addToBackStack(null).replace(R.id.landingContainer, adderFragment, ADD_FRAG_TAG).commit();
         }
 
 
@@ -77,7 +76,6 @@ public class AdderActivity extends FragmentActivity implements AdderInterface {
 
     //called from SecondF2AInterface.  Passes integer so main activity can page to
     //newly added soldier's division
-    @Override
     public void returnToChamp(boolean shouldCursorUpdate) {
         Intent intent = new Intent(this, ChampionActivity.class);
 

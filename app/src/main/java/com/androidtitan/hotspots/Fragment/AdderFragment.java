@@ -1,10 +1,8 @@
 package com.androidtitan.hotspots.Fragment;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -12,15 +10,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.androidtitan.hotspots.Activity.MapsActivity;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.LocationBundle;
 import com.androidtitan.hotspots.Interface.AdderInterface;
 import com.androidtitan.hotspots.R;
+import com.google.android.gms.maps.model.LatLng;
 
 
 public class AdderFragment extends Fragment {
@@ -34,13 +34,14 @@ public class AdderFragment extends Fragment {
     private LinearLayout backLayout;
 
     private EditText firstEdit;
-    private TextView deleteBtn;
-    private TextView addBtn;
+//    private TextView deleteBtn;
+    private ImageButton addBtn;
 
+    private String newFname;
 
-    private int locationIndex = -1;
-    private String newFname = "blank";
-    private Boolean editPage = false;
+    private double receivedLat;
+    private double receivedLng;
+    private LatLng receivedLatLng;
 
 
     @Override
@@ -50,7 +51,7 @@ public class AdderFragment extends Fragment {
             adderInterface = (AdderInterface) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement ADDERINTERFACE");
         }
     }
 
@@ -61,25 +62,20 @@ public class AdderFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //loads data that is saved when the screen is rotated
+        databaseHelper = new DatabaseHelper(getActivity());
+
         setRetainInstance(true); //retains our data object when activity is desroyed
         if(savedInstanceState != null) {
             newFname = savedInstanceState.getString(SAVED_FIRST);
         }
         Bundle bundle = new Bundle();
         bundle = this.getArguments();
-        locationIndex = bundle.getInt("editSoloIndex");
-        newFname = bundle.getString("editSoloFirst");
 
+        receivedLat = bundle.getDouble(MapsActivity.adderFragmentLatitude);
+        receivedLng = bundle.getDouble(MapsActivity.adderFragmentLongitude);
+        receivedLatLng = new LatLng(receivedLat, receivedLng);
 
-        if(newFname == null) {
-            editPage = false;
-        }
-        else {
-            editPage = true;
-        }
-
-        databaseHelper = new DatabaseHelper(getActivity());
-
+        Log.e(TAG, String.valueOf(receivedLatLng));
     }
 
     @Override
@@ -89,9 +85,9 @@ public class AdderFragment extends Fragment {
 
         backLayout = (LinearLayout) v.findViewById(R.id.back_layout);
 
-        firstEdit = (EditText) v.findViewById(R.id.firstName_edit);
+        firstEdit = (EditText) v.findViewById(R.id.name_edit);
 
-        deleteBtn = (TextView) v.findViewById(R.id.deleteBtn);
+        /*deleteBtn = (TextView) v.findViewById(R.id.deleteBtn);
         if(locationIndex == -1) {
             deleteBtn.setTextColor(0xFFFFFFFF);
         }
@@ -112,13 +108,12 @@ public class AdderFragment extends Fragment {
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
 
-                                //todo
                                 LocationBundle focusBundle = databaseHelper.getLocationBundle(locationIndex);
                                 Log.e("AFdeleter", focusBundle.getLocalName() + " " + focusBundle.getId());
 
                                 databaseHelper.deleteLocation(focusBundle);
 
-                                adderInterface.returnToChamp(true);
+                                //adderInterface.returnToChamp(true);
 
                             }
                         })
@@ -138,18 +133,15 @@ public class AdderFragment extends Fragment {
 
             }
         });
+*/
+        addBtn = (ImageButton) v.findViewById(R.id.floatingActionImageButton);
 
-        addBtn = (TextView) v.findViewById(R.id.submit_button);
-
-        if(editPage == true) {
-            addBtn.setText("Edit");
-        }
-
-        //todo: we need to
         backLayout.setOnClickListener(new ImageView.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adderInterface.returnToChamp(false);
+                adderInterface.quitToMap();
+                //fragment slide out
+
 
             }
         });
@@ -172,7 +164,7 @@ public class AdderFragment extends Fragment {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 newFname = s.toString();
 
-                //consider implementing this.  We would need to do it for all SPECIAL CHARS
+                //todo: consider implementing this.  We would need to do it for all SPECIAL CHARS
                 //newFname = newFname.replace("'","\'");
             }
 
@@ -183,44 +175,31 @@ public class AdderFragment extends Fragment {
 
 
 
-        addBtn.setOnClickListener(new TextView.OnClickListener() {
+
+        addBtn.setOnClickListener(new ImageButton.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 if (firstEdit.getText().toString().matches("")) {
                     Toast.makeText(getActivity(), "Please complete fields", Toast.LENGTH_LONG).show();
                 } else {
+                    
+                    //add to database. associate division
+                    LocationBundle temp = new LocationBundle(newFname);
+                    temp.setLatlng(receivedLatLng);
 
-                    //if we are editing an existing user
-                    if(editPage == true) {
+                    databaseHelper.createLocation(temp);
 
-                        //todo
-                        LocationBundle updateBundle = databaseHelper.getAllLocations().get(locationIndex);
-
-                        updateBundle.setLocalName(newFname);
-
-                        databaseHelper.updateLocationBundle(updateBundle);
-
-                        adderInterface.returnToChamp(true);
-                    }
-
-                    //if we are adding a New user
-                    //if (editPage == false)
-                    else {
-                        //add to database. associate division
-                        LocationBundle temp = new LocationBundle(newFname);
-
-                        databaseHelper.createLocation(temp);
-
-                        adderInterface.returnToChamp(true);
-                    }
-
+                    adderInterface.onMapReturn();
                 }
+
             }
         });
 
         return v;
+
     }
+
 
     //Saves data that is lost on rotation
     @Override
@@ -232,7 +211,7 @@ public class AdderFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        //mListener = null;
+        adderInterface = null;
     }
 
 }
