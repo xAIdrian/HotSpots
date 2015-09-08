@@ -8,7 +8,6 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 
-import com.androidtitan.hotspots.Activity.MapsActivity;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.LocationBundle;
 import com.androidtitan.hotspots.Data.Venue;
@@ -54,6 +53,8 @@ public class FoursquareHandler {
         this.location_id = location_id;
         locationHandle = databaseHelper.getLocationBundle(location_id);
 
+        Log.e(TAG, "Location Handle ::: " + locationHandle.getLocalName());
+
         this.venueIndexOverride = databaseHelper.getAllVenues().size();
 
         new fourquare().execute();
@@ -87,14 +88,12 @@ public class FoursquareHandler {
                 // all things went right
                 parseFoursquare(tempString);
 
-                //now we are getting the rating for each...
-
                 for(Venue freshVenue : databaseHelper.getAllVenuesFromLocation(locationHandle)) {
                     new FoursquareVenueHandler(context, freshVenue.getId());
                 }
             }
             Log.e(TAG, "onPostExecute!");
-            ((MapsActivity) context).fragmentAction();
+            //((MapsActivity) context).fragmentAction();
 
 
 
@@ -184,7 +183,7 @@ public class FoursquareHandler {
                                     //todo: uri & ContentValues
 
                                     venueIndexOverride ++;
- /**/                                   //poi.setId(venueIndexOverride);
+ /**/                                  // poi.setId(venueIndexOverride); //todo
                                     creater(poi);
 
                                     //databaseHelper.assignVenueToLocation();

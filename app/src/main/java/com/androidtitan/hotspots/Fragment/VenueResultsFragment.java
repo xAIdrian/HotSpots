@@ -8,6 +8,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import com.androidtitan.hotspots.Activity.MapsActivity;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.LocationBundle;
 import com.androidtitan.hotspots.Data.Venue;
+import com.androidtitan.hotspots.Provider.FoursquareHandler;
 import com.androidtitan.hotspots.Provider.VenueProvider;
 import com.androidtitan.hotspots.R;
 
@@ -28,13 +30,14 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
 
     DatabaseHelper databaseHelper;
 
+    Handler handler = new Handler();
+
     private Bundle providerBundle;
     private LocationBundle focusLocation;
     private long locationIndex;
 
+    private TextView locationNameView;
     private TextView scoreView;
-
-    int selection;
 
     private static final String[] PROJECTION = new String[]{
             VenueProvider.InterfaceConstants.id,
@@ -58,7 +61,15 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         locationIndex = getArguments().getLong(MapsActivity.venueFragmentLocIndex);
         focusLocation = databaseHelper.getLocationBundle(locationIndex);
 
+        if (databaseHelper.getAllVenuesFromLocation(focusLocation).size() == 0) {
+            Log.e(TAG, "!!!!!!!! ::: ");
+            new FoursquareHandler(getActivity(), focusLocation.getLatlng().latitude,
+                    focusLocation.getLatlng().longitude, focusLocation.getId());
+        }
+
         Log.e(TAG, "locationIndex: " + locationIndex + ", focusLocation: " + focusLocation.getLocalName());
+
+
 
         // getLoaderManager().restartLoader(LOADER_ID, providerBundle, callBacks);
         String[] dataColumns = { VenueProvider.InterfaceConstants.venue_name };
@@ -81,7 +92,11 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_venue_results, container, false);
 
+        locationNameView = (TextView) v.findViewById(R.id.locationNameText);
+        locationNameView.setText(focusLocation.getLocalName());
         scoreView = (TextView) v.findViewById(R.id.scoreText);
+
+
 
         return v;
     }
@@ -120,8 +135,19 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
                 adapter.swapCursor(cursor);
                 break;
             }
+
         Log.e(TAG, "onLoadFinished: " + cursor.getCount());
-        yourScore();
+
+        //todo: LET'S SEE IF WE CAN GET NOTIFIED WHEN THE "background thread" HAS COMPLETED
+        //TODO: NO WORK IS TOO MUCH
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                yourScore();
+            }
+        }, 1500);
+
+
     }
 
     @Override
@@ -166,20 +192,5 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         databaseHelper.updateLocationBundle(focusLocation);
 
     }
-
-        //Log.e(TAG, String.valueOf(databaseHelper.getAllVenuesFromLocation(focusLocation)));
-
-     /*       if (cursor != null)
-                cursor.moveToFirst();
-
-            do {
-
-                Log.e(TAG, "divisor : " + divisor);
-                dividend += cursor.getInt(cursor.getColumnIndex(DatabaseHelper.KEY_VENUE_RATING));
-                Log.e(TAG, "dividend : " + dividend);
-            } while (cursor.moveToNext());
-
-            scoreView.setText(String.valueOf(dividend / divisor));
-        }*/
 
 }

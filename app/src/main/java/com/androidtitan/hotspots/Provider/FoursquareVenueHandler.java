@@ -67,7 +67,7 @@ public class FoursquareVenueHandler {
                     + FoursquareHandler.CLIENT_ID + "&client_secret=" + FoursquareHandler.CLIENT_SECRET
                     + "&v=20130815");
 
-            Log.e(TAG, tempString);
+            //Log.e(TAG, tempString);
 
             return "";
         }

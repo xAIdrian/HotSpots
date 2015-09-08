@@ -1,7 +1,6 @@
 package com.androidtitan.hotspots.Activity;
 
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,10 +23,10 @@ import android.widget.Toast;
 
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.LocationBundle;
+import com.androidtitan.hotspots.Data.Venue;
 import com.androidtitan.hotspots.Fragment.AdderFragment;
 import com.androidtitan.hotspots.Fragment.VenueResultsFragment;
 import com.androidtitan.hotspots.Interface.AdderInterface;
-import com.androidtitan.hotspots.Provider.FoursquareHandler;
 import com.androidtitan.hotspots.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -116,6 +115,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
     private LinearLayout markConfirmLayout;
     private TextView markConfirmCancel;
     private TextView markConfirmMark;
+    private View shadow;
 
     private Animation slidein;
     private Animation slideOut;
@@ -134,6 +134,9 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
     private boolean isLocationAdded = false; //use this to control yo dialogs
     private boolean isLocked = false;
 
+    private Bundle adderBundle;
+    private Bundle venueBundle;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,8 +149,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
         }
 
         databaseHelper = DatabaseHelper.getInstance(this);
-        venueFragment = new VenueResultsFragment();
-        adderFragment = new AdderFragment();
 
         Intent intent = getIntent();
         locationIndex = intent.getIntExtra(ChampionActivity.SELECTION_TO_MAP, -1);
@@ -231,6 +232,8 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
         markConfirmLayout.setVisibility(View.GONE);
         markConfirmCancel.setVisibility(View.GONE);
         markConfirmMark.setVisibility(View.GONE);
+
+        shadow = (View) findViewById(R.id.dropshadow);
 
         //if we've used all of our locations then we lock-it up
         //this is our Critical Logic
@@ -354,17 +357,10 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
                                     //databaseHelper.updateLocationBundle(focusLocation);
 
 
-                                    Bundle adderBundle = new Bundle();
+                                    adderBundle = new Bundle();
 
                                     adderBundle.putDouble(adderFragmentLatitude, currentLatitude);
                                     adderBundle.putDouble(adderFragmentLongitude, currentLongitude);
-
-                                    toggleFragment(adderFragment, adderFragmentTag);
-
-                                    /*FragmentTransaction fragTran = getFragmentManager().beginTransaction();
-                                    adderFragment.setArguments(adderBundle);
-                                    fragTran.add(R.id.container, adderFragment, adderFragmentTag)
-                                            .addToBackStack(adderFragmentTag).commit();*/
 
                                     actionButton.startAnimation(slideOut);
                                     actionButton.setVisibility(View.GONE);
@@ -378,6 +374,13 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
                                     markConfirmCancel.setVisibility(View.GONE);
                                     markConfirmMark.setVisibility(View.GONE);
 
+                                    toggleFragment(false, adderFragmentTag);
+
+                                    /*FragmentTransaction fragTran = getFragmentManager().beginTransaction();
+                                    adderFragment.setArguments(adderBundle);
+                                    fragTran.add(R.id.container, adderFragment, adderFragmentTag)
+                                            .addToBackStack(adderFragmentTag).commit();*/
+
                                 }
                             });
 
@@ -386,22 +389,14 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
 
                         case 2: //SUBMIT fab
 
-                            if (databaseHelper.getAllVenuesFromLocation(focusLocation).size() == 0) {
-                                Log.e(TAG, "!!!!!!!! ::: ");
-                                new FoursquareHandler(MapsActivity.this, focusLocation.getLatlng().latitude,
-                                        focusLocation.getLatlng().longitude, focusLocation.getId());
-                            } else {
-                                fragmentAction();
-                            }
+                            fragmentAction();
 
-
-                            //where fragmentAction will be
 
                             break;
 
                         case 3: //BACK-SUBMIT fab
 
-                            getFragmentManager().popBackStack();
+                            toggleFragment(true, venueFragmentTag);
 
                             FABstatus--;
 
@@ -592,11 +587,9 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
     @Override
     public void onBackPressed() {
 
-        if (venueFragment.isVisible() || adderFragment.isVisible()) {
 
-            getFragmentManager().popBackStack();
-
-            FABstatus--;
+        if (venueFragment.isVisible()) {
+            toggleFragment(true, venueFragmentTag);
 
             actionButton.startAnimation(slideOut);
             actionButton.setVisibility(View.GONE);
@@ -610,16 +603,36 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
                 }
             }, slideOut.getDuration());
 
-        } else {
+            FABstatus--;
 
-            //do nothing
         }
+        if (adderFragment.isVisible()) {
+            toggleFragment(true, adderFragmentTag);
+
+            actionButton.startAnimation(slideOut);
+            actionButton.setVisibility(View.GONE);
+
+            handler.postDelayed(new Runnable() {
+                public void run() {
+                    actionButton.setImageResource(R.drawable.icon_add);
+                    actionButton.setVisibility(View.VISIBLE);
+                    actionButton.startAnimation(slidein);
+
+                }
+            }, slideOut.getDuration());
+        }
+
+
+
+
+
+
     }
 
     @Override
     public void onMapReturn() {
         //this will show our new FAB
-        getFragmentManager().popBackStack();
+        toggleFragment(true, adderFragmentTag);
         postAdditionActivities(databaseHelper.getAllLocations().get(databaseHelper.getAllLocations().size() - 1));
         databaseHelper.printLocationsTable();
 
@@ -627,7 +640,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
 
     @Override
     public void quitToMap() {
-        getFragmentManager().popBackStack();
+        toggleFragment(true, adderFragmentTag);
 
         actionButton.setImageResource(R.drawable.icon_add);
         actionButton.setVisibility(View.VISIBLE);
@@ -766,18 +779,13 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
 
         FABstatus++;
 
-        actionButton.startAnimation(slideOut);
         actionButton.setVisibility(View.GONE);
-
-        backer.startAnimation(leftSlideOut);
         backer.setVisibility(View.GONE);
 
-        markConfirmLayout.startAnimation(slideOut);
-        markConfirmCancel.startAnimation(slideOut);
-        markConfirmMark.startAnimation(slideOut);
         markConfirmLayout.setVisibility(View.GONE);
         markConfirmCancel.setVisibility(View.GONE);
         markConfirmMark.setVisibility(View.GONE);
+
 
         //todo: reasses the WHY we have locking...
         handler.postDelayed(new Runnable() {
@@ -819,11 +827,10 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
     }
 
     public void fragmentAction() {
-        Bundle venueBundle = new Bundle();
-
+        venueBundle = new Bundle();
         venueBundle.putLong(venueFragmentLocIndex, focusLocation.getId());
 
-        toggleFragment(venueFragment, venueFragmentTag);
+        toggleFragment(false, venueFragmentTag);
 
         /*FragmentTransaction fragTran = getFragmentManager().beginTransaction();
         venueFragment.setArguments(venueBundle);
@@ -845,19 +852,43 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
             }
         }, slideOut.getDuration());
 
-        databaseHelper.printVenuesByLocation(focusLocation);
+        Log.e(TAG, "printVenuesByLocation ::: ");
+
+
+
     }
 
     //todo: note: this will replace our addFragment code that we have in two seperate instances
-    private void toggleFragment(Fragment frag, String fragTag) {
+    private void toggleFragment(boolean shouldPop, String fragTag) {
 
-        if(frag != null) {
+        if(shouldPop) {
+            Log.e(TAG, "null trash");
             getFragmentManager().popBackStack();
+            shadow.setVisibility(View.VISIBLE);
         }
         else {
-            getFragmentManager().beginTransaction()
-                    .setCustomAnimations(R.anim.fragment_slide_up, R.anim.fragment_slide_down)
-                    .add(R.id.container, frag, fragTag).addToBackStack(null).commit();
+            if(fragTag == venueFragmentTag) {
+                venueFragment = new VenueResultsFragment();
+                venueFragment.setArguments(venueBundle);
+
+                getFragmentManager().beginTransaction()
+                        .setCustomAnimations(R.anim.fragment_slide_up, R.anim.fragment_slide_down,
+                                R.anim.fragment_slide_up, R.anim.fragment_slide_down)
+                        .add(R.id.container, venueFragment, fragTag).addToBackStack(null).commit();
+
+                shadow.setVisibility(View.GONE);
+            }
+            if(fragTag == adderFragmentTag) {
+                adderFragment = new AdderFragment();
+                adderFragment.setArguments(adderBundle);
+
+                getFragmentManager().beginTransaction()
+                        .setCustomAnimations(R.anim.fragment_slide_up, R.anim.fragment_slide_down,
+                                R.anim.fragment_slide_up, R.anim.fragment_slide_down)
+                        .add(R.id.container, adderFragment, fragTag).addToBackStack(null).commit();
+
+                shadow.setVisibility(View.GONE);
+            }
         }
 
     }

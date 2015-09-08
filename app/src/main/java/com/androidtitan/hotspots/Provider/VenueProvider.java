@@ -144,11 +144,10 @@ public class VenueProvider extends ContentProvider {
         int uriType = uriMatcher.match(uri);
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
-        long insertId = 0;
         switch(uriType) {
             case GET_ONE:
 
-                insertId = database.insert(DatabaseHelper.TABLE_VENUES, null, values);
+                database.insert(DatabaseHelper.TABLE_VENUES, null, values);
 
                 break;
 
