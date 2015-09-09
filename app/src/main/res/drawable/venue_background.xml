@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <gradient
+                android:angle="135"
+                android:startColor="#FFFFFF"
+                android:endColor="#CCFFFFFF"
+                android:type="linear" />
+        </shape>
+    </item>
+</selector>
+
+<!-- android:angle
+Integer. The angle for the gradient, in degrees. 0 is left to right,
+90 is bottom to top. It must be a multiple of 45. Default is 0. -->

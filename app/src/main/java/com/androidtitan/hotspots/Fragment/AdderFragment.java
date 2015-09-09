@@ -13,11 +13,9 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.androidtitan.hotspots.Activity.MapsActivity;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
-import com.androidtitan.hotspots.Data.LocationBundle;
 import com.androidtitan.hotspots.Interface.AdderInterface;
 import com.androidtitan.hotspots.R;
 import com.google.android.gms.maps.model.LatLng;
@@ -37,11 +35,11 @@ public class AdderFragment extends Fragment {
 //    private TextView deleteBtn;
     private ImageButton addBtn;
 
-    private String newFname;
+    public String newFname;
 
     private double receivedLat;
     private double receivedLng;
-    private LatLng receivedLatLng;
+    public LatLng receivedLatLng;
 
 
     @Override
@@ -173,29 +171,6 @@ public class AdderFragment extends Fragment {
             }
         });
 
-
-
-
-        addBtn.setOnClickListener(new ImageButton.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (firstEdit.getText().toString().matches("")) {
-                    Toast.makeText(getActivity(), "Please complete fields", Toast.LENGTH_LONG).show();
-                } else {
-                    
-                    //add to database. associate division
-                    LocationBundle temp = new LocationBundle(newFname);
-                    temp.setLatlng(receivedLatLng);
-
-                    databaseHelper.createLocation(temp);
-
-                    adderInterface.onMapReturn();
-                }
-
-            }
-        });
-
         return v;
 
     }
@@ -212,6 +187,16 @@ public class AdderFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         adderInterface = null;
+    }
+
+    //todo: method to get the contents of our EDITEXT for our activity
+    public Boolean getEditTextStatus() {
+        if (firstEdit.getText().toString().matches("")) {
+            return false;
+            //Below goes in activity
+        } else {
+            return true;
+        }
     }
 
 }

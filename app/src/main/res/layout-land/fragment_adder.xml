@@ -1,9 +1,8 @@
-<com.androidtitan.hotspots.JavaCustoms.SlidingRelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.androidtitan.hotspots.JavaCustoms.SlidingRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/left_layer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#CCFFFFFF"  >
 
     <LinearLayout
         android:id="@+id/header"
@@ -38,8 +37,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/header"
         android:layout_above="@+id/bottomConfirm"
+        android:layout_below="@+id/header"
         android:orientation="horizontal"
         android:weightSum="2">
 
@@ -72,21 +71,22 @@
                 android:layout_below="@+id/firstTitleText"
                 android:backgroundTint="#448AFF"
                 android:gravity="center"
+                style="@style/editStyle"
                 android:imeOptions="actionDone"
                 android:inputType="textCapSentences"
-                android:singleLine="true"
-                android:selectAllOnFocus="true"/>
+                android:selectAllOnFocus="true"
+                android:singleLine="true" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/name_edit"
-                android:paddingTop="16dp"
                 android:gravity="center"
+                android:paddingTop="16dp"
                 android:text="you only get one!"
-                android:textColor="@color/colorDivider"/>
+                android:textColor="@color/colorDivider" />
 
-            </RelativeLayout>
+        </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -97,19 +97,7 @@
 
         </RelativeLayout>
 
-        </LinearLayout>
-
-    <ImageButton
-        android:id="@+id/floatingActionImageButton"
-        android:layout_margin="15dp"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:src="@drawable/icon_add"
-        android:background="@drawable/circle"
-        android:focusable="true"/>
-
+    </LinearLayout>
 
 
 </com.androidtitan.hotspots.JavaCustoms.SlidingRelativeLayout>

@@ -23,10 +23,11 @@ import android.widget.Toast;
 
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.LocationBundle;
-import com.androidtitan.hotspots.Data.Venue;
 import com.androidtitan.hotspots.Fragment.AdderFragment;
 import com.androidtitan.hotspots.Fragment.VenueResultsFragment;
 import com.androidtitan.hotspots.Interface.AdderInterface;
+import com.androidtitan.hotspots.Interface.VenueInterface;
+import com.androidtitan.hotspots.Provider.FoursquareHandler;
 import com.androidtitan.hotspots.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -83,7 +84,7 @@ REFACTOR. WE NEED TO BE MORE OBJECT ORIENTED
  */
 
 
-public class MapsActivity extends FragmentActivity implements AdderInterface, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
+public class MapsActivity extends FragmentActivity implements AdderInterface, VenueInterface, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String TAG = "MapActivity";
 
@@ -129,13 +130,15 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
 
     private int locationIndex = -1;
 
-    private int FABstatus = 0; //0=location 1=add   2=submit
+    private int FABstatus = 0; //0=location 1=add   2=adder submit 3=submit 4=back
 
     private boolean isLocationAdded = false; //use this to control yo dialogs
     private boolean isLocked = false;
 
     private Bundle adderBundle;
     private Bundle venueBundle;
+
+    private int venueSelection;
 
 
     @Override
@@ -152,7 +155,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
 
         Intent intent = getIntent();
         locationIndex = intent.getIntExtra(ChampionActivity.SELECTION_TO_MAP, -1);
-
 
         //our handle for our MapFragment
         MapFragment mapFragment = (MapFragment) getFragmentManager()
@@ -248,7 +250,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
             locker.setImageResource(R.drawable.lock_closed);
             actionButton.setImageResource(R.drawable.icon_submit);
 
-            FABstatus = 2;
+            FABstatus = 3;
             //todo: LATER we need to include for if we are Locked AND Scored
 
         }
@@ -327,6 +329,8 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
 
                         case 1: //ADD FAB
 
+                            FABstatus ++;
+
                             markConfirmLayout.setVisibility(View.VISIBLE);
                             markConfirmCancel.setVisibility(View.VISIBLE);
                             markConfirmMark.setVisibility(View.VISIBLE);
@@ -376,10 +380,19 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
 
                                     toggleFragment(false, adderFragmentTag);
 
-                                    /*FragmentTransaction fragTran = getFragmentManager().beginTransaction();
-                                    adderFragment.setArguments(adderBundle);
-                                    fragTran.add(R.id.container, adderFragment, adderFragmentTag)
-                                            .addToBackStack(adderFragmentTag).commit();*/
+                                    //todo
+                                    actionButton.startAnimation(slideOut);
+                                    actionButton.setVisibility(View.GONE);
+
+                                    //handler is being used for the return action
+                                    handler.postDelayed(new Runnable() {
+                                        public void run() {
+                                            actionButton.setImageResource(R.drawable.icon_add);
+                                            actionButton.setVisibility(View.VISIBLE);
+                                            actionButton.startAnimation(slidein);
+
+                                        }
+                                    }, slideOut.getDuration());
 
                                 }
                             });
@@ -387,14 +400,34 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
 
                             break;
 
-                        case 2: //SUBMIT fab
+                        case 2: //ADDER FRAG SUBMIT
+
+
+                            if(adderFragment.getEditTextStatus()) {
+                                //add to database. associate division
+                                LocationBundle temp = new LocationBundle(adderFragment.newFname);
+                                temp.setLatlng(adderFragment.receivedLatLng);
+
+                                databaseHelper.createLocation(temp);
+
+                                toggleFragment(true, adderFragmentTag);
+                                postAdditionActivities(databaseHelper.getAllLocations().get(databaseHelper.getAllLocations().size() - 1));
+                                databaseHelper.printLocationsTable();
+                            }
+                            else {
+                                Toast.makeText(MapsActivity.this, "Please complete fields", Toast.LENGTH_LONG).show();
+                            }
+
+                            break;
+
+                        case 3: //SUBMIT fab
 
                             fragmentAction();
 
 
                             break;
 
-                        case 3: //BACK-SUBMIT fab
+                        case 4: //BACK-SUBMIT fab
 
                             toggleFragment(true, venueFragmentTag);
 
@@ -538,7 +571,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
         if (locationIndex > -1) {
             if (!focusLocation.getLatlng().equals(new LatLng(0.0, 0.0)) && !isLocked) {
                 actionButton.setVisibility(View.GONE);
-                FABstatus = 2;
+                FABstatus = 3;
             } //else { previous handler location }
         } else {
             handler.postDelayed(new Runnable() {
@@ -587,24 +620,25 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
     @Override
     public void onBackPressed() {
 
+        if (venueFragment != null) {
+            if (venueFragment.isVisible()) {
+                toggleFragment(true, venueFragmentTag);
 
-        if (venueFragment.isVisible()) {
-            toggleFragment(true, venueFragmentTag);
+                actionButton.startAnimation(slideOut);
+                actionButton.setVisibility(View.GONE);
 
-            actionButton.startAnimation(slideOut);
-            actionButton.setVisibility(View.GONE);
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        actionButton.setImageResource(R.drawable.icon_submit);
+                        actionButton.setVisibility(View.VISIBLE);
+                        actionButton.startAnimation(slidein);
 
-            handler.postDelayed(new Runnable() {
-                public void run() {
-                    actionButton.setImageResource(R.drawable.icon_submit);
-                    actionButton.setVisibility(View.VISIBLE);
-                    actionButton.startAnimation(slidein);
+                    }
+                }, slideOut.getDuration());
 
-                }
-            }, slideOut.getDuration());
+                FABstatus--;
 
-            FABstatus--;
-
+            }
         }
         if (adderFragment.isVisible()) {
             toggleFragment(true, adderFragmentTag);
@@ -622,29 +656,28 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
             }, slideOut.getDuration());
         }
 
-
-
-
-
-
     }
 
     @Override
     public void onMapReturn() {
         //this will show our new FAB
-        toggleFragment(true, adderFragmentTag);
-        postAdditionActivities(databaseHelper.getAllLocations().get(databaseHelper.getAllLocations().size() - 1));
-        databaseHelper.printLocationsTable();
 
     }
 
     @Override
     public void quitToMap() {
+
+        FABstatus --;
         toggleFragment(true, adderFragmentTag);
 
         actionButton.setImageResource(R.drawable.icon_add);
         actionButton.setVisibility(View.VISIBLE);
         actionButton.startAnimation(slidein);
+    }
+
+    @Override
+    public void selectionPasser(int selectionInt) {
+        venueSelection = selectionInt;
     }
 
 
@@ -770,6 +803,13 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
 
         focusLocation = locationBundle;
 
+        //Foursquare API
+        if (databaseHelper.getAllVenuesFromLocation(focusLocation).size() == 0) {
+            Log.e(TAG, "!!!!!!!! ::: ");
+            new FoursquareHandler(MapsActivity.this, focusLocation.getLatlng().latitude,
+                    focusLocation.getLatlng().longitude, focusLocation.getId());
+        }
+
         map.addMarker(new MarkerOptions()
                 .title(locationBundle.getLocalName())
                 .position(locationBundle.getLatlng()))
@@ -869,6 +909,8 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
         else {
             if(fragTag == venueFragmentTag) {
                 venueFragment = new VenueResultsFragment();
+                venueFragment.setRetainInstance(true);
+
                 venueFragment.setArguments(venueBundle);
 
                 getFragmentManager().beginTransaction()
@@ -880,6 +922,8 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
             }
             if(fragTag == adderFragmentTag) {
                 adderFragment = new AdderFragment();
+                adderFragment.setRetainInstance(true);
+
                 adderFragment.setArguments(adderBundle);
 
                 getFragmentManager().beginTransaction()
@@ -892,31 +936,9 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, On
         }
 
     }
+
+    public int getVenueSelection() {
+        return venueSelection;
+    }
 }
 
-
-    /*//this method will check to see if we have visited this fragment before...for this user
-    //if it is then we will display the instruction splash screen.
-    public boolean isFirstTime() {
-        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-        boolean ranBefore = preferences.getBoolean("RanBefore", false);
-        if (!ranBefore) {
-
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("RanBefore", true);
-            editor.commit();
-            topLevelLayout.setVisibility(View.VISIBLE);
-            topLevelLayout.setOnTouchListener(new View.OnTouchListener(){
-
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    topLevelLayout.setVisibility(View.INVISIBLE);
-                    return false;
-                }
-
-            });
-
-
-        }
-        return ranBefore;
-    }*/

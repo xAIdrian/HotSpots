@@ -2,8 +2,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#B3000000">
+    android:background="@drawable/venue_background">
 
     <TextView android:id="@+id/locationNameText"
         android:layout_width="match_parent"
@@ -11,9 +10,7 @@
         android:layout_alignParentTop="true"
         android:padding="16dp"
         android:gravity="center"
-        android:text="cunt"
-        android:textSize="@dimen/abc_text_size_medium_material"
-        android:textColor="@android:color/white"/>
+        android:textSize="@dimen/abc_text_size_medium_material"/>
 
     <TextView android:id="@+id/scoreText"
         android:layout_width="match_parent"
@@ -21,13 +18,22 @@
         android:layout_below="@+id/locationNameText"
         android:padding="60dp"
         android:gravity="center"
-        android:textSize="48dp"
-        android:textStyle="bold"
-        android:textColor="@android:color/white"/>
+        android:textSize="75dp"
+        android:textStyle="bold"/>
 
     <ListView android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/scoreText"/>
+        android:layout_below="@+id/scoreText"
+        android:layout_above="@+id/foursquareBtn"/>
+
+    <ImageButton android:id="@+id/foursquareBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:background="#CCFFFFFF"
+        android:layout_alignParentBottom="true"
+        android:padding="16dp"
+        android:src="@drawable/foursquare_icon"/>
 
 </com.androidtitan.hotspots.JavaCustoms.SlidingRelativeLayout>

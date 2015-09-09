@@ -20,7 +20,6 @@ public class ChampionCursorAdapter extends SimpleCursorAdapter {
 
     DatabaseHelper databaseHelper;
     private Context context;
-
     private int layout;
 
     private int selection;
@@ -48,16 +47,13 @@ public class ChampionCursorAdapter extends SimpleCursorAdapter {
         selection = ((ChampionActivity) context).getListViewSelection();
         int position = c.getPosition();
 
+        //Cursor myCursor = c;
 
-        Cursor myCursor = c;
+        int nameColumn = c.getColumnIndex(DatabaseHelper.KEY_LOCAL_NAME);
+        int lockedColumn = c.getColumnIndex(DatabaseHelper.KEY_LOCKED);
 
-        int nameColumn = myCursor.getColumnIndex(DatabaseHelper.KEY_LOCAL_NAME);
-        //int latColumn = myCursor.getColumnIndex(DatabaseHelper.KEY_LATITUDE);
-        //int longColumn = myCursor.getColumnIndex(DatabaseHelper.KEY_LONGITUDE);
-        int lockedColumn = myCursor.getColumnIndex(DatabaseHelper.KEY_LOCKED);
-
-        String firstName = myCursor.getString(nameColumn);
-        int lockedStatus = myCursor.getInt(lockedColumn); //0 is Opem aka Unlocked
+        String firstName = c.getString(nameColumn);
+        int lockedStatus = c.getInt(lockedColumn); //0 is Opem aka Unlocked
 
         TextView textView = (TextView) v.findViewById(R.id.primary_champ_text);
 

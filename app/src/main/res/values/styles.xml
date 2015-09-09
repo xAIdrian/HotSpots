@@ -7,4 +7,9 @@
         <item name="windowActionBar">false</item>
     </style>
 
+    <style name="editStyle">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/abc_text_size_large_material</item>
+    </style>
+
 </resources>

@@ -13,6 +13,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
@@ -20,7 +22,7 @@ import com.androidtitan.hotspots.Activity.MapsActivity;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.LocationBundle;
 import com.androidtitan.hotspots.Data.Venue;
-import com.androidtitan.hotspots.Provider.FoursquareHandler;
+import com.androidtitan.hotspots.Interface.VenueInterface;
 import com.androidtitan.hotspots.Provider.VenueProvider;
 import com.androidtitan.hotspots.R;
 
@@ -29,8 +31,10 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
     private static final String TAG = "VenueResultsFragment";
 
     DatabaseHelper databaseHelper;
+    VenueInterface venueInterface;
 
     Handler handler = new Handler();
+    private int selection = -1;
 
     private Bundle providerBundle;
     private LocationBundle focusLocation;
@@ -38,6 +42,7 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
 
     private TextView locationNameView;
     private TextView scoreView;
+    private ImageButton foursquareBtn;
 
     private static final String[] PROJECTION = new String[]{
             VenueProvider.InterfaceConstants.id,
@@ -61,19 +66,12 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         locationIndex = getArguments().getLong(MapsActivity.venueFragmentLocIndex);
         focusLocation = databaseHelper.getLocationBundle(locationIndex);
 
-        if (databaseHelper.getAllVenuesFromLocation(focusLocation).size() == 0) {
-            Log.e(TAG, "!!!!!!!! ::: ");
-            new FoursquareHandler(getActivity(), focusLocation.getLatlng().latitude,
-                    focusLocation.getLatlng().longitude, focusLocation.getId());
-        }
-
         Log.e(TAG, "locationIndex: " + locationIndex + ", focusLocation: " + focusLocation.getLocalName());
 
 
-
-        // getLoaderManager().restartLoader(LOADER_ID, providerBundle, callBacks);
-        String[] dataColumns = { VenueProvider.InterfaceConstants.venue_name };
-        int[] viewItems = { R.id.nameTextView };
+        String[] dataColumns = { VenueProvider.InterfaceConstants.venue_name,
+                VenueProvider.InterfaceConstants.venue_rating };
+        int[] viewItems = { R.id.nameTextView, R.id.ratingTextView };
 
         adapter = new SimpleCursorAdapter(getActivity(), R.layout.listview_venue_item, null,
                 dataColumns, viewItems, 0);
@@ -94,28 +92,61 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
 
         locationNameView = (TextView) v.findViewById(R.id.locationNameText);
         locationNameView.setText(focusLocation.getLocalName());
+
         scoreView = (TextView) v.findViewById(R.id.scoreText);
 
+        foursquareBtn = (ImageButton) v.findViewById(R.id.foursquareBtn);
+        foursquareBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(selection == -1) {
+                    //do nothing
+                }
+                else {
+                    //use an implicit intent to send the user to the foursquare app
+                    //if they do not have the foursquare app send them to the download screen
+                }
+            }
+        });
 
 
         return v;
     }
 
     @Override
+    public void onListItemClick(ListView l, View v, int pos, long id) {
+        super.onListItemClick(l, v, pos, id);
+
+       /* for (int i = 0; i <= getListView().getLastVisiblePosition() - getListView().getFirstVisiblePosition(); i++) {
+            View item = getListView().getChildAt(i);
+            item.setBackgroundColor(0xCCFFCD38);
+        }*/
+
+        if(selection == pos) {  //if we are selecting an already highlighted button
+            v.setBackgroundColor(0xCCFFFFFF);
+            selection = -1;
+        }
+        else {
+            v.setBackgroundColor(0xCCFFCD38);
+        }
+        venueInterface.selectionPasser(pos);
+    }
+
+    @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            //mListener = (OnFragmentInteractionListener) activity;
+            venueInterface = (VenueInterface) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement Interface");
+                    + " must implement venueInterface...Oops!");
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        //mListener = null;
+        venueInterface = null;
     }
 
     @Override
@@ -134,7 +165,7 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
             case LOADER_ID:
                 adapter.swapCursor(cursor);
                 break;
-            }
+        }
 
         Log.e(TAG, "onLoadFinished: " + cursor.getCount());
 
@@ -145,7 +176,7 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
             public void run() {
                 yourScore();
             }
-        }, 1500);
+        }, 1000);
 
 
     }

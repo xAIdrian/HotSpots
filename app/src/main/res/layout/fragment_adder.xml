@@ -3,7 +3,7 @@
     android:id="@+id/left_layer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="#CCFFFFFF"
     android:descendantFocusability="beforeDescendants"
     android:focusableInTouchMode="true">
 
@@ -59,6 +59,7 @@
         android:layout_below="@+id/firstTitleText"
         android:backgroundTint="#448AFF"
         android:gravity="center"
+        style="@style/editStyle"
         android:imeOptions="actionDone"
         android:inputType="textCapSentences"
         android:selectAllOnFocus="true"
@@ -73,16 +74,7 @@
         android:text="you only get one!"
         android:textColor="@color/colorDivider"/>
 
-    <ImageButton
-        android:id="@+id/floatingActionImageButton"
-        android:layout_margin="15dp"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:src="@drawable/icon_add"
-        android:background="@drawable/circle"
-        android:focusable="true"/>
+
 
 
 
