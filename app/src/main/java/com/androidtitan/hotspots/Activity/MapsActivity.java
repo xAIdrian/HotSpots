@@ -141,6 +141,21 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
     private int venueSelection;
 
 
+    //// TODO: 9/14/15
+    public int divisor;
+    public int dividend;
+
+    public int getResult() {
+        //logic to account for 0;
+        Log.e(TAG, "Map Result: " + divisor + "/" + dividend + "=" + divisor/dividend);
+        return divisor/dividend;
+    }
+
+    public void setMathResult(float plus) {
+        dividend += plus;
+        divisor += 1;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -422,7 +437,12 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
                         case 3: //SUBMIT fab
 
-                            fragmentAction();
+                            try {
+                                fragmentAction();
+                            } catch (Exception e) {
+                                Toast.makeText(MapsActivity.this, "Please wait...", Toast.LENGTH_SHORT).show();
+                                fragmentAction();
+                            }
 
 
                             break;
@@ -867,6 +887,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
     }
 
     public void fragmentAction() {
+
         venueBundle = new Bundle();
         venueBundle.putLong(venueFragmentLocIndex, focusLocation.getId());
 
@@ -892,10 +913,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
             }
         }, slideOut.getDuration());
 
-        Log.e(TAG, "printVenuesByLocation ::: ");
-
-
-
     }
 
     //todo: note: this will replace our addFragment code that we have in two seperate instances
@@ -912,6 +929,9 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                 venueFragment.setRetainInstance(true);
 
                 venueFragment.setArguments(venueBundle);
+
+                focusLocation.setLocationRating(getResult());
+
 
                 getFragmentManager().beginTransaction()
                         .setCustomAnimations(R.anim.fragment_slide_up, R.anim.fragment_slide_down,

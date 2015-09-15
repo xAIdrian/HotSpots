@@ -17,6 +17,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.androidtitan.hotspots.Activity.MapsActivity;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
@@ -35,6 +36,8 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
 
     Handler handler = new Handler();
     private int selection = -1;
+
+    Cursor venueCursor;
 
     private Bundle providerBundle;
     private LocationBundle focusLocation;
@@ -81,7 +84,7 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         callBacks = this;
 
         getLoaderManager().initLoader(LOADER_ID, null, callBacks);
-        //makeProviderBundle(PROJECTION, VenueProvider.InterfaceConstants.venue_name, null, null);
+        //makeProviderBundle(PROJECTION, viewItems, null, null);
     }
 
     @Override
@@ -94,6 +97,8 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         locationNameView.setText(focusLocation.getLocalName());
 
         scoreView = (TextView) v.findViewById(R.id.scoreText);
+        Log.e(TAG, String.valueOf(focusLocation.getLocationRating()));
+        scoreView.setText(String.valueOf(focusLocation.getLocationRating()));
 
         foursquareBtn = (ImageButton) v.findViewById(R.id.foursquareBtn);
         foursquareBtn.setOnClickListener(new View.OnClickListener() {
@@ -167,16 +172,18 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
                 break;
         }
 
+        venueCursor = cursor;
+
         Log.e(TAG, "onLoadFinished: " + cursor.getCount());
 
         //todo: LET'S SEE IF WE CAN GET NOTIFIED WHEN THE "background thread" HAS COMPLETED
         //TODO: NO WORK IS TOO MUCH
-        handler.postDelayed(new Runnable() {
+       /* handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 yourScore();
             }
-        }, 1000);
+        }, 1000);*/
 
 
     }
@@ -185,7 +192,7 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
     public void onLoaderReset(Loader<Cursor> loader) {
         Log.e(TAG, "onLoaderReset");
 
-        adapter.swapCursor(null);
+        adapter.swapCursor(venueCursor);
     }
 
 
@@ -209,15 +216,33 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
     public void yourScore() {
 
 
+        int xRated = 0;
         int divisor = 0;
         int dividend = 0;
 
+        Log.e(TAG, "SIZE: " + databaseHelper.getAllVenuesFromLocation(focusLocation));
         for(Venue v : databaseHelper.getAllVenuesFromLocation(focusLocation)) {
-            divisor ++;
+            divisor += 1;
             dividend += v.getRating();
         }
-        int xRated = dividend / divisor;
-        scoreView.setText(String.valueOf(xRated));
+
+
+        if(dividend/divisor == 0) {
+            Toast.makeText(getActivity(), "Loading Score", Toast.LENGTH_SHORT).show();
+
+            //new FoursquareHandler(getActivity(), focusLocation.getLatlng().latitude,
+                    //focusLocation.getLatlng().longitude, focusLocation.getId());
+
+            //getLoaderManager().restartLoader(LOADER_ID, providerBundle, callBacks);
+        }
+        else {
+            xRated = dividend / divisor;
+            scoreView.setText(String.valueOf(xRated));
+
+        }
+
+        Log.e(TAG, dividend + " / " + divisor);
+        Log.e(TAG, "result: " + xRated);
 
         focusLocation.setLocationRating(xRated);
         databaseHelper.updateLocationBundle(focusLocation);

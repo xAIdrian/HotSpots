@@ -88,6 +88,7 @@ public class FoursquareHandler {
                 // all things went right
                 parseFoursquare(tempString);
 
+                //todo ::: perhaps we can call this outside of this method
                 for(Venue freshVenue : databaseHelper.getAllVenuesFromLocation(locationHandle)) {
                     new FoursquareVenueHandler(context, freshVenue.getId());
                 }
@@ -184,6 +185,7 @@ public class FoursquareHandler {
 
                                     venueIndexOverride ++;
  /**/                                  // poi.setId(venueIndexOverride); //todo
+
                                     creater(poi);
 
                                     //databaseHelper.assignVenueToLocation();

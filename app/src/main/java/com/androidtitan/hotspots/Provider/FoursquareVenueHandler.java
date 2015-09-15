@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 
+import com.androidtitan.hotspots.Activity.MapsActivity;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.Venue;
 
@@ -67,6 +68,11 @@ public class FoursquareVenueHandler {
                     + FoursquareHandler.CLIENT_ID + "&client_secret=" + FoursquareHandler.CLIENT_SECRET
                     + "&v=20130815");
 
+            /*Log.e(TAG, makeCall("https://api.foursquare.com/v2/venues/" + venue_id + "?client_id="
+                    + FoursquareHandler.CLIENT_ID + "&client_secret=" + FoursquareHandler.CLIENT_SECRET
+                    + "&v=20130815"));
+            Log.e(TAG, " -- ");*/
+
             //Log.e(TAG, tempString);
 
             return "";
@@ -74,7 +80,7 @@ public class FoursquareVenueHandler {
 
         @Override
         protected void onPreExecute() {
-            focusVenue = databaseHelper.getVenue(venueDBid);
+            focusVenue = databaseHelper.getVenue(venueDBid); //this is where that extensive print is coming from
             venue_id = focusVenue.getVenueIdString();
 
         }
@@ -89,6 +95,9 @@ public class FoursquareVenueHandler {
                 // all things went right
                 parseFoursquare(tempString);
             }
+
+            //int topHat = ((MapsActivity)context).getResult();
+            Log.e(TAG, "On Post Execute!");
         }
 
     }
@@ -147,12 +156,20 @@ public class FoursquareVenueHandler {
                         String rating = innerJObject.getString("rating");
 
 /**/                        focusVenue.setRating(Float.parseFloat((rating)));
+                        //Log.e(TAG, focusVenue.getName() + ": " + focusVenue.getRating());
 
-                        createrHandler(focusVenue);
+                        updaterHandler(focusVenue);
 
                     }
                     else {
+                        Log.e(TAG, focusVenue.getName() + " has NO rating, setting to 0");
+                        focusVenue.setRating(3);
+
+                        updaterHandler(focusVenue);
                     }
+
+                    ((MapsActivity)context).setMathResult(focusVenue.getRating());//// TODO: 9/14/15
+
                 }
 
             }
@@ -163,7 +180,7 @@ public class FoursquareVenueHandler {
 
     }
 
-    public void createrHandler(Venue venue) {
+    public void updaterHandler(Venue venue) {
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
         ContentValues values = new ContentValues();

@@ -353,7 +353,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase database = getReadableDatabase();
 
         String selectionQuery = "SELECT * FROM " + TABLE_VENUES + " WHERE " + KEY_ID + " = " + venue_id;
-        Log.e(TAG, selectionQuery);
+        Log.e(TAG, "getVenue-- " + selectionQuery);
 
         Cursor cursor = database.rawQuery(selectionQuery, null);
 
@@ -409,6 +409,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String starterQuery = "SELECT * FROM " + DatabaseHelper.TABLE_LOCATIONS + " WHERE "
                 + DatabaseHelper.KEY_LOCAL_NAME + " = ?";
+
+        Log.e(TAG, "SELECT * FROM " + DatabaseHelper.TABLE_LOCATIONS + " WHERE "
+                + DatabaseHelper.KEY_LOCAL_NAME + " = " + locationBundle.getLocalName());
+
         Cursor cursor = database.rawQuery(starterQuery,
                 new String[] { locationBundle.getLocalName() });
 
