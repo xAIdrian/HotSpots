@@ -97,7 +97,7 @@ public class FoursquareVenueHandler {
             }
 
             //int topHat = ((MapsActivity)context).getResult();
-            Log.e(TAG, "On Post Execute!");
+            Log.i(TAG, "On Post Execute!");
         }
 
     }
@@ -148,13 +148,14 @@ public class FoursquareVenueHandler {
                 Iterator<String> keys = jsonObject.keys();
                 while (keys.hasNext()) {
                     String key = keys.next();
-                    Log.i("**********", "**********");
-                    Log.i("resonse key", key);
+//                    Log.i("**********", "**********");
+//                    Log.i("resonse key", key);
 
                     JSONObject innerJObject = jsonObject.getJSONObject(key);
                     if(innerJObject.has("rating")) {
                         String rating = innerJObject.getString("rating");
 
+                        Log.i(TAG, focusVenue.getName() + " has a rating of " + rating);
 /**/                        focusVenue.setRating(Float.parseFloat((rating)));
                         //Log.e(TAG, focusVenue.getName() + ": " + focusVenue.getRating());
 
@@ -162,8 +163,8 @@ public class FoursquareVenueHandler {
 
                     }
                     else {
-                        Log.e(TAG, focusVenue.getName() + " has NO rating, setting to 0");
-                        focusVenue.setRating(3);
+                        Log.i(TAG, focusVenue.getName() + " has NO rating, setting to 0");
+                        focusVenue.setRating(0);
 
                         updaterHandler(focusVenue);
                     }
@@ -193,8 +194,8 @@ public class FoursquareVenueHandler {
 //        values.put(DatabaseHelper.KEY_VENUE_LOCATION_ID, venue.getLocation_id());
 
         //insert row
-        context.getContentResolver().update(Uri.parse(VenueProvider.base_CONTENT_URI + focusVenue.getId()), values,
-                null, null);
+        context.getContentResolver().update(Uri.parse(VenueProvider.base_CONTENT_URI), values,
+                DatabaseHelper.KEY_ID + " = ?", new String[] { String.valueOf(focusVenue.getId()) });
 
     }
 

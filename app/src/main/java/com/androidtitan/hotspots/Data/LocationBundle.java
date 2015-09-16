@@ -104,7 +104,7 @@ public class LocationBundle {
         return locationRating;
     }
 
-    public void setLocationRating(int locationRating) {
-        this.locationRating = locationRating;
+    public void setLocationRating(int locationRat) {
+        this.locationRating = locationRat;
     }
 }

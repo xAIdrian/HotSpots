@@ -70,6 +70,7 @@
     <string name="title_activity_splash">SplashActivity</string>
 
     <string name="name">name location</string>
+    <string name="view_V">View venue?</string>
 
 
     <!-- <string name="empty">Please give me something to display \n I'm hungry</string> -->

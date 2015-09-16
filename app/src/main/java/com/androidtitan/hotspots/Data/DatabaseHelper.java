@@ -504,6 +504,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 v.setRating(cursor.getFloat(cursor.getColumnIndex(KEY_VENUE_RATING)));
                 v.setLocation_id(cursor.getInt(cursor.getColumnIndex(KEY_VENUE_LOCATION_ID)));
 
+                Log.i("DBHprintALLvenues", cursor.getInt(cursor.getColumnIndex(KEY_ID)) +
+                        " name: " + cursor.getString(cursor.getColumnIndex(KEY_VENUE_NAME)) + ", city: " +
+                        cursor.getString(cursor.getColumnIndex(KEY_VENUE_CITY)) + ", cat: " +
+                        cursor.getString(cursor.getColumnIndex(KEY_VENUE_CATEGORY)) + ", venueID: " +
+                        cursor.getString(cursor.getColumnIndex(KEY_VENUE_STRING)) + ", rating: " +
+                        cursor.getFloat(cursor.getColumnIndex(KEY_VENUE_RATING)) + ", Location ID: " +
+                        cursor.getLong(cursor.getColumnIndex(KEY_VENUE_LOCATION_ID)));
+
             } while (cursor.moveToNext()); //so long as the cursor is not at the end keep adding Venues
         }
 

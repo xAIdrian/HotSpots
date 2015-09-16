@@ -147,8 +147,8 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
     public int getResult() {
         //logic to account for 0;
-        Log.e(TAG, "Map Result: " + divisor + "/" + dividend + "=" + divisor/dividend);
-        return divisor/dividend;
+        Log.e(TAG, "Map Result: " + dividend + "/" + divisor + "=" + dividend/divisor);
+        return dividend/divisor;
     }
 
     public void setMathResult(float plus) {
@@ -417,9 +417,9 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
                         case 2: //ADDER FRAG SUBMIT
 
-
                             if(adderFragment.getEditTextStatus()) {
                                 //add to database. associate division
+
                                 LocationBundle temp = new LocationBundle(adderFragment.newFname);
                                 temp.setLatlng(adderFragment.receivedLatLng);
 
@@ -427,7 +427,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
                                 toggleFragment(true, adderFragmentTag);
                                 postAdditionActivities(databaseHelper.getAllLocations().get(databaseHelper.getAllLocations().size() - 1));
-                                databaseHelper.printLocationsTable();
+                                //databaseHelper.printLocationsTable();
                             }
                             else {
                                 Toast.makeText(MapsActivity.this, "Please complete fields", Toast.LENGTH_LONG).show();
@@ -437,11 +437,21 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
                         case 3: //SUBMIT fab
 
-                            try {
-                                fragmentAction();
-                            } catch (Exception e) {
-                                Toast.makeText(MapsActivity.this, "Please wait...", Toast.LENGTH_SHORT).show();
-                                fragmentAction();
+                            if(divisor > 0) {
+                                actionButton.setEnabled(true);
+                                if (divisor == databaseHelper.getAllVenuesFromLocation(focusLocation).size()) {
+
+                                    focusLocation.setLocationRating(getResult());
+                                    databaseHelper.updateLocationBundle(focusLocation);
+
+                                    preSubmitActivities();
+//
+                                } else {
+                                    Toast.makeText(MapsActivity.this, "One sec...", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                            else {
+                                Toast.makeText(MapsActivity.this, "One sec...", Toast.LENGTH_SHORT).show();
                             }
 
 
@@ -509,7 +519,12 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putBoolean(SAVED_DIALOG_BOOL, isLocationAdded);
+    }
 
+    //Google Map methods
     /**
      * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
      * installed) and the map has not already been instantiated.. This will ensure that we only ever
@@ -563,11 +578,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putBoolean(SAVED_DIALOG_BOOL, isLocationAdded);
     }
 
     @Override
@@ -818,17 +828,10 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
     }
 
 
-    //this will be removed eventually...the dialog at least
+    //Called when Location is added
     public void postAdditionActivities(LocationBundle locationBundle) {
 
         focusLocation = locationBundle;
-
-        //Foursquare API
-        if (databaseHelper.getAllVenuesFromLocation(focusLocation).size() == 0) {
-            Log.e(TAG, "!!!!!!!! ::: ");
-            new FoursquareHandler(MapsActivity.this, focusLocation.getLatlng().latitude,
-                    focusLocation.getLatlng().longitude, focusLocation.getId());
-        }
 
         map.addMarker(new MarkerOptions()
                 .title(locationBundle.getLocalName())
@@ -852,8 +855,19 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
             public void run() {
                 lockingAction();
 
+                Toast.makeText(MapsActivity.this, "One sec...", Toast.LENGTH_LONG);
+
+                //Foursquare API
+                if (databaseHelper.getAllVenuesFromLocation(focusLocation).size() == 0) {
+                    Log.e(TAG, "Querying Foursquare API...");
+                    new FoursquareHandler(MapsActivity.this, focusLocation.getLatlng().latitude,
+                            focusLocation.getLatlng().longitude, focusLocation.getId());
+                }
+
+                actionButton.setClickable(true);
             }
-        }, slideOut.getDuration());
+        }, slideOut.getDuration() + 250); //screen lags with calling the heavy operation
+
     }
 
     public void lockingAction() {
@@ -872,6 +886,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                 actionButton.setVisibility(View.VISIBLE);
                 actionButton.startAnimation(slidein);
 
+
             }
 
         } else {
@@ -882,21 +897,12 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         }
     }
 
-    public String getFocusVenueName() {
-        return focusLocation.getLocalName();
-    }
-
-    public void fragmentAction() {
+    public void preSubmitActivities() {
 
         venueBundle = new Bundle();
         venueBundle.putLong(venueFragmentLocIndex, focusLocation.getId());
 
         toggleFragment(false, venueFragmentTag);
-
-        /*FragmentTransaction fragTran = getFragmentManager().beginTransaction();
-        venueFragment.setArguments(venueBundle);
-        fragTran.add(R.id.container, venueFragment, venueFragmentTag)
-                .addToBackStack(venueFragmentTag).commit();*/
 
         FABstatus++;
 
@@ -919,7 +925,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
     private void toggleFragment(boolean shouldPop, String fragTag) {
 
         if(shouldPop) {
-            Log.e(TAG, "null trash");
+            Log.e(TAG, "should pop");
             getFragmentManager().popBackStack();
             shadow.setVisibility(View.VISIBLE);
         }
@@ -929,8 +935,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                 venueFragment.setRetainInstance(true);
 
                 venueFragment.setArguments(venueBundle);
-
-                focusLocation.setLocationRating(getResult());
 
 
                 getFragmentManager().beginTransaction()

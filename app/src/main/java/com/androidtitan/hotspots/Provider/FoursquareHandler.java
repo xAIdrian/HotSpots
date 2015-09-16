@@ -93,8 +93,8 @@ public class FoursquareHandler {
                     new FoursquareVenueHandler(context, freshVenue.getId());
                 }
             }
-            Log.e(TAG, "onPostExecute!");
-            //((MapsActivity) context).fragmentAction();
+            Log.i(TAG, "onPostExecute!");
+            //((MapsActivity) context).preSubmitActivities();
 
 
 

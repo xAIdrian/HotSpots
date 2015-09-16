@@ -4,25 +4,23 @@ import android.app.Activity;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.androidtitan.hotspots.Activity.MapsActivity;
+import com.androidtitan.hotspots.Adapter.VenueCursorAdapter;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.LocationBundle;
-import com.androidtitan.hotspots.Data.Venue;
 import com.androidtitan.hotspots.Interface.VenueInterface;
 import com.androidtitan.hotspots.Provider.VenueProvider;
 import com.androidtitan.hotspots.R;
@@ -34,7 +32,7 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
     DatabaseHelper databaseHelper;
     VenueInterface venueInterface;
 
-    Handler handler = new Handler();
+    //Handler handler = new Handler();
     private int selection = -1;
 
     Cursor venueCursor;
@@ -53,13 +51,14 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
             VenueProvider.InterfaceConstants.venue_city,
             VenueProvider.InterfaceConstants.venue_category,
             VenueProvider.InterfaceConstants.venue_id_string,
-            VenueProvider.InterfaceConstants.venue_rating
+            VenueProvider.InterfaceConstants.venue_rating,
+            VenueProvider.InterfaceConstants.venue_location_id
     };
 
     private static final int LOADER_ID = 1;
 
     private LoaderManager.LoaderCallbacks<Cursor> callBacks;
-    private SimpleCursorAdapter adapter;
+    private VenueCursorAdapter adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -76,7 +75,7 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
                 VenueProvider.InterfaceConstants.venue_rating };
         int[] viewItems = { R.id.nameTextView, R.id.ratingTextView };
 
-        adapter = new SimpleCursorAdapter(getActivity(), R.layout.listview_venue_item, null,
+        adapter = new VenueCursorAdapter(getActivity(), R.layout.listview_venue_item, null,
                 dataColumns, viewItems, 0);
 
         setListAdapter(adapter);
@@ -97,19 +96,29 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         locationNameView.setText(focusLocation.getLocalName());
 
         scoreView = (TextView) v.findViewById(R.id.scoreText);
-        Log.e(TAG, String.valueOf(focusLocation.getLocationRating()));
         scoreView.setText(String.valueOf(focusLocation.getLocationRating()));
 
+
+        //use an implicit intent to send the user to the foursquare app
+        //if they do not have the foursquare app send them to the download screen
+        //todo: maybe we can include an option in case they need to download foursquare
         foursquareBtn = (ImageButton) v.findViewById(R.id.foursquareBtn);
         foursquareBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(selection == -1) {
-                    //do nothing
-                }
-                else {
-                    //use an implicit intent to send the user to the foursquare app
-                    //if they do not have the foursquare app send them to the download screen
+                if (selection > -1) {
+                    //link construction
+                    String selectedVenueId = databaseHelper.getAllVenuesFromLocation(focusLocation)
+                            .get(selection).getVenueIdString();
+                    String webpageURL = "https://foursquare.com/venue/" + selectedVenueId;
+
+                    Intent fourSquareIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webpageURL));
+                    Intent intentChooser = Intent.createChooser(fourSquareIntent,
+                            getResources().getString(R.string.view_V));
+
+                    if (fourSquareIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                        startActivity(intentChooser);
+                    }
                 }
             }
         });
@@ -122,10 +131,10 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
     public void onListItemClick(ListView l, View v, int pos, long id) {
         super.onListItemClick(l, v, pos, id);
 
-       /* for (int i = 0; i <= getListView().getLastVisiblePosition() - getListView().getFirstVisiblePosition(); i++) {
+       for (int i = 0; i <= getListView().getLastVisiblePosition() - getListView().getFirstVisiblePosition(); i++) {
             View item = getListView().getChildAt(i);
-            item.setBackgroundColor(0xCCFFCD38);
-        }*/
+            item.setBackgroundColor(0xCCFFFFFF);
+        }
 
         if(selection == pos) {  //if we are selecting an already highlighted button
             v.setBackgroundColor(0xCCFFFFFF);
@@ -133,9 +142,12 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         }
         else {
             v.setBackgroundColor(0xCCFFCD38);
+            selection = pos;
         }
-        venueInterface.selectionPasser(pos);
+
+        venueInterface.selectionPasser(selection);
     }
+
 
     @Override
     public void onAttach(Activity activity) {
@@ -172,19 +184,9 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
                 break;
         }
 
-        venueCursor = cursor;
-
         Log.e(TAG, "onLoadFinished: " + cursor.getCount());
-
-        //todo: LET'S SEE IF WE CAN GET NOTIFIED WHEN THE "background thread" HAS COMPLETED
-        //TODO: NO WORK IS TOO MUCH
-       /* handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                yourScore();
-            }
-        }, 1000);*/
-
+//        getListView().getChildAt(0).setBackgroundColor(0xCCFFFFFF);
+        venueCursor = cursor;
 
     }
 
@@ -208,45 +210,6 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         providerBundle.putString("selection", selection);
         providerBundle.putStringArray("selectionArgs", selectionArgs);
         if(sortOrder != null) providerBundle.putString("sortOrder", sortOrder);
-    }
-
-    //this method will go through all of the venues associated to this location and score the location
-    //Average of the ratings
-        //maybe more will be added
-    public void yourScore() {
-
-
-        int xRated = 0;
-        int divisor = 0;
-        int dividend = 0;
-
-        Log.e(TAG, "SIZE: " + databaseHelper.getAllVenuesFromLocation(focusLocation));
-        for(Venue v : databaseHelper.getAllVenuesFromLocation(focusLocation)) {
-            divisor += 1;
-            dividend += v.getRating();
-        }
-
-
-        if(dividend/divisor == 0) {
-            Toast.makeText(getActivity(), "Loading Score", Toast.LENGTH_SHORT).show();
-
-            //new FoursquareHandler(getActivity(), focusLocation.getLatlng().latitude,
-                    //focusLocation.getLatlng().longitude, focusLocation.getId());
-
-            //getLoaderManager().restartLoader(LOADER_ID, providerBundle, callBacks);
-        }
-        else {
-            xRated = dividend / divisor;
-            scoreView.setText(String.valueOf(xRated));
-
-        }
-
-        Log.e(TAG, dividend + " / " + divisor);
-        Log.e(TAG, "result: " + xRated);
-
-        focusLocation.setLocationRating(xRated);
-        databaseHelper.updateLocationBundle(focusLocation);
-
     }
 
 }

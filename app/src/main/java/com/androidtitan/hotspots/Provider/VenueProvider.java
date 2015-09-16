@@ -7,6 +7,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 
@@ -42,6 +43,7 @@ public class VenueProvider extends ContentProvider {
         public static final String venue_category = "venue_category";
         public static final String venue_id_string = "venue_string";
         public static final String venue_rating = "venue_rating";
+        public static final String venue_location_id = "assignedLocation";
     }
 
     //URI matcher variable
@@ -186,17 +188,19 @@ public class VenueProvider extends ContentProvider {
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         int uriType = uriMatcher.match(uri);
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
-
         int updateId = 0;
 
         switch(uriType) {
             case GET_ONE:
-
-                updateId = database.update(DatabaseHelper.TABLE_VENUES, values, null, null);
+                Log.e(TAG, "updatePop1!");
+                updateId = database.update(DatabaseHelper.TABLE_VENUES, values, selection, selectionArgs);
 
                 break;
 
             case GET_ALL:
+                Log.i(TAG, "UPDATE " + values + " IN " + DatabaseHelper.TABLE_VENUES + " WHERE "
+                        + selection + " " + selectionArgs[0] );
+                updateId = database.update(DatabaseHelper.TABLE_VENUES, values, selection, selectionArgs);
                 break;
 
             case GET_SELECT:

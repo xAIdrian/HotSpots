@@ -2,7 +2,6 @@ package com.androidtitan.hotspots.Adapter;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +45,7 @@ public class VenueCursorAdapter extends SimpleCursorAdapter {
     public void bindView(View v, Context context, Cursor c) {
 
         selection = ((MapsActivity) context).getVenueSelection();
+
         int position = c.getPosition();
 
         int nameColumn = c.getColumnIndex(DatabaseHelper.KEY_VENUE_NAME);
@@ -62,7 +62,6 @@ public class VenueCursorAdapter extends SimpleCursorAdapter {
             ratingText.setText(rating);
         }
 
-        Log.e(TAG, "selection: " + selection);
         //persistent highlighting
         if (position == selection) {
             v.setBackgroundColor(0xCCFFCD38);
