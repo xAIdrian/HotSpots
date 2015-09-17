@@ -427,7 +427,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
                                 toggleFragment(true, adderFragmentTag);
                                 postAdditionActivities(databaseHelper.getAllLocations().get(databaseHelper.getAllLocations().size() - 1));
-                                //databaseHelper.printLocationsTable();
+
                             }
                             else {
                                 Toast.makeText(MapsActivity.this, "Please complete fields", Toast.LENGTH_LONG).show();
@@ -437,21 +437,24 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
                         case 3: //SUBMIT fab
 
-                            if(divisor > 0) {
-                                actionButton.setEnabled(true);
-                                if (divisor == databaseHelper.getAllVenuesFromLocation(focusLocation).size()) {
+
+                            if(divisor > 0 && divisor == databaseHelper.getAllVenuesFromLocation(focusLocation).size()) {
 
                                     focusLocation.setLocationRating(getResult());
                                     databaseHelper.updateLocationBundle(focusLocation);
 
                                     preSubmitActivities();
-//
-                                } else {
-                                    Toast.makeText(MapsActivity.this, "One sec...", Toast.LENGTH_SHORT).show();
-                                }
                             }
                             else {
+
                                 Toast.makeText(MapsActivity.this, "One sec...", Toast.LENGTH_SHORT).show();
+
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                    }
+                                }, 250);
                             }
 
 
@@ -842,32 +845,24 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
         FABstatus++;
 
+        actionButton.startAnimation(slideOut);
         actionButton.setVisibility(View.GONE);
+        backer.startAnimation(leftSlideOut);
         backer.setVisibility(View.GONE);
 
         markConfirmLayout.setVisibility(View.GONE);
         markConfirmCancel.setVisibility(View.GONE);
         markConfirmMark.setVisibility(View.GONE);
 
-
-        //todo: reasses the WHY we have locking...
-        handler.postDelayed(new Runnable() {
-            public void run() {
-                lockingAction();
-
-                Toast.makeText(MapsActivity.this, "One sec...", Toast.LENGTH_LONG);
-
-                //Foursquare API
-                if (databaseHelper.getAllVenuesFromLocation(focusLocation).size() == 0) {
-                    Log.e(TAG, "Querying Foursquare API...");
-                    new FoursquareHandler(MapsActivity.this, focusLocation.getLatlng().latitude,
-                            focusLocation.getLatlng().longitude, focusLocation.getId());
-                }
-
-                actionButton.setClickable(true);
-            }
-        }, slideOut.getDuration() + 250); //screen lags with calling the heavy operation
-
+        //Foursquare API
+        if (databaseHelper.getAllVenuesFromLocation(focusLocation).size() == 0) {
+            Log.e(TAG, "Querying Foursquare API...");
+            new FoursquareHandler(MapsActivity.this, focusLocation.getLatlng().latitude,
+                    focusLocation.getLatlng().longitude, focusLocation.getId());
+        }
+        else {
+            Log.e(TAG, "Trouble");
+        }
     }
 
     public void lockingAction() {
@@ -875,8 +870,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
         if (!isLocked) {
             if (isLocationAdded) {
-
-                Toast.makeText(MapsActivity.this, "Locked-in", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MapsActivity.this, "Locked-in", Toast.LENGTH_SHORT).show();
 
                 locker.setImageResource(R.drawable.lock_closed);
                 focusLocation.setIsLocationLocked(true);
@@ -885,7 +879,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                 actionButton.setImageResource(R.drawable.icon_submit);
                 actionButton.setVisibility(View.VISIBLE);
                 actionButton.startAnimation(slidein);
-
 
             }
 

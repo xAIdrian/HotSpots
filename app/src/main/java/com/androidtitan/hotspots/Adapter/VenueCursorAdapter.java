@@ -2,6 +2,7 @@ package com.androidtitan.hotspots.Adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,6 +65,7 @@ public class VenueCursorAdapter extends SimpleCursorAdapter {
 
         //persistent highlighting
         if (position == selection) {
+            Log.e(TAG, "swerve girl");
             v.setBackgroundColor(0xCCFFCD38);
         }
         else {

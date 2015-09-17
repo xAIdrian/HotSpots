@@ -21,9 +21,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Created by amohnacs on 8/25/15.
@@ -44,14 +42,12 @@ public class FoursquareVenueHandler {
 
     Venue focusVenue;
 
-    List<Integer> ratingsList;
 
-    public FoursquareVenueHandler(Context context, long venueDBid) {
+    public FoursquareVenueHandler(Context context, long venueDBid, long locationId) {
         this.context = context;
         databaseHelper = DatabaseHelper.getInstance(context);
         this.venueDBid = venueDBid;
         //this.venueDBid = venueDBid;
-        ratingsList = new ArrayList<Integer>();
 
         new fourquareVenue().execute();
     }
@@ -169,8 +165,6 @@ public class FoursquareVenueHandler {
                         updaterHandler(focusVenue);
                     }
 
-                    ((MapsActivity)context).setMathResult(focusVenue.getRating());//// TODO: 9/14/15
-
                 }
 
             }
@@ -184,19 +178,24 @@ public class FoursquareVenueHandler {
     public void updaterHandler(Venue venue) {
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
+        if(venue.getRating() == 0) {
+            //insert row
+            context.getContentResolver().delete(Uri.parse(VenueProvider.base_CONTENT_URI),
+                    DatabaseHelper.KEY_ID + " = ?", new String[] { String.valueOf(venue.getId()) });
+        }
+        else {
+            ((MapsActivity) context).setMathResult(venue.getRating());
 
-//        values.put(DatabaseHelper.KEY_VENUE_NAME, venue.getName());
-//        values.put(DatabaseHelper.KEY_VENUE_CITY, venue.getCity());
-//        values.put(DatabaseHelper.KEY_VENUE_CATEGORY, venue.getCategory());
-//        values.put(DatabaseHelper.KEY_VENUE_STRING, venue.getVenueIdString());
-        values.put(DatabaseHelper.KEY_VENUE_RATING, venue.getRating());
-//        values.put(DatabaseHelper.KEY_VENUE_LOCATION_ID, venue.getLocation_id());
+            ContentValues values = new ContentValues();
+            values.put(DatabaseHelper.KEY_VENUE_RATING, venue.getRating());
 
-        //insert row
-        context.getContentResolver().update(Uri.parse(VenueProvider.base_CONTENT_URI), values,
-                DatabaseHelper.KEY_ID + " = ?", new String[] { String.valueOf(focusVenue.getId()) });
+            //insert row
+            context.getContentResolver().update(Uri.parse(VenueProvider.base_CONTENT_URI), values,
+                    DatabaseHelper.KEY_ID + " = ?", new String[]{String.valueOf(venue.getId())});
+        }
 
     }
+
+
 
 }

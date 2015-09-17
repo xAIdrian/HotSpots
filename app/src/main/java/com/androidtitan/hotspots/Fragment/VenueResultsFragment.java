@@ -106,7 +106,7 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         foursquareBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (selection > -1) {
+                if (selection >= 0) {
                     //link construction
                     String selectedVenueId = databaseHelper.getAllVenuesFromLocation(focusLocation)
                             .get(selection).getVenueIdString();
@@ -116,6 +116,7 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
                     Intent intentChooser = Intent.createChooser(fourSquareIntent,
                             getResources().getString(R.string.view_V));
 
+                    //check to make sure there is an application that can handle this intent
                     if (fourSquareIntent.resolveActivity(getActivity().getPackageManager()) != null) {
                         startActivity(intentChooser);
                     }
@@ -123,7 +124,7 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
             }
         });
 
-
+        venueInterface.selectionPasser(-1);
         return v;
     }
 
@@ -145,6 +146,7 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
             selection = pos;
         }
 
+        //Log.e(TAG, "venuePasserPosition: " + selection + ",, " + );
         venueInterface.selectionPasser(selection);
     }
 

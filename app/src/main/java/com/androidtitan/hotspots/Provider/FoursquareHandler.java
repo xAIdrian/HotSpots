@@ -7,7 +7,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
+import com.androidtitan.hotspots.Activity.MapsActivity;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.LocationBundle;
 import com.androidtitan.hotspots.Data.Venue;
@@ -44,6 +46,8 @@ public class FoursquareHandler {
     private long location_id;
     private LocationBundle locationHandle;
 
+    public static int venueCounter;
+
 
     public FoursquareHandler(Context context, double latitude, double longitude, long location_id){
         this.context=context;
@@ -69,7 +73,7 @@ public class FoursquareHandler {
         protected String doInBackground(View... urls) {
             // make Call to the url
             tempString = makeCall("https://api.foursquare.com/v2/venues/search?client_id=" + CLIENT_ID + "&client_secret=" + CLIENT_SECRET
-                    + "&v=20130815&ll=" + latitude + "," + longitude);
+                    + "&v=20130815&ll=" + latitude + "," + longitude + "&radius=" + 400);
 
             return "";
         }
@@ -90,17 +94,14 @@ public class FoursquareHandler {
 
                 //todo ::: perhaps we can call this outside of this method
                 for(Venue freshVenue : databaseHelper.getAllVenuesFromLocation(locationHandle)) {
-                    new FoursquareVenueHandler(context, freshVenue.getId());
+                    new FoursquareVenueHandler(context, freshVenue.getId(), location_id);
                 }
             }
+
             Log.i(TAG, "onPostExecute!");
-            //((MapsActivity) context).preSubmitActivities();
+            Toast.makeText(((MapsActivity)context), "One sec...", Toast.LENGTH_LONG);
+            ((MapsActivity) context).lockingAction();
 
-
-
-           /* FragmentManager fm = ((MapsActivity) context).getFragmentManager();
-            VenueResultsFragment venueFrag=(VenueResultsFragment)fm.findFragmentByTag(((MapsActivity) context).venueFragmentTag);
-            venueFrag.yourScore();*/
 
         }
     }
@@ -232,7 +233,6 @@ public class FoursquareHandler {
         context.getContentResolver().insert(Uri.parse(venueProvider.base_CONTENT_URI + venueIndexOverride), values);
 
     }
-
 
 }
 
