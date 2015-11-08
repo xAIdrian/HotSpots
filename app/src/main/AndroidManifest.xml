@@ -39,14 +39,6 @@
             android:screenOrientation="portrait" >
         </activity>
 
-        <activity
-            android:name=".Activity.AdderActivity"
-            android:configChanges="keyboardHidden|orientation"
-            android:label="@string/title_activity_second"
-            android:parentActivityName=".Activity.ChampionActivity"
-            android:windowSoftInputMode="adjustPan" >
-        </activity>
-
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

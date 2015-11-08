@@ -372,6 +372,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return v;
     }
 
+    public Venue getMostRecentVenue() {
+        SQLiteDatabase database = getReadableDatabase();
+
+        String selectionQuery = "SELECT * FROM " + TABLE_VENUES + " ORDER BY " + KEY_ID + " DESC LIMIT 1";
+        Log.e(TAG, "getVenue-- " + selectionQuery);
+
+        Cursor cursor = database.rawQuery(selectionQuery, null);
+
+        if(cursor != null)
+            cursor.moveToFirst();
+
+        Venue v = new Venue();
+        v.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID)));
+        v.setName(cursor.getString(cursor.getColumnIndex(KEY_VENUE_NAME)));
+        v.setCity(cursor.getString(cursor.getColumnIndex(KEY_VENUE_CITY)));
+        v.setCategory(cursor.getString(cursor.getColumnIndex(KEY_VENUE_CATEGORY)));
+        v.setVenueIdString(cursor.getString(cursor.getColumnIndex(KEY_VENUE_STRING)));
+        v.setRating(cursor.getFloat(cursor.getColumnIndex(KEY_VENUE_RATING)));
+        v.setLocation_id(cursor.getInt(cursor.getColumnIndex(KEY_VENUE_LOCATION_ID)));
+
+        return v;
+    }
+
     public List<Venue> getAllVenues() {
         SQLiteDatabase database = getReadableDatabase();
 

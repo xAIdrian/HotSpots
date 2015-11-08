@@ -1,13 +1,9 @@
 package com.androidtitan.hotspots.Provider;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.androidtitan.hotspots.Activity.MapsActivity;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
@@ -24,17 +20,26 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by amohnacs on 8/25/15.
  */
-public class FoursquareHandler {
+
+
+public class FoursquareHandler extends AsyncTask<View, Void, String> {
     private static String TAG = "FoursquareHandler";
+
+    String tempString;
 
     DatabaseHelper databaseHelper;
     VenueProvider venueProvider;
 
-    int venueIndexOverride;
+    private int venueIndexOverride;
 
     public static final String CLIENT_ID = "CE1BU4JLX2UL5ESYMNKRO14QBOMDCKXONG55XUCBX1MEAPRW";
     public static final String CLIENT_SECRET = "NQ01XNIA4CM0WID0QWML5LSSCU1UU4QDUBFVGUZHNIESGEVT";
@@ -46,11 +51,11 @@ public class FoursquareHandler {
     private long location_id;
     private LocationBundle locationHandle;
 
-    public static int venueCounter;
+    public ArrayList<Venue> venueArrayList = new ArrayList<>();
 
 
-    public FoursquareHandler(Context context, double latitude, double longitude, long location_id){
-        this.context=context;
+    public FoursquareHandler(Context context, double latitude, double longitude, long location_id) {
+        this.context = context;
         databaseHelper = DatabaseHelper.getInstance(context);
         this.latitude = String.valueOf(latitude);
         this.longitude = String.valueOf(longitude);
@@ -60,50 +65,74 @@ public class FoursquareHandler {
         Log.e(TAG, "Location Handle ::: " + locationHandle.getLocalName());
 
         this.venueIndexOverride = databaseHelper.getAllVenues().size();
-
-        new fourquare().execute();
     }
 
-    public class fourquare extends AsyncTask<View, Void, String> {
+    @Override
+    protected String doInBackground(View... urls) {
+        // make Call to the url
+        tempString = makeCall("https://api.foursquare.com/v2/venues/search?client_id=" + CLIENT_ID + "&client_secret=" + CLIENT_SECRET
+                + "&v=20130815&ll=" + latitude + "," + longitude + "&radius=" + 400);
 
-        String tempString;
 
+        if (tempString == null) {
+            // we have an error to the call
+            // we can also stop the progress bar
 
-        @Override
-        protected String doInBackground(View... urls) {
-            // make Call to the url
-            tempString = makeCall("https://api.foursquare.com/v2/venues/search?client_id=" + CLIENT_ID + "&client_secret=" + CLIENT_SECRET
-                    + "&v=20130815&ll=" + latitude + "," + longitude + "&radius=" + 400);
-
-            return "";
-        }
-
-        @Override
-        protected void onPreExecute() {
+        } else {
+            // all things went right
+            parseFoursquare(tempString);
 
         }
+        return tempString;
+    }
 
-        @Override
-        protected void onPostExecute(String result) {
-            if (tempString == null) {
-                // we have an error to the call
-                // we can also stop the progress bar
-            } else {
-                // all things went right
-                parseFoursquare(tempString);
+    @Override
+    protected void onPreExecute() {
 
-                //todo ::: perhaps we can call this outside of this method
-                for(Venue freshVenue : databaseHelper.getAllVenuesFromLocation(locationHandle)) {
-                    new FoursquareVenueHandler(context, freshVenue.getId(), location_id);
-                }
-            }
+    }
 
-            Log.i(TAG, "onPostExecute!");
-            Toast.makeText(((MapsActivity)context), "One sec...", Toast.LENGTH_LONG);
-            ((MapsActivity) context).lockingAction();
+    @Override
+    protected void onPostExecute(String result) {
+        /**
+         * TODO: This needs to be improved
+         *
+         * How?  We need efficient concurrency
+         * ThreadPool to manage the AsyncTasks for each Venue
+         * Service that is constantly downloading information as soon as a location is set
+         *
+         * Let's try and launch each individual async task as a venue is found, instead of onPostExecute()
+         *     This way they can stay out of the UI thread
+         *
+         * We can actually run the Async Tasks from on Progress update
+         *     If we return a Venue, call PublishProgress
+         *
+         */
 
+//TODO: if(tempstring == null)
 
+        //todo ::: perhaps we can call this outside of this method
+        //for(Venue freshVenue : databaseHelper.getAllVenuesFromLocation(locationHandle)) {
+        //new FoursquareVenueHandler(context, freshVenue.getId(), location_id);
+        //}
+
+        Log.i(TAG, "onPostExecute!");
+        //((MapsActivity) context).setTaskSize(venueArrayList.size());
+
+        int NUMBER_OF_CORES =
+                Runtime.getRuntime().availableProcessors();
+        // A queue of Runnables
+        final BlockingQueue<Runnable> mDecodeWorkQueue;
+        // Instantiates the queue of Runnables as a LinkedBlockingQueue
+        mDecodeWorkQueue = new LinkedBlockingQueue<>();
+
+        ThreadPoolExecutor mThreadPoolExecutor = new ThreadPoolExecutor(
+                NUMBER_OF_CORES, NUMBER_OF_CORES, 5, TimeUnit.SECONDS, mDecodeWorkQueue);
+
+        for (Venue venueItem : venueArrayList) {
+            new FoursquareVenueHandler(context, venueItem , venueIndexOverride).executeOnExecutor(mThreadPoolExecutor);
         }
+
+        ((MapsActivity) context).lockingAction();
     }
 
 
@@ -142,6 +171,9 @@ public class FoursquareHandler {
     public void parseFoursquare(final String response) {
 
         try {
+            //double for loop
+            //array of what are acceptable key words
+            //iterate through array and IF they match take it
 
             // make an jsonObject in order to parse the response
             JSONObject jsonObject = new JSONObject(response);
@@ -153,16 +185,18 @@ public class FoursquareHandler {
 
                     for (int i = 0; i < jsonArray.length(); i++) {
 
-                        Venue poi = new Venue();
-/**/                        poi.setLocation_id(location_id);
+                        Venue venueOfInterest = new Venue();
+/**/
+                        venueOfInterest.setLocation_id(location_id);
 
                         if (jsonArray.getJSONObject(i).has("name")) {
-                            poi.setName(jsonArray.getJSONObject(i).getString("name"));
+                            venueOfInterest.setName(jsonArray.getJSONObject(i).getString("name"));
 
                             if (jsonArray.getJSONObject(i).has("location")) {
                                 if (jsonArray.getJSONObject(i).getJSONObject("location").has("address")) {
                                     if (jsonArray.getJSONObject(i).getJSONObject("location").has("city")) {
-    /**/                                    poi.setCity(jsonArray.getJSONObject(i).getJSONObject("location").getString("city"));
+/**/
+                                        venueOfInterest.setCity(jsonArray.getJSONObject(i).getJSONObject("location").getString("city"));
                                     }
 
                                     ////////////////////////////
@@ -170,33 +204,31 @@ public class FoursquareHandler {
                                     //we will use this for another URI query and get more detailed information on the venue!!!
                                     if (jsonArray.getJSONObject(i).has("id")) {
                                         //Log.e(TAG, "realVenueId: " + jsonArray.getJSONObject(i).getString("id"));
-/**/                                        poi.setVenueIdString(jsonArray.getJSONObject(i).getString("id"));
+/**/
+                                        venueOfInterest.setVenueIdString(jsonArray.getJSONObject(i).getString("id"));
                                     }
 
                                     //////////////////////////
                                     if (jsonArray.getJSONObject(i).has("categories")) {
                                         if (jsonArray.getJSONObject(i).getJSONArray("categories").length() > 0) {
                                             if (jsonArray.getJSONObject(i).getJSONArray("categories").getJSONObject(0).has("icon")) {
-/**/                                                poi.setCategory(jsonArray.getJSONObject(i).getJSONArray("categories").getJSONObject(0).getString("name"));
+/**/
+                                                venueOfInterest.setCategory(jsonArray.getJSONObject(i).getJSONArray("categories").getJSONObject(0).getString("name"));
                                             }
                                         }
                                     }
 
                                     //todo: uri & ContentValues
 
-                                    venueIndexOverride ++;
- /**/                                  // poi.setId(venueIndexOverride); //todo
+                                    venueIndexOverride++;
+                                    venueArrayList.add(venueOfInterest);
+                                    Log.e(TAG, venueOfInterest.getName());
+ /**/
 
-                                    creater(poi);
+                                    // venueOfInterest.setId(venueIndexOverride);
 
-                                    //databaseHelper.assignVenueToLocation();
 
-                                    //todo:
-                                    //we replace createVenue with venueProvider.insert()
-                                        //make appropriate changes to .insert()
-                                    //we assign to location outside of the insert
 
-                                    //perhaps we can do the same thing with VenueHandler
                                 }
                             }
                         }
@@ -211,28 +243,9 @@ public class FoursquareHandler {
     }
 
 
-    public void creater(Venue venue) {
-        SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
-        long id = 0;
-        ContentValues values = new ContentValues();
-
-//        Log.e(TAG, venueProvider.base_CONTENT_URI + venue.getId());
-
-        //try/catch?
-        //values.put(DatabaseHelper.KEY_ID, venue.getId());
-        values.put(DatabaseHelper.KEY_VENUE_NAME, venue.getName());
-        values.put(DatabaseHelper.KEY_VENUE_CITY, venue.getCity());
-        values.put(DatabaseHelper.KEY_VENUE_CATEGORY, venue.getCategory());
-        values.put(DatabaseHelper.KEY_VENUE_STRING, venue.getVenueIdString());
-        values.put(DatabaseHelper.KEY_VENUE_RATING, venue.getRating());
-        values.put(DatabaseHelper.KEY_VENUE_LOCATION_ID, venue.getLocation_id());
-
-
-        //insert row
-        context.getContentResolver().insert(Uri.parse(venueProvider.base_CONTENT_URI + venueIndexOverride), values);
-
-    }
 
 }
+
+
 

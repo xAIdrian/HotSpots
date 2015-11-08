@@ -11,13 +11,16 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,30 +48,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.Random;
 
-/*
-COMPLETED???
-
-- //Replace the careful lock in dialog with a transparent splash...for only the FIRST time
-        remove the 'INITIAL_VISIT' column form location_table
-        we need to reconsider the FAB action "switch statement" without the inital location logic
-- Make MapsActivity the Launcher Activity
-        remove the 'focusLocation' variable and change it's creation to after the add button.
-        we need to add a 'LOCATION_FINAL_RATING' column for our location table. this will be for "View all locations"
-        our zoom needs to be closer when we start and when we get the location
-        -we will need to name the location after it is created and the coordinates set.
-        this can be done just by launching the ADDERACTIVITY
-        we will need to pass the same variables on creation that we passed from the listview for camera purposes
-
- */
-
-
 
 /*
 TODO:::
 
 -Things will continue as usual...but...UPGRADED from here to get to the VENUE functionality
-        VENUE:
-            map coordinates (direction?)
 
         We need to make the "Venue Fragment" exciting!!!
         * Custom Cursor Adapter. include direction, distance, and category
@@ -80,7 +64,7 @@ TODO:::
         View all past venues.  Provide more information (View all of them on the map?)
 
 REFACTOR. WE NEED TO BE MORE OBJECT ORIENTED
-    PUT REPEATED TASKS INTO A FUNCITON e.g. ANIMATIONS
+    PUT REPEATED TASKS INTO A FUNCITON e.g. MATERIAL DESIGN AND ANIMATIONS
  */
 
 
@@ -118,6 +102,13 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
     private TextView markConfirmMark;
     private View shadow;
 
+    private DrawerLayout navDrawerLayout;
+    private TextView userTitleBtn;
+    private TextView alertTitleBtn;
+    private TextView scoreNav;
+    private ListView navDrawerListView;
+    private ArrayAdapter<String> mAdapter;
+
     private Animation slidein;
     private Animation slideOut;
     private Animation leftSlideIn;
@@ -140,10 +131,14 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
     private int venueSelection;
 
-
     //// TODO: 9/14/15
     public int divisor;
     public int dividend;
+
+    /*todo: we are going to use a COUNDTDOWN LATCH inside of our VenueHandler AyncTask in order to
+        in order to find out if this is our last "onPostExecute()"
+        if it is then we are going to run our getResult method
+    */
 
     public int getResult() {
         //logic to account for 0;
@@ -252,13 +247,24 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
         shadow = (View) findViewById(R.id.dropshadow);
 
+        //Navigation Drawer yo!
+//        navDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        userTitleBtn = (TextView) findViewById(R.id.userTitleBtn);
+//        alertTitleBtn = (TextView) findViewById(R.id.alertTitleBtn);
+//        scoreNav = (TextView) findViewById(R.id.scoreTextNavDrawer);
+//        navDrawerListView = (ListView) findViewById(R.id.navList);
+//        addDrawerItems();
+
+        /*navDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+        });*/
+
+
         //if we've used all of our locations then we lock-it up
-        //this is our Critical Logic
-        //todo: we might get rid of locking
-
         if (!isLocked) {
-
-
         } else {
             isLocationAdded = true;
             //lockingAction();
@@ -270,7 +276,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
         }
 
-
         map.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
@@ -278,12 +283,9 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
             }
         });
 
-
         //using existing variables we are going to check which state it is already in
         //on changing state 'actionButton' is going to slide out and then slide back in
         //new sourceImage and newColor (newColor will require 2 new circle backgrounds)
-
-        //maybe we can use a SWITCH statement
         actionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -333,12 +335,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                                 }, slideOut.getDuration());
 
                             }
-                            /*Log.e("!!!!!!!!!!!!!", "All Venues");
-                            databaseHelper.printVenuesTable();
-                            Log.e("!!!!!!!!!!!!!", "Venues By Location");
-                            databaseHelper.printVenuesByLocation(focusLocation);
-                            Log.e("!!!!!!!!!!!!!", "Linking Table");
-                            databaseHelper.printLinkingTable();*/
 
                             break;
 
@@ -435,28 +431,13 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
                             break;
 
-                        case 3: //SUBMIT fab
+                        case 3: //VenueResult fab
 
+                            focusLocation.setLocationRating(getResult());
+                            databaseHelper.updateLocationBundle(focusLocation);
+                            preSubmitActivities();
 
-                            if(divisor > 0 && divisor == databaseHelper.getAllVenuesFromLocation(focusLocation).size()) {
-
-                                    focusLocation.setLocationRating(getResult());
-                                    databaseHelper.updateLocationBundle(focusLocation);
-
-                                    preSubmitActivities();
-                            }
-                            else {
-
-                                Toast.makeText(MapsActivity.this, "One sec...", Toast.LENGTH_SHORT).show();
-
-                                handler.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-
-                                    }
-                                }, 250);
-                            }
-
+                            scoreNav.setText(getResult());
 
                             break;
 
@@ -673,21 +654,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
             }
         }
-        if (adderFragment.isVisible()) {
-            toggleFragment(true, adderFragmentTag);
-
-            actionButton.startAnimation(slideOut);
-            actionButton.setVisibility(View.GONE);
-
-            handler.postDelayed(new Runnable() {
-                public void run() {
-                    actionButton.setImageResource(R.drawable.icon_add);
-                    actionButton.setVisibility(View.VISIBLE);
-                    actionButton.startAnimation(slidein);
-
-                }
-            }, slideOut.getDuration());
-        }
 
     }
 
@@ -713,9 +679,57 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         venueSelection = selectionInt;
     }
 
+    //todo: view functions
 
-    //todo: custom methods
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+    private void addDrawerItems() {
+        String[] optionsArray = {"Flash Back", "Top 10 HotSpots", "IceCubes", "Combat Record"};
+        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, optionsArray);
+
+        try {
+            scoreNav.setText(getResult());
+        } catch(Exception e) {
+            scoreNav.setText(String.valueOf((int) databaseHelper.getMostRecentVenue().getRating()));
+        }
+        navDrawerListView.setAdapter(mAdapter);
+    }
+
+    //directs the user to a location on the map
+    //eventually we will use tha parameter to navigate to SQL row item
+    //used for all of the Map Navigations
+
+    //the int will be used in the future if we need to view a number of locations
+    private void cameraLocation(boolean isRandom, int locationIndx, LatLng setLatLang) {
+
+
+        LatLng starterLocation;
+        CameraUpdate zoom = CameraUpdateFactory.zoomTo(12);
+
+        if (setLatLang != null) {
+            starterLocation = setLatLang;
+
+        } else {
+
+            if (isRandom) {
+                int rando = randInt(1, 4);
+                starterLocation = databaseHelper.getStarterLocationBundle(rando).getLatlng();
+                //add marker
+
+                map.addMarker(new MarkerOptions()
+                        .position(databaseHelper.getStarterLocationBundle(rando).getLatlng()));
+                zoom = CameraUpdateFactory.zoomTo(12);
+            } else {
+                starterLocation = focusLocation.getLatlng();
+
+            }
+        }
+
+        CameraUpdate center =
+                CameraUpdateFactory.newLatLng(starterLocation);
+
+        map.moveCamera(center);
+        map.animateCamera(zoom);
+
+    }
 
     private class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
@@ -762,6 +776,11 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         }
     }
 
+
+    //todo: custom methods
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
     //generates a random integer
     public static int randInt(int min, int max) {
 
@@ -774,43 +793,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         return rand.nextInt((max - min) + 1) + min;
     }
 
-    //directs the user to a location on the map
-    //eventually we will use tha parameter to navigate to SQL row item
-    //used for all of the Map Navigations
-
-    //the int will be used in the future if we need to view a number of locations
-    private void cameraLocation(boolean isRandom, int locationIndx, LatLng setLatLang) {
-
-
-        LatLng starterLocation;
-        CameraUpdate zoom = CameraUpdateFactory.zoomTo(12);
-
-        if (setLatLang != null) {
-            starterLocation = setLatLang;
-
-        } else {
-
-            if (isRandom) {
-                int rando = randInt(1, 4);
-                starterLocation = databaseHelper.getStarterLocationBundle(rando).getLatlng();
-                //add marker
-
-                map.addMarker(new MarkerOptions()
-                        .position(databaseHelper.getStarterLocationBundle(rando).getLatlng()));
-                zoom = CameraUpdateFactory.zoomTo(12);
-            } else {
-                starterLocation = focusLocation.getLatlng();
-
-            }
-        }
-
-        CameraUpdate center =
-                CameraUpdateFactory.newLatLng(starterLocation);
-
-        map.moveCamera(center);
-        map.animateCamera(zoom);
-
-    }
 
     private void buildAlertMessageNoGps() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -858,7 +840,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         if (databaseHelper.getAllVenuesFromLocation(focusLocation).size() == 0) {
             Log.e(TAG, "Querying Foursquare API...");
             new FoursquareHandler(MapsActivity.this, focusLocation.getLatlng().latitude,
-                    focusLocation.getLatlng().longitude, focusLocation.getId());
+                    focusLocation.getLatlng().longitude, focusLocation.getId()).execute();
         }
         else {
             Log.e(TAG, "Trouble");

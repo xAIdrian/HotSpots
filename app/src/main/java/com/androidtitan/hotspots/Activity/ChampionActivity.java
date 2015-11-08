@@ -52,10 +52,10 @@ public class ChampionActivity extends AppCompatActivity implements ChampionInter
     @Override
     public void soldierPasser(int locationInt, String localName) {
 
-        Intent intent = new Intent(this, AdderActivity.class);
+        /*Intent intent = new Intent(this, AdderActivity.class);
         intent.putExtra("editSoloIndex", locationInt);
         intent.putExtra("editSoloFirst", localName);
-        startActivity(intent);
+        startActivity(intent);*/
     }
 
     //this is going to be used for navigation once we have more pieces

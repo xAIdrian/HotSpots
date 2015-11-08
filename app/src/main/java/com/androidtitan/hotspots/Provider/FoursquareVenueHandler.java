@@ -26,63 +26,45 @@ import java.util.Iterator;
 /**
  * Created by amohnacs on 8/25/15.
  */
-//TODO: let's call this in our fragment
-public class FoursquareVenueHandler {
+/*TODO: let's call this in our fragment
+    What needs to happen?
+    We are going to hold off on adding all our venues to the VenueProvider
+
+
+    */
+public class FoursquareVenueHandler extends AsyncTask<View, Void, Boolean>{
     private static String TAG = "FoursquareVenueHandler";
 
     //test
     DatabaseHelper databaseHelper;
-    VenueProvider venueProvider;
+    //VenueProvider venueProvider;
 
     private Context context;
 
-    //private long venueDBid;
-    private String venue_id;
-    private long venueDBid;
+    private String focus_venue_id;
 
-    Venue focusVenue;
+    private String tempString;
+    private Venue focusVenue;
+    private int venueIndexOverride;
 
 
-    public FoursquareVenueHandler(Context context, long venueDBid, long locationId) {
+    public FoursquareVenueHandler(Context context, Venue passerVenue, int venueindexoverride) {
         this.context = context;
         databaseHelper = DatabaseHelper.getInstance(context);
-        this.venueDBid = venueDBid;
-        //this.venueDBid = venueDBid;
+        this.focusVenue = passerVenue;
+        this.venueIndexOverride = venueindexoverride;
 
-        new fourquareVenue().execute();
+        //new fourquareVenue().execute();
     }
-
-    public class fourquareVenue extends AsyncTask<View, Void, String> {
-
-        String tempString;
 
 
         @Override
-        protected String doInBackground(View... urls) {
+        protected Boolean doInBackground(View... urls) {
             // make Call to the url
-            tempString = makeCall("https://api.foursquare.com/v2/venues/" + venue_id + "?client_id="
+            tempString = makeCall("https://api.foursquare.com/v2/venues/" + focus_venue_id + "?client_id="
                     + FoursquareHandler.CLIENT_ID + "&client_secret=" + FoursquareHandler.CLIENT_SECRET
                     + "&v=20130815");
 
-            /*Log.e(TAG, makeCall("https://api.foursquare.com/v2/venues/" + venue_id + "?client_id="
-                    + FoursquareHandler.CLIENT_ID + "&client_secret=" + FoursquareHandler.CLIENT_SECRET
-                    + "&v=20130815"));
-            Log.e(TAG, " -- ");*/
-
-            //Log.e(TAG, tempString);
-
-            return "";
-        }
-
-        @Override
-        protected void onPreExecute() {
-            focusVenue = databaseHelper.getVenue(venueDBid); //this is where that extensive print is coming from
-            venue_id = focusVenue.getVenueIdString();
-
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
             if (tempString == null) {
                 // we have an error to the call
                 // we can also stop the progress bar
@@ -92,11 +74,24 @@ public class FoursquareVenueHandler {
                 parseFoursquare(tempString);
             }
 
+            return false;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            focus_venue_id = focusVenue.getVenueIdString();
+
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+
+
             //int topHat = ((MapsActivity)context).getResult();
             Log.i(TAG, "On Post Execute!");
         }
 
-    }
+
 
 
     public static String makeCall(String url) {
@@ -152,17 +147,18 @@ public class FoursquareVenueHandler {
                         String rating = innerJObject.getString("rating");
 
                         Log.i(TAG, focusVenue.getName() + " has a rating of " + rating);
-/**/                        focusVenue.setRating(Float.parseFloat((rating)));
+/**/                    focusVenue.setRating(Float.parseFloat((rating)));
                         //Log.e(TAG, focusVenue.getName() + ": " + focusVenue.getRating());
 
-                        updaterHandler(focusVenue);
+                        addFoursquareHandler(focusVenue);
 
                     }
                     else {
+                        //todo: block for a null rating
                         Log.i(TAG, focusVenue.getName() + " has NO rating, setting to 0");
                         focusVenue.setRating(0);
 
-                        updaterHandler(focusVenue);
+                        addFoursquareHandler(focusVenue);
                     }
 
                 }
@@ -175,26 +171,52 @@ public class FoursquareVenueHandler {
 
     }
 
-    public void updaterHandler(Venue venue) {
+    /*
+    this creates your Venue item and populates your VenueProvider as a means to update
+    your List of Venues
+    */
+    public void addFoursquareHandler(Venue venue) {
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
         if(venue.getRating() == 0) {
             //insert row
-            context.getContentResolver().delete(Uri.parse(VenueProvider.base_CONTENT_URI),
-                    DatabaseHelper.KEY_ID + " = ?", new String[] { String.valueOf(venue.getId()) });
+            //context.getContentResolver().delete(Uri.parse(VenueProvider.base_CONTENT_URI),
+              //      DatabaseHelper.KEY_ID + " = ?", new String[] { String.valueOf(venue.getId()) });
         }
         else {
+            ContentValues values = new ContentValues();
+
+            //Log.e(TAG, venueProvider.base_CONTENT_URI + venue.getId());
+
+            //try/catch?
+            //values.put(DatabaseHelper.KEY_ID, venue.getId());
+            values.put(DatabaseHelper.KEY_VENUE_NAME, venue.getName());
+            values.put(DatabaseHelper.KEY_VENUE_CITY, venue.getCity());
+            values.put(DatabaseHelper.KEY_VENUE_CATEGORY, venue.getCategory());
+            values.put(DatabaseHelper.KEY_VENUE_STRING, venue.getVenueIdString());
+            values.put(DatabaseHelper.KEY_VENUE_RATING, (int) venue.getRating());
+            values.put(DatabaseHelper.KEY_VENUE_LOCATION_ID, venue.getLocation_id());
+
+            //insert row
+            context.getContentResolver().insert(Uri.parse(VenueProvider.base_CONTENT_URI + venueIndexOverride), values);
+
+
+
             ((MapsActivity) context).setMathResult(venue.getRating());
 
+
+
+/*
             ContentValues values = new ContentValues();
             values.put(DatabaseHelper.KEY_VENUE_RATING, venue.getRating());
 
             //insert row
             context.getContentResolver().update(Uri.parse(VenueProvider.base_CONTENT_URI), values,
-                    DatabaseHelper.KEY_ID + " = ?", new String[]{String.valueOf(venue.getId())});
+                    DatabaseHelper.KEY_ID + " = ?", new String[]{String.valueOf(venue.getId())});*/
         }
 
     }
+
 
 
 
