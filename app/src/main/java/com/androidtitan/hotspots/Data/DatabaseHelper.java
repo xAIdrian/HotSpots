@@ -40,11 +40,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String KEY_LOCKED = "locationLocked";
     public static final String KEY_LOCAL_RATING = "locationRating";
 
-    //random coordinates table
-    private static final String KEY_STARTER_LOCAL = "randolocal";
-    private static final String KEY_STARTER_LATITUDE = "randolatitude";
-    private static final String KEY_STARTER_LONGITUDE = "randolongitude";
-
    //venues table
    //Venue
     public static final String KEY_VENUE_NAME = "venue_name";
@@ -58,6 +53,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String KEY_COORDS_ID = "coords_id";
     public static final String KEY_VENUES_ID = "venue_id";
 
+    //random coordinates table
+    private static final String KEY_STARTER_LOCAL = "randolocal";
+    private static final String KEY_STARTER_LATITUDE = "randolatitude";
+    private static final String KEY_STARTER_LONGITUDE = "randolongitude";
 
     // Table Creation Statements
 

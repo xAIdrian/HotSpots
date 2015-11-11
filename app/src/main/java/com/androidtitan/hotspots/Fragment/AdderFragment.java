@@ -2,6 +2,7 @@ package com.androidtitan.hotspots.Fragment;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -16,6 +18,7 @@ import android.widget.LinearLayout;
 
 import com.androidtitan.hotspots.Activity.MapsActivity;
 import com.androidtitan.hotspots.Data.DatabaseHelper;
+import com.androidtitan.hotspots.Data.RandomInputs;
 import com.androidtitan.hotspots.Interface.AdderInterface;
 import com.androidtitan.hotspots.R;
 import com.google.android.gms.maps.model.LatLng;
@@ -25,6 +28,8 @@ public class AdderFragment extends Fragment {
     private static final String TAG = "AdderFragment";
 
     private static final String SAVED_FIRST = "savedFirst";
+
+    RandomInputs randomInputs;
 
     DatabaseHelper databaseHelper;
     AdderInterface adderInterface;
@@ -60,6 +65,8 @@ public class AdderFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //loads data that is saved when the screen is rotated
+        randomInputs = new RandomInputs();
+
         databaseHelper = new DatabaseHelper(getActivity());
 
         setRetainInstance(true); //retains our data object when activity is desroyed
@@ -84,63 +91,22 @@ public class AdderFragment extends Fragment {
         backLayout = (LinearLayout) v.findViewById(R.id.back_layout);
 
         firstEdit = (EditText) v.findViewById(R.id.name_edit);
+        firstEdit.setSelectAllOnFocus(true);
 
-        /*deleteBtn = (TextView) v.findViewById(R.id.deleteBtn);
-        if(locationIndex == -1) {
-            deleteBtn.setTextColor(0xFFFFFFFF);
-        }
+        String quickRandomString = randomInputs.getRandomStringInput();
+        firstEdit.setHint(quickRandomString);
+        newFname = quickRandomString;
 
-        deleteBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                        getActivity());
-
-                // set title
-                alertDialogBuilder.setTitle("Delete?");
-
-                // set dialog message
-                alertDialogBuilder
-                        .setCancelable(false)
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-
-                                LocationBundle focusBundle = databaseHelper.getLocationBundle(locationIndex);
-                                Log.e("AFdeleter", focusBundle.getLocalName() + " " + focusBundle.getId());
-
-                                databaseHelper.deleteLocation(focusBundle);
-
-                                //adderInterface.returnToChamp(true);
-
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // if this button is clicked, just close
-                                // the dialog box and do nothing
-                                dialog.cancel();
-                            }
-                        });
-
-                // create alert dialog
-                AlertDialog alertDialog = alertDialogBuilder.create();
-
-                // show it
-                alertDialog.show();
-
-            }
-        });
-*/
         addBtn = (ImageButton) v.findViewById(R.id.floatingActionImageButton);
 
         backLayout.setOnClickListener(new ImageView.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //this hides the soft keyboard
+                InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
+
                 adderInterface.quitToMap();
-                //fragment slide out
-
-
             }
         });
 

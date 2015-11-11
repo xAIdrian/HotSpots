@@ -16,17 +16,17 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.LocationBundle;
+import com.androidtitan.hotspots.Data.RandomInputs;
 import com.androidtitan.hotspots.Fragment.AdderFragment;
+import com.androidtitan.hotspots.Fragment.NavigationDrawerFragment;
 import com.androidtitan.hotspots.Fragment.VenueResultsFragment;
 import com.androidtitan.hotspots.Interface.AdderInterface;
 import com.androidtitan.hotspots.Interface.VenueInterface;
@@ -46,17 +46,17 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.Random;
-
 
 /*
 TODO:::
 
--Things will continue as usual...but...UPGRADED from here to get to the VENUE functionality
-
-        We need to make the "Venue Fragment" exciting!!!
-        * Custom Cursor Adapter. include direction, distance, and category
-        * Implicit intent to FourSquare app for review OR to google maps for direction.
+//todo: VenueFragment
+//todo: we are going to include events if they are avaialable and place under event (CustomCursorAdapter)
+example row
+------------------------------------------------------------------------
+COPPERFIELD BREWERY                                         8
+    Friday: Tasting, Saturday: Free Bottle of Wine...
+------------------------------------------------------------------------
 
 -> NAVIGATION DRAWER.
         Top half is going to be past stats
@@ -88,10 +88,10 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
     private GoogleMapOptions options = new GoogleMapOptions();
     private GoogleApiClient googleAPIclient;
 
-    private LocationBundle focusLocation;
-    //private Location tempLocation;
-
+    private DrawerLayout navDrawerLayout;
     private Handler handler;
+
+    private LocationBundle focusLocation;
 
     private ImageButton actionButton;
     private ImageView backer;
@@ -101,13 +101,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
     private TextView markConfirmCancel;
     private TextView markConfirmMark;
     private View shadow;
-
-    private DrawerLayout navDrawerLayout;
-    private TextView userTitleBtn;
-    private TextView alertTitleBtn;
-    private TextView scoreNav;
-    private ListView navDrawerListView;
-    private ArrayAdapter<String> mAdapter;
 
     private Animation slidein;
     private Animation slideOut;
@@ -134,11 +127,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
     //// TODO: 9/14/15
     public int divisor;
     public int dividend;
-
-    /*todo: we are going to use a COUNDTDOWN LATCH inside of our VenueHandler AyncTask in order to
-        in order to find out if this is our last "onPostExecute()"
-        if it is then we are going to run our getResult method
-    */
 
     public int getResult() {
         //logic to account for 0;
@@ -196,17 +184,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
             isLocked = focusLocation.getIsLocationLocked();
 
-
-            try {
-                //tempLocation = new Location("tempLocation");
-                //tempLocation.setLatitude(focusLocation.getLatlng().latitude);
-                //tempLocation.setLongitude(focusLocation.getLatlng().longitude);
-
-                //focusLocation.getLatlng().latitude;
-                //focusLocation.getLatlng().longitude;
-            } catch (NullPointerException e) {
-                Log.e(TAG, "Blank MAPS: " + String.valueOf(e));
-            }
         } else {
             cameraLocation(true, -1, null);
         }
@@ -228,9 +205,9 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
             }
         }
 
-        //databaseHelper.printLocationsTable();
-
         //initializations
+
+        navDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         backer = (ImageView) findViewById(R.id.back_action);
         backer.setVisibility(View.GONE);
@@ -247,20 +224,11 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
         shadow = (View) findViewById(R.id.dropshadow);
 
-        //Navigation Drawer yo!
-//        navDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        userTitleBtn = (TextView) findViewById(R.id.userTitleBtn);
-//        alertTitleBtn = (TextView) findViewById(R.id.alertTitleBtn);
-//        scoreNav = (TextView) findViewById(R.id.scoreTextNavDrawer);
-//        navDrawerListView = (ListView) findViewById(R.id.navList);
-//        addDrawerItems();
-
-        /*navDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-            }
-        });*/
+        //NavigationDrawer
+        //todo
+        NavigationDrawerFragment navDrawerFragment = new NavigationDrawerFragment();
+        getFragmentManager().beginTransaction()
+                .add(R.id.navDrawer_container, navDrawerFragment).addToBackStack(null).commit();
 
 
         //if we've used all of our locations then we lock-it up
@@ -365,12 +333,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                             markConfirmMark.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    //pass location information to frag
-                                    //focusLocation = new LocationBundle("tempLocation");
-
-                                    //focusLocation.setLatlng(new LatLng(currentLatitude, currentLongitude));
-                                    //databaseHelper.updateLocationBundle(focusLocation);
-
 
                                     adderBundle = new Bundle();
 
@@ -437,7 +399,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                             databaseHelper.updateLocationBundle(focusLocation);
                             preSubmitActivities();
 
-                            scoreNav.setText(getResult());
+//                            scoreNav.setText(getResult());
 
                             break;
 
@@ -681,18 +643,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
     //todo: view functions
 
-    private void addDrawerItems() {
-        String[] optionsArray = {"Flash Back", "Top 10 HotSpots", "IceCubes", "Combat Record"};
-        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, optionsArray);
-
-        try {
-            scoreNav.setText(getResult());
-        } catch(Exception e) {
-            scoreNav.setText(String.valueOf((int) databaseHelper.getMostRecentVenue().getRating()));
-        }
-        navDrawerListView.setAdapter(mAdapter);
-    }
-
     //directs the user to a location on the map
     //eventually we will use tha parameter to navigate to SQL row item
     //used for all of the Map Navigations
@@ -710,7 +660,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         } else {
 
             if (isRandom) {
-                int rando = randInt(1, 4);
+                int rando = RandomInputs.randInt(1, 4);
                 starterLocation = databaseHelper.getStarterLocationBundle(rando).getLatlng();
                 //add marker
 
@@ -780,18 +730,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
     //todo: custom methods
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-    //generates a random integer
-    public static int randInt(int min, int max) {
-
-        // NOTE: Usually this should be a field rather than a method
-        // variable so that it is not re-seeded every call.
-        Random rand = new Random();
-
-        // nextInt is normally exclusive of the top value,
-        // so add 1 to make it inclusive
-        return rand.nextInt((max - min) + 1) + min;
-    }
 
 
     private void buildAlertMessageNoGps() {
