@@ -72,8 +72,9 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String TAG = "MapActivity";
 
-    public static final String SAVED_INITIAL_BOOL = "hasVisitedMaps";
+    //public static final String SAVED_INITIAL_BOOL = "hasVisitedMaps";
     public static final String SAVED_DIALOG_BOOL = "savedDialogBool";
+    public static final String PASSED_RESULT = "getResult2Pass";
 
     private DatabaseHelper databaseHelper;
     private VenueResultsFragment venueFragment;
@@ -88,7 +89,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
     private GoogleMapOptions options = new GoogleMapOptions();
     private GoogleApiClient googleAPIclient;
 
-    private DrawerLayout navDrawerLayout;
+    private DrawerLayout navDrawerLayout; //this will be used if we need to forcefully close our nav drawer
     private Handler handler;
 
     private LocationBundle focusLocation;
@@ -130,8 +131,10 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
     public int getResult() {
         //logic to account for 0;
-        Log.e(TAG, "Map Result: " + dividend + "/" + divisor + "=" + dividend/divisor);
-        return dividend/divisor;
+
+        Log.e(TAG, "Map Result: " + dividend + "/" + divisor + "=" + dividend / divisor);
+        return dividend / divisor;
+
     }
 
     public void setMathResult(float plus) {
@@ -225,11 +228,20 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         shadow = (View) findViewById(R.id.dropshadow);
 
         //NavigationDrawer
-        //todo
+        Bundle navDrawerBundle = new Bundle();
         NavigationDrawerFragment navDrawerFragment = new NavigationDrawerFragment();
+
+        try {
+            navDrawerBundle.putInt(PASSED_RESULT, getResult());
+
+        } catch (Exception e) {
+            navDrawerBundle.putInt(PASSED_RESULT, (int) databaseHelper.getMostRecentVenue().getRating());
+
+        }
+
+        navDrawerFragment.setArguments(navDrawerBundle);
         getFragmentManager().beginTransaction()
                 .add(R.id.navDrawer_container, navDrawerFragment).addToBackStack(null).commit();
-
 
         //if we've used all of our locations then we lock-it up
         if (!isLocked) {
@@ -398,8 +410,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                             focusLocation.setLocationRating(getResult());
                             databaseHelper.updateLocationBundle(focusLocation);
                             preSubmitActivities();
-
-//                            scoreNav.setText(getResult());
 
                             break;
 

@@ -3,6 +3,7 @@ package com.androidtitan.hotspots.Fragment;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.androidtitan.hotspots.Activity.MapsActivity;
 import com.androidtitan.hotspots.R;
 
 
@@ -23,10 +25,19 @@ public class NavigationDrawerFragment extends Fragment {
     private ListView navDrawerListView;
     private ArrayAdapter<String> mAdapter;
 
+    private int scoreInt;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
+            scoreInt = getArguments().getInt(MapsActivity.PASSED_RESULT, 0);
+
+            Log.e(TAG, "Nav score: " + scoreInt);
+
+        } else {
+            Log.e(TAG, "Nav score == null");
         }
     }
 
@@ -73,12 +84,7 @@ public class NavigationDrawerFragment extends Fragment {
     private void addDrawerItems() {
         String[] optionsArray = {"Flash Back", "Top 10 HotSpots", "IceCubes", "Combat Record"};
         mAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, optionsArray);
-
-        /*try {
-            scoreNav.setText(getResult());
-        } catch(Exception e) {
-            scoreNav.setText(String.valueOf((int) databaseHelper.getMostRecentVenue().getRating()));
-        }*/
+        scoreNav.setText(String.valueOf(scoreInt));
         navDrawerListView.setAdapter(mAdapter);
     }
 }
