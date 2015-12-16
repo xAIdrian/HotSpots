@@ -504,7 +504,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                     .getMap();
             // Check if we were successful in obtaining the map.
             if (map != null) {
-                setUpMap();
+                //setUpMap();
             }
         }
 
@@ -517,9 +517,9 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
      * <p/>
      * This should only be called once and when we are sure that {@link #map} is not null.
      */
-    private void setUpMap() {
-        map.setInfoWindowAdapter(new CustomInfoWindowAdapter());
-    }
+//    private void setUpMap() {
+//        map.setInfoWindowAdapter(new CustomInfoWindowAdapter());
+//    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {

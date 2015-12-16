@@ -1,0 +1,3 @@
+[submodule "hotspots"]
+	path = hotspots
+	url = https://github.com/amohnacs15/hotspots.git
