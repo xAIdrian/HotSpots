@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.CursorIndexOutOfBoundsException;
 import android.location.Location;
 import android.location.LocationListener;
@@ -50,19 +51,19 @@ import com.google.android.gms.maps.model.MarkerOptions;
 /*
 TODO:::
 
-//todo: VenueFragment
-//todo: we are going to include events if they are avaialable and place under event (CustomCursorAdapter)
-example row
-------------------------------------------------------------------------
-COPPERFIELD BREWERY                                         8
-    Friday: Tasting, Saturday: Free Bottle of Wine...
-------------------------------------------------------------------------
-
+-> On Complete.  Replace Lock to start over.
 -> NAVIGATION DRAWER.
-        Top half is going to be past stats
-        View All past locations and their associated rankings.  View them on the map
-        View all past venues.  Provide more information (View all of them on the map?)
+        Recycler view of all past searches
+-> Landscape formatting
+-> Configuration changes and Concurrency
+-> Upgrade Venue Fragment
 
+
+- Circular reveal for mark bar
+- Scale/Fade FAB instead of "drop"
+- "Gullotine" effect for Nav Bar
+
+//todo: configurations and sizes
 REFACTOR. WE NEED TO BE MORE OBJECT ORIENTED
     PUT REPEATED TASKS INTO A FUNCITON e.g. MATERIAL DESIGN AND ANIMATIONS
  */
@@ -97,6 +98,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
     private ImageButton actionButton;
     private ImageView backer;
     private ImageView locker;
+    private TextView goText;
 
     private LinearLayout markConfirmLayout;
     private TextView markConfirmCancel;
@@ -107,6 +109,9 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
     private Animation slideOut;
     private Animation leftSlideIn;
     private Animation leftSlideOut;
+    private Animation fab_pop;
+    private Animation fab_pop_settle;
+    private Animation fab_close;
 
     private Location lastLocation;
     private LatLng lastLatLang;
@@ -153,9 +158,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         }
 
         databaseHelper = DatabaseHelper.getInstance(this);
-
-        Intent intent = getIntent();
-        locationIndex = intent.getIntExtra(ChampionActivity.SELECTION_TO_MAP, -1);
 
         //our handle for our MapFragment
         MapFragment mapFragment = (MapFragment) getFragmentManager()
@@ -209,12 +211,15 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         }
 
         //initializations
-
+        //todo: need to all go in one method
         navDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         backer = (ImageView) findViewById(R.id.back_action);
         backer.setVisibility(View.GONE);
         locker = (ImageView) findViewById(R.id.locker);
+        goText = (TextView) findViewById(R.id.newSpot);
+        goText.setVisibility(View.GONE);
+        goText.setClickable(false);
         actionButton = (ImageButton) findViewById(R.id.floatingActionImageButton);
         actionButton.setVisibility(View.GONE);
 
@@ -230,6 +235,10 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         //NavigationDrawer
         Bundle navDrawerBundle = new Bundle();
         NavigationDrawerFragment navDrawerFragment = new NavigationDrawerFragment();
+
+        fab_pop = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_pop);
+        fab_pop_settle = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_pop_settle);
+        fab_close = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_close);
 
         try {
             navDrawerBundle.putInt(PASSED_RESULT, getResult());
@@ -406,10 +415,34 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                             break;
 
                         case 3: //VenueResult fab
-
                             focusLocation.setLocationRating(getResult());
                             databaseHelper.updateLocationBundle(focusLocation);
                             preSubmitActivities();
+
+                            //todo: here we need to slide these bad boys out and then back in
+                            if(locker.getVisibility() != View.GONE) {
+                                locker.startAnimation(slideOut);
+                                slideOut.setAnimationListener(new Animation.AnimationListener() {
+                                    @Override
+                                    public void onAnimationStart(Animation animation) {
+
+                                    }
+
+                                    @Override
+                                    public void onAnimationEnd(Animation animation) {
+                                        locker.setVisibility(View.GONE);
+
+                                        goText.setVisibility(View.VISIBLE);
+                                        goText.setClickable(true);
+                                        goText.startAnimation(slidein);
+                                    }
+
+                                    @Override
+                                    public void onAnimationRepeat(Animation animation) {
+
+                                    }
+                                });
+                            }
 
                             break;
 
@@ -439,6 +472,20 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                             break;
                     }
                 }
+            }
+        });
+
+        //todo: we are going to reset our FAB integer and the icons
+        goText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e(TAG, "jefferson");
+                FABstatus = 0;
+
+                popCloseAnimation();
+                toggleFragment(true, venueFragmentTag);
+                actionButton.setImageResource(R.drawable.icon_location);
+                popOpenAnimation();
             }
         });
 
@@ -484,7 +531,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
     /**
      * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
      * installed) and the map has not already been instantiated.. This will ensure that we only ever
-     * call {@link #setUpMap()} once when {@link #map} is not null.
+     * call  once when {@link #map} is not null.
      * <p/>
      * If it isn't installed {@link SupportMapFragment} (and
      * {@link com.google.android.gms.maps.MapView MapView}) will show a prompt for the user to
@@ -629,6 +676,13 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
     }
 
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+    }
+
     @Override
     public void onMapReturn() {
         //this will show our new FAB
@@ -649,6 +703,37 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
     @Override
     public void selectionPasser(int selectionInt) {
         venueSelection = selectionInt;
+    }
+
+
+    //todo: animation functions
+
+    public void popOpenAnimation() {
+
+        actionButton.setClickable(false);
+        actionButton.startAnimation(fab_pop);
+
+        //TODO: do we want a handler or onAnimationEnd() ???
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                actionButton.startAnimation(fab_pop_settle);
+                actionButton.setClickable(true);
+            }
+        }, fab_pop.getDuration());
+    }
+
+    public void popCloseAnimation() {
+
+        actionButton.setClickable(false);
+        actionButton.startAnimation(fab_close);
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                actionButton.setClickable(true);
+            }
+        }, fab_close.getDuration());
     }
 
     //todo: view functions
@@ -785,14 +870,14 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         markConfirmMark.setVisibility(View.GONE);
 
         //Foursquare API
-        if (databaseHelper.getAllVenuesFromLocation(focusLocation).size() == 0) {
+        //if (databaseHelper.getAllVenuesFromLocation(focusLocation).size() == 0) {
             Log.e(TAG, "Querying Foursquare API...");
             new FoursquareHandler(MapsActivity.this, focusLocation.getLatlng().latitude,
                     focusLocation.getLatlng().longitude, focusLocation.getId()).execute();
-        }
+        /*}
         else {
             Log.e(TAG, "Trouble");
-        }
+        }*/
     }
 
     public void lockingAction() {

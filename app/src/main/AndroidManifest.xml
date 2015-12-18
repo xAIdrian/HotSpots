@@ -22,7 +22,7 @@
     <!-- <uses-sdk android:minSdkVersion="21" /> -->
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/trooptracker_icon"
+        android:icon="@mipmap/fire_element"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 

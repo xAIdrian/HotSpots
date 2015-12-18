@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="colorPrimary">#03A9F4</color>
+    <color name="colorPrimary">#F44336</color>
 
-    <color name="colorPrimaryDark">#0288D1</color>
+    <color name="colorPrimaryDark">#D32F2F</color>
 
-    <color name="colorTransparentPrimary">#A603A9F4</color>
+    <color name="colorTransparentPrimary">#A6F44336</color>
 
-    <color name="colorToolbarTransparentPrimary">#8003A9F4</color>
+    <!--<color name="colorToolbarTransparentPrimary">#80F44336</color>-->
 
-    <color name="colorPrimaryLight">#B3E5FC</color>
+    <color name="colorPrimaryLight">#A6F44336</color>
 
-    <color name="colorAccent">#FFC107</color>
+    <color name="colorAccent">#448AFF</color>
 
-    <color name="colorHighlight">#FFCD38</color>
+    <color name="colorHighlight">#80448AFF</color>
 
-    <color name="colorCrush">#F90101</color>
+    <color name="colorCrush">#FF9800</color>
 
     <color name="colorPrimaryText">#212121</color>
 
@@ -23,6 +23,5 @@
 
     <color name="colorDivider">#B6B6B6</color>
 
-    <color name="colorMapToolbar">#CC03A9F4</color>
 
 </resources>

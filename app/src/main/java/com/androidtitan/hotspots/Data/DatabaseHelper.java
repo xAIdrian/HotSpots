@@ -246,7 +246,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         database.delete(TABLE_LOCATIONS,
-                KEY_ID + " =?", new String[]{ String.valueOf(locBun.getId()) });
+                KEY_ID + " =?", new String[]{String.valueOf(locBun.getId())});
 
 
     }
@@ -383,13 +383,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor.moveToFirst();
 
         Venue v = new Venue();
-        v.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID)));
-        v.setName(cursor.getString(cursor.getColumnIndex(KEY_VENUE_NAME)));
-        v.setCity(cursor.getString(cursor.getColumnIndex(KEY_VENUE_CITY)));
-        v.setCategory(cursor.getString(cursor.getColumnIndex(KEY_VENUE_CATEGORY)));
-        v.setVenueIdString(cursor.getString(cursor.getColumnIndex(KEY_VENUE_STRING)));
-        v.setRating(cursor.getFloat(cursor.getColumnIndex(KEY_VENUE_RATING)));
-        v.setLocation_id(cursor.getInt(cursor.getColumnIndex(KEY_VENUE_LOCATION_ID)));
+        try {
+
+            v.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID)));
+            v.setName(cursor.getString(cursor.getColumnIndex(KEY_VENUE_NAME)));
+            v.setCity(cursor.getString(cursor.getColumnIndex(KEY_VENUE_CITY)));
+            v.setCategory(cursor.getString(cursor.getColumnIndex(KEY_VENUE_CATEGORY)));
+            v.setVenueIdString(cursor.getString(cursor.getColumnIndex(KEY_VENUE_STRING)));
+            v.setRating(cursor.getFloat(cursor.getColumnIndex(KEY_VENUE_RATING)));
+            v.setLocation_id(cursor.getInt(cursor.getColumnIndex(KEY_VENUE_LOCATION_ID)));
+        } catch (Exception e) {
+            Log.e(TAG, String.valueOf(e));
+        }
 
         return v;
     }

@@ -27,7 +27,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorMapToolbar"
+            android:background="@color/colorPrimary"
             android:minHeight="?attr/actionBarSize"
             app:contentInsetEnd="0dp"
             app:contentInsetStart="0dp">
@@ -64,6 +64,20 @@
                     android:padding="6dp"
                     android:src="@drawable/lock_open" />
 
+                <TextView android:id="@+id/newSpot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginEnd="6dp"
+                    android:layout_marginRight="6dp"
+                    android:gravity="center_vertical"
+                    android:padding="6dp"
+                    android:text="@string/go"
+                    android:textColor="@android:color/white"
+                    style="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textStyle="bold"/>
+
             </RelativeLayout>
 
         </android.support.v7.widget.Toolbar>
@@ -91,7 +105,7 @@
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:layout_alignParentBottom="true"
-            android:background="@color/colorMapToolbar"
+            android:background="@color/colorPrimary"
             android:orientation="horizontal"
             android:weightSum="2">
 
@@ -112,7 +126,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/mark"
-                android:textColor="@color/colorAccent"
+                android:textColor="@android:color/white"
                 android:textSize="@dimen/abc_text_size_large_material"
                 android:textStyle="bold" />
 
