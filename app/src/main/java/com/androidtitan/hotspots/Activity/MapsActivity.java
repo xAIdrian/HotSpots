@@ -1,5 +1,6 @@
 package com.androidtitan.hotspots.Activity;
 
+import android.animation.Animator;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,6 +16,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
@@ -241,9 +243,7 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
         markConfirmLayout = (LinearLayout) findViewById(R.id.markerLayout);
         markConfirmCancel = (TextView) findViewById(R.id.markerCancel);
         markConfirmMark = (TextView) findViewById(R.id.markerMark);
-        markConfirmLayout.setVisibility(View.GONE);
-        markConfirmCancel.setVisibility(View.GONE);
-        markConfirmMark.setVisibility(View.GONE);
+        markConfirmLayout.setVisibility(View.INVISIBLE);
 
         shadow = (View) findViewById(R.id.dropshadow);
 
@@ -345,11 +345,10 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
                             FABstatus ++;
 
                             popCloseAnimation();
+                            actionButton.setVisibility(View.GONE);
 
 
                             markConfirmLayout.setVisibility(View.VISIBLE);
-                            markConfirmCancel.setVisibility(View.VISIBLE);
-                            markConfirmMark.setVisibility(View.VISIBLE);
 
                             //todo: circular reveal
                             markConfirmLayout.startAnimation(slidein);
@@ -379,8 +378,6 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
                                     adderBundle.putDouble(adderFragmentLatitude, currentLatitude);
                                     adderBundle.putDouble(adderFragmentLongitude, currentLongitude);
 
-                                    popCloseAnimation();
-                                    actionButton.setVisibility(View.GONE);
                                     backer.startAnimation(leftSlideOut);
                                     backer.setVisibility(View.GONE);
 
@@ -388,15 +385,9 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
                                     markConfirmLayout.startAnimation(slideOut);
                                     markConfirmCancel.startAnimation(slideOut);
                                     markConfirmMark.startAnimation(slideOut);
-                                    markConfirmLayout.setVisibility(View.INVISIBLE);
-                                    markConfirmCancel.setVisibility(View.INVISIBLE);
-                                    markConfirmMark.setVisibility(View.INVISIBLE);
+                                    markConfirmLayout.setVisibility(View.GONE);
 
                                     toggleFragment(false, adderFragmentTag);
-
-                                    //todo
-                                    popCloseAnimation();
-                                    actionButton.setVisibility(View.GONE);
 
                                     //handler is being used for the return action
                                     handler.postDelayed(new Runnable() {
@@ -499,7 +490,8 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
         goText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e(TAG, "jefferson");
+                MapsActivity.this.recreate();
+                /*Log.e(TAG, "jefferson");
                 FABstatus = 0;
 
                 popCloseAnimation();
@@ -526,7 +518,7 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
                     public void onAnimationRepeat(Animation animation) {
 
                     }
-                });
+                });*/
             }
         });
 
@@ -638,7 +630,9 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
     public void onConnected(Bundle bundle) {
         //todo:new method
         slidein = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slidin_bottom);
+        slidein.setDuration(ANIM_DURATION);
         slideOut = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slideout_bottom);
+        slideOut.setDuration(ANIM_DURATION);
         leftSlideIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slidein_left);
         leftSlideOut = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slideout_left);
         fab_pop = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_pop);
@@ -772,6 +766,24 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
                 actionButton.setClickable(true);
             }
         }, fab_pop.getDuration());
+    }
+
+    public void circularReveal() {
+        int centerX = (markConfirmLayout.getLeft() + markConfirmLayout.getRight()) / 2;
+        int centerY = (markConfirmLayout.getTop() + markConfirmLayout.getBottom()) / 2;
+
+        int startRadius = 0;
+        //get the clipping circles final width
+        int endRadius = Math.max(markConfirmLayout.getWidth(), markConfirmLayout.getHeight());
+
+        Animator circularRevealAnim = ViewAnimationUtils.createCircularReveal(markConfirmLayout,
+                centerX, centerY, startRadius, endRadius);
+        markConfirmLayout.setVisibility(View.VISIBLE);
+        circularRevealAnim.start();
+    }
+
+    public void circularHide() {
+
     }
 
     public void popCloseAnimation() {
