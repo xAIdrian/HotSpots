@@ -11,8 +11,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -51,15 +51,22 @@ import com.google.android.gms.maps.model.MarkerOptions;
 /*
 TODO:::
 
--> On Complete.  Replace Lock to start over.
+//-> On Complete.  Replace Lock to start over.
+
 -> NAVIGATION DRAWER.
         Recycler view of all past searches
+        Ordered last to first
+            Let's add a date
+            Show it's rank too
+
+
 -> Landscape formatting
 -> Configuration changes and Concurrency
 -> Upgrade Venue Fragment
 
 
 - Circular reveal for mark bar
+    -->add a shadow
 - Scale/Fade FAB instead of "drop"
 - "Gullotine" effect for Nav Bar
 
@@ -69,13 +76,15 @@ REFACTOR. WE NEED TO BE MORE OBJECT ORIENTED
  */
 
 
-public class MapsActivity extends FragmentActivity implements AdderInterface, VenueInterface, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
+public class MapsActivity extends AppCompatActivity implements AdderInterface, VenueInterface, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String TAG = "MapActivity";
 
     //public static final String SAVED_INITIAL_BOOL = "hasVisitedMaps";
     public static final String SAVED_DIALOG_BOOL = "savedDialogBool";
     public static final String PASSED_RESULT = "getResult2Pass";
+
+    public static final int ANIM_DURATION = 150;
 
     private DatabaseHelper databaseHelper;
     private VenueResultsFragment venueFragment;
@@ -109,6 +118,8 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
     private Animation slideOut;
     private Animation leftSlideIn;
     private Animation leftSlideOut;
+    private Animation rightSlideOut;
+    private Animation rightSlideIn;
     private Animation fab_pop;
     private Animation fab_pop_settle;
     private Animation fab_close;
@@ -158,6 +169,10 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         }
 
         databaseHelper = DatabaseHelper.getInstance(this);
+
+
+        //todo: new method
+
 
         //our handle for our MapFragment
         MapFragment mapFragment = (MapFragment) getFragmentManager()
@@ -233,12 +248,9 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         shadow = (View) findViewById(R.id.dropshadow);
 
         //NavigationDrawer
+        //todo
         Bundle navDrawerBundle = new Bundle();
         NavigationDrawerFragment navDrawerFragment = new NavigationDrawerFragment();
-
-        fab_pop = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_pop);
-        fab_pop_settle = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_pop_settle);
-        fab_close = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_close);
 
         try {
             navDrawerBundle.putInt(PASSED_RESULT, getResult());
@@ -253,6 +265,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                 .add(R.id.navDrawer_container, navDrawerFragment).addToBackStack(null).commit();
 
         //if we've used all of our locations then we lock-it up
+        //todo: new method
         if (!isLocked) {
         } else {
             isLocationAdded = true;
@@ -262,6 +275,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
             FABstatus = 3;
             //todo: LATER we need to include for if we are Locked AND Scored
+            //what is locked and scored
 
         }
 
@@ -271,7 +285,6 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                 //placeholder
             }
         });
-
         //using existing variables we are going to check which state it is already in
         //on changing state 'actionButton' is going to slide out and then slide back in
         //new sourceImage and newColor (newColor will require 2 new circle backgrounds)
@@ -307,7 +320,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
                                 FABstatus++;
 
-                                actionButton.startAnimation(slideOut);
+                                popCloseAnimation();
                                 actionButton.setVisibility(View.GONE);
 
                                 //handler is being used for the return action
@@ -315,13 +328,13 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                                     public void run() {
                                         actionButton.setImageResource(R.drawable.icon_add);
                                         actionButton.setVisibility(View.VISIBLE);
-                                        actionButton.startAnimation(slidein);
+                                        popOpenAnimation();
 
                                         backer.startAnimation(leftSlideIn);
                                         backer.setVisibility(View.VISIBLE);
 
                                     }
-                                }, slideOut.getDuration());
+                                }, ANIM_DURATION);
 
                             }
 
@@ -331,9 +344,14 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
                             FABstatus ++;
 
+                            popCloseAnimation();
+
+
                             markConfirmLayout.setVisibility(View.VISIBLE);
                             markConfirmCancel.setVisibility(View.VISIBLE);
                             markConfirmMark.setVisibility(View.VISIBLE);
+
+                            //todo: circular reveal
                             markConfirmLayout.startAnimation(slidein);
                             markConfirmCancel.startAnimation(slidein);
                             markConfirmMark.startAnimation(slidein);
@@ -341,12 +359,13 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                             markConfirmCancel.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
+                                    //todo:circular hide
                                     markConfirmLayout.startAnimation(slideOut);
                                     markConfirmCancel.startAnimation(slideOut);
                                     markConfirmMark.startAnimation(slideOut);
-                                    markConfirmLayout.setVisibility(View.GONE);
-                                    markConfirmCancel.setVisibility(View.GONE);
-                                    markConfirmMark.setVisibility(View.GONE);
+                                    markConfirmLayout.setVisibility(View.INVISIBLE);
+                                    markConfirmCancel.setVisibility(View.INVISIBLE);
+                                    markConfirmMark.setVisibility(View.INVISIBLE);
                                 }
                             });
 
@@ -360,22 +379,23 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                                     adderBundle.putDouble(adderFragmentLatitude, currentLatitude);
                                     adderBundle.putDouble(adderFragmentLongitude, currentLongitude);
 
-                                    actionButton.startAnimation(slideOut);
+                                    popCloseAnimation();
                                     actionButton.setVisibility(View.GONE);
                                     backer.startAnimation(leftSlideOut);
                                     backer.setVisibility(View.GONE);
 
+                                    //todo:circular hide
                                     markConfirmLayout.startAnimation(slideOut);
                                     markConfirmCancel.startAnimation(slideOut);
                                     markConfirmMark.startAnimation(slideOut);
-                                    markConfirmLayout.setVisibility(View.GONE);
-                                    markConfirmCancel.setVisibility(View.GONE);
-                                    markConfirmMark.setVisibility(View.GONE);
+                                    markConfirmLayout.setVisibility(View.INVISIBLE);
+                                    markConfirmCancel.setVisibility(View.INVISIBLE);
+                                    markConfirmMark.setVisibility(View.INVISIBLE);
 
                                     toggleFragment(false, adderFragmentTag);
 
                                     //todo
-                                    actionButton.startAnimation(slideOut);
+                                    popCloseAnimation();
                                     actionButton.setVisibility(View.GONE);
 
                                     //handler is being used for the return action
@@ -383,10 +403,10 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                                         public void run() {
                                             actionButton.setImageResource(R.drawable.icon_add);
                                             actionButton.setVisibility(View.VISIBLE);
-                                            actionButton.startAnimation(slidein);
+                                            popOpenAnimation();
 
                                         }
-                                    }, slideOut.getDuration());
+                                    }, ANIM_DURATION);
 
                                 }
                             });
@@ -421,8 +441,8 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
                             //todo: here we need to slide these bad boys out and then back in
                             if(locker.getVisibility() != View.GONE) {
-                                locker.startAnimation(slideOut);
-                                slideOut.setAnimationListener(new Animation.AnimationListener() {
+                                locker.startAnimation(rightSlideOut);
+                                rightSlideOut.setAnimationListener(new Animation.AnimationListener() {
                                     @Override
                                     public void onAnimationStart(Animation animation) {
 
@@ -434,7 +454,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
                                         goText.setVisibility(View.VISIBLE);
                                         goText.setClickable(true);
-                                        goText.startAnimation(slidein);
+                                        goText.startAnimation(rightSlideIn);
                                     }
 
                                     @Override
@@ -452,17 +472,17 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
                             FABstatus--;
 
-                            actionButton.startAnimation(slideOut);
+                            popCloseAnimation();
                             actionButton.setVisibility(View.GONE);
 
                             handler.postDelayed(new Runnable() {
                                 public void run() {
                                     actionButton.setImageResource(R.drawable.icon_submit);
                                     actionButton.setVisibility(View.VISIBLE);
-                                    actionButton.startAnimation(slidein);
+                                    popOpenAnimation();
 
                                 }
-                            }, slideOut.getDuration());
+                            }, ANIM_DURATION);
 
 
                             break;
@@ -486,6 +506,27 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                 toggleFragment(true, venueFragmentTag);
                 actionButton.setImageResource(R.drawable.icon_location);
                 popOpenAnimation();
+
+                goText.startAnimation(rightSlideOut);
+                rightSlideOut.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        goText.setVisibility(View.GONE);
+                        locker.setImageResource(R.drawable.lock_open);
+                        locker.setVisibility(View.VISIBLE);
+                        locker.startAnimation(rightSlideIn);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
             }
         });
 
@@ -494,7 +535,8 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
             @Override
             public void onClick(View v) {
                 if (FABstatus == 1) {
-                    actionButton.startAnimation(slideOut);
+
+                    popCloseAnimation();
                     actionButton.setVisibility(View.GONE);
 
                     //handler is being used for the return action
@@ -502,14 +544,14 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                         public void run() {
                             actionButton.setImageResource(R.drawable.icon_location);
                             actionButton.setVisibility(View.VISIBLE);
-                            actionButton.startAnimation(slidein);
+                            popOpenAnimation();
 
                             backer.startAnimation(leftSlideOut);
                             backer.setVisibility(View.GONE);
 
                             FABstatus--;
                         }
-                    }, slideOut.getDuration());
+                    }, ANIM_DURATION);
                 }
             }
         });
@@ -527,7 +569,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         savedInstanceState.putBoolean(SAVED_DIALOG_BOOL, isLocationAdded);
     }
 
-    //Google Map methods
+    //todo: Google Map methods () {
     /**
      * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
      * installed) and the map has not already been instantiated.. This will ensure that we only ever
@@ -594,10 +636,19 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
     @Override
     public void onConnected(Bundle bundle) {
+        //todo:new method
         slidein = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slidin_bottom);
         slideOut = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slideout_bottom);
         leftSlideIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slidein_left);
         leftSlideOut = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slideout_left);
+        fab_pop = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_pop);
+        fab_pop.setDuration(ANIM_DURATION);
+        fab_pop_settle = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_pop_settle);
+        fab_pop_settle.setDuration(ANIM_DURATION);
+        fab_close = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_close);
+        fab_close.setDuration(ANIM_DURATION);
+        rightSlideOut = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.icon_slideout_right);
+        rightSlideIn = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.icon_slidein_right);
 
         handler = new Handler();
 
@@ -611,7 +662,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
                 public void run() {
 
                     actionButton.setVisibility(View.VISIBLE);
-                    actionButton.startAnimation(slidein);
+                    popOpenAnimation();
 
                 }
             }, 500);
@@ -657,17 +708,17 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
             if (venueFragment.isVisible()) {
                 toggleFragment(true, venueFragmentTag);
 
-                actionButton.startAnimation(slideOut);
+                popCloseAnimation();
                 actionButton.setVisibility(View.GONE);
 
                 handler.postDelayed(new Runnable() {
                     public void run() {
                         actionButton.setImageResource(R.drawable.icon_submit);
                         actionButton.setVisibility(View.VISIBLE);
-                        actionButton.startAnimation(slidein);
+                        popOpenAnimation();
 
                     }
-                }, slideOut.getDuration());
+                }, ANIM_DURATION);
 
                 FABstatus--;
 
@@ -697,7 +748,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
         actionButton.setImageResource(R.drawable.icon_add);
         actionButton.setVisibility(View.VISIBLE);
-        actionButton.startAnimation(slidein);
+        popOpenAnimation();
     }
 
     @Override
@@ -860,7 +911,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
         FABstatus++;
 
-        actionButton.startAnimation(slideOut);
+        popCloseAnimation();
         actionButton.setVisibility(View.GONE);
         backer.startAnimation(leftSlideOut);
         backer.setVisibility(View.GONE);
@@ -893,7 +944,7 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
 
                 actionButton.setImageResource(R.drawable.icon_submit);
                 actionButton.setVisibility(View.VISIBLE);
-                actionButton.startAnimation(slidein);
+                popOpenAnimation();
 
             }
 
@@ -915,17 +966,17 @@ public class MapsActivity extends FragmentActivity implements AdderInterface, Ve
         FABstatus++;
 
         //animation
-        actionButton.startAnimation(slideOut);
+        popCloseAnimation();
         actionButton.setVisibility(View.GONE);
 
         handler.postDelayed(new Runnable() {
             public void run() {
                 actionButton.setImageResource(R.drawable.left_arrow);
                 actionButton.setVisibility(View.VISIBLE);
-                actionButton.startAnimation(slidein);
+                popOpenAnimation();
 
             }
-        }, slideOut.getDuration());
+        }, ANIM_DURATION);
 
     }
 

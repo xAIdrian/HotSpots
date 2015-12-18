@@ -6,55 +6,6 @@
     android:weightSum="2"
     android:background="@android:color/white">
 
-    <RelativeLayout
-        android:id="@+id/topRowLayout"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="8dp">
-
-        <TextView
-            android:id="@+id/userTitleBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:padding="8dp"
-            android:text="@string/userTitle"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/alertTitleBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:padding="8dp"
-            android:text="@string/alertTitle"
-            android:textStyle="bold" />
-
-        <TextView android:id="@+id/lastFlamText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:gravity="center_horizontal"
-            android:text="@string/lastFlameTitle"
-            android:layout_below="@+id/userTitleBtn" />
-
-        <TextView
-            android:id="@+id/scoreTextNavDrawer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:gravity="center_horizontal|bottom"
-            android:padding="16dp"
-            android:textSize="100sp"
-            android:textStyle="bold"
-            android:layout_below="@+id/lastFlamText" />
-
-    </RelativeLayout>
-
-
     <ListView
         android:id="@+id/navList"
         android:layout_width="240dp"

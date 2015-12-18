@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.androidtitan.hotspots.Activity.MapsActivity;
 import com.androidtitan.hotspots.R;
@@ -19,9 +18,6 @@ import com.androidtitan.hotspots.R;
 public class NavigationDrawerFragment extends Fragment {
     private String TAG = getClass().getSimpleName();
 
-    private TextView userTitleBtn;
-    private TextView alertTitleBtn;
-    private TextView scoreNav;
     private ListView navDrawerListView;
     private ArrayAdapter<String> mAdapter;
 
@@ -47,9 +43,7 @@ public class NavigationDrawerFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
 
         //Navigation Drawer yo!
-        userTitleBtn = (TextView) v.findViewById(R.id.userTitleBtn);
-        alertTitleBtn = (TextView) v.findViewById(R.id.alertTitleBtn);
-        scoreNav = (TextView) v.findViewById(R.id.scoreTextNavDrawer);
+
         navDrawerListView = (ListView) v.findViewById(R.id.navList);
         addDrawerItems();
 
@@ -84,7 +78,6 @@ public class NavigationDrawerFragment extends Fragment {
     private void addDrawerItems() {
         String[] optionsArray = {"Flash Back", "Top 10 HotSpots", "IceCubes", "Combat Record"};
         mAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, optionsArray);
-        scoreNav.setText(String.valueOf(scoreInt));
         navDrawerListView.setAdapter(mAdapter);
     }
 }

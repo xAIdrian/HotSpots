@@ -98,7 +98,8 @@
             android:layout_margin="15dp"
             android:background="@drawable/circle"
             android:focusable="true"
-            android:src="@drawable/icon_location" />
+            android:src="@drawable/icon_location"
+            android:elevation="8dp"/>
 
         <LinearLayout
             android:id="@+id/markerLayout"
