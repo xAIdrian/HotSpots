@@ -58,7 +58,7 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
     private static final int LOADER_ID = 1;
 
     private LoaderManager.LoaderCallbacks<Cursor> callBacks;
-    private VenueCursorAdapter adapter;
+    public VenueCursorAdapter adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,7 +69,6 @@ public class VenueResultsFragment extends ListFragment implements LoaderManager.
         focusLocation = databaseHelper.getLocationBundle(locationIndex);
 
         Log.e(TAG, "locationIndex: " + locationIndex + ", focusLocation: " + focusLocation.getLocalName());
-
 
         String[] dataColumns = { VenueProvider.InterfaceConstants.venue_name,
                 VenueProvider.InterfaceConstants.venue_rating };

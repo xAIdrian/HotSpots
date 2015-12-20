@@ -9,6 +9,7 @@ android {
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
+
     }
     buildTypes {
         release {
@@ -31,6 +32,8 @@ dependencies {
 
     compile 'org.apache.httpcomponents:httpcore:4.4.1'
     compile 'org.apache.httpcomponents:httpclient:4.5'
+
+    compile group: 'cz.msebera.android' , name: 'httpclient', version: '4.4.1.1'
 }
 
 /*

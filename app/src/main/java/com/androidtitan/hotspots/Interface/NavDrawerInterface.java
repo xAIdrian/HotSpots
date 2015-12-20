@@ -14,10 +14,8 @@ package com.androidtitan.hotspots.Interface;
  * "http://developer.android.com/training/basics/fragments/communicating.html"
  * >Communicating with Other Fragments</a> for more information.
  */
-public interface ChampionInterface {
-    public void soldierPasser(int locationInt, String localName);
-    public void drawerListViewSelection(int selection);
-    public void setListViewSelection(int selection);
+public interface NavDrawerInterface {
+    public int getDrawerListViewSelection();
+    public void setDrawerListViewSelection(int selection);
 
-    public void selectionToMap(int selection);
 }

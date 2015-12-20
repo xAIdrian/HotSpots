@@ -1,7 +1,6 @@
 package com.androidtitan.hotspots.Activity;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -87,9 +86,9 @@ public class SplashActivity extends Activity {
     }
 
     private synchronized void jumpMain() {
-        Intent intent = new Intent(SplashActivity.this, ChampionActivity.class);
+        /*Intent intent = new Intent(SplashActivity.this, ChampionActivity.class);
         startActivity(intent);
-        finish();
+        finish();*/
     }
 
 }

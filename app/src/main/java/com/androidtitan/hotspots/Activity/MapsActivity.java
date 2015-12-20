@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.CursorAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -29,9 +30,10 @@ import com.androidtitan.hotspots.Data.DatabaseHelper;
 import com.androidtitan.hotspots.Data.LocationBundle;
 import com.androidtitan.hotspots.Data.RandomInputs;
 import com.androidtitan.hotspots.Fragment.AdderFragment;
-import com.androidtitan.hotspots.Fragment.NavigationDrawerFragment;
+import com.androidtitan.hotspots.Fragment.ChampionListFragment;
 import com.androidtitan.hotspots.Fragment.VenueResultsFragment;
 import com.androidtitan.hotspots.Interface.AdderInterface;
+import com.androidtitan.hotspots.Interface.NavDrawerInterface;
 import com.androidtitan.hotspots.Interface.VenueInterface;
 import com.androidtitan.hotspots.Provider.FoursquareHandler;
 import com.androidtitan.hotspots.R;
@@ -53,24 +55,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 /*
 TODO:::
 
-//-> On Complete.  Replace Lock to start over.
-
--> NAVIGATION DRAWER.
-        Recycler view of all past searches
-        Ordered last to first
-            Let's add a date
-            Show it's rank too
-
-
--> Landscape formatting
--> Configuration changes and Concurrency
 -> Upgrade Venue Fragment
-
-
-- Circular reveal for mark bar
-    -->add a shadow
-- Scale/Fade FAB instead of "drop"
-- "Gullotine" effect for Nav Bar
 
 //todo: configurations and sizes
 REFACTOR. WE NEED TO BE MORE OBJECT ORIENTED
@@ -78,7 +63,7 @@ REFACTOR. WE NEED TO BE MORE OBJECT ORIENTED
  */
 
 
-public class MapsActivity extends AppCompatActivity implements AdderInterface, VenueInterface, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
+public class MapsActivity extends AppCompatActivity implements NavDrawerInterface, AdderInterface, VenueInterface, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String TAG = "MapActivity";
 
@@ -132,6 +117,7 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
     private double currentLongitude;
 
     private int locationIndex = -1;
+    private int selectionIndex = -1;
 
     private int FABstatus = 0; //0=location 1=add   2=adder submit 3=submit 4=back
 
@@ -143,22 +129,9 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
 
     private int venueSelection;
 
-    //// TODO: 9/14/15
     public int divisor;
     public int dividend;
 
-    public int getResult() {
-        //logic to account for 0;
-
-        Log.e(TAG, "Map Result: " + dividend + "/" + divisor + "=" + dividend / divisor);
-        return dividend / divisor;
-
-    }
-
-    public void setMathResult(float plus) {
-        dividend += plus;
-        divisor += 1;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,119 +145,12 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
 
         databaseHelper = DatabaseHelper.getInstance(this);
 
-
-        //todo: new method
-
-
-        //our handle for our MapFragment
-        MapFragment mapFragment = (MapFragment) getFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-        setUpMapIfNeeded();
-
-        buildGoogleApiClient();
-        options.mapType(GoogleMap.MAP_TYPE_NORMAL)
-                .compassEnabled(false)
-                .rotateGesturesEnabled(false)
-                .tiltGesturesEnabled(false);
-
-        map.getUiSettings().setZoomControlsEnabled(true);
-        map.getUiSettings().setMyLocationButtonEnabled(false);
-        map.setMyLocationEnabled(true);
-
-        //camera
-        if (locationIndex > -1) {
-            focusLocation = databaseHelper.getLocationBundle(locationIndex);
-
-            if (!focusLocation.getLatlng().equals(new LatLng(0.0, 0.0))) { //if there is something present
-            /*this currently gets the first location in their many saved locations...
-            eventually we want to be able to 'page' through all of them
-            */
-                cameraLocation(false, -1, null);
-            }
-
-            isLocked = focusLocation.getIsLocationLocked();
-
-        } else {
-            cameraLocation(true, -1, null);
-        }
-
-
-        //place markers for every saved location
-        for (LocationBundle bund : databaseHelper.getAllLocations()) {
-            try {
-
-                map.addMarker(new MarkerOptions()
-                        .position(bund.getLatlng())
-                        .title(bund.getLocalName())
-                        .snippet(bund.getLocalName()));
-            } catch (CursorIndexOutOfBoundsException e) {
-
-                map.addMarker(new MarkerOptions()
-                        .position(bund.getLatlng())
-                        .title(bund.getLocalName()));
-            }
-        }
-
         //initializations
-        //todo: need to all go in one method
-        navDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-        backer = (ImageView) findViewById(R.id.back_action);
-        backer.setVisibility(View.GONE);
-        locker = (ImageView) findViewById(R.id.locker);
-        goText = (TextView) findViewById(R.id.newSpot);
-        goText.setVisibility(View.GONE);
-        goText.setClickable(false);
-        actionButton = (ImageButton) findViewById(R.id.floatingActionImageButton);
-        actionButton.setVisibility(View.GONE);
+        initializeElements();
+        initializeNavDrawer();
+        buildGoogleMapsFragment();
 
-        markConfirmLayout = (LinearLayout) findViewById(R.id.markerLayout);
-        markConfirmCancel = (TextView) findViewById(R.id.markerCancel);
-        markConfirmMark = (TextView) findViewById(R.id.markerMark);
-        markConfirmLayout.setVisibility(View.INVISIBLE);
-
-        shadow = (View) findViewById(R.id.dropshadow);
-
-        //NavigationDrawer
-        //todo
-        Bundle navDrawerBundle = new Bundle();
-        NavigationDrawerFragment navDrawerFragment = new NavigationDrawerFragment();
-
-        try {
-            navDrawerBundle.putInt(PASSED_RESULT, getResult());
-
-        } catch (Exception e) {
-            navDrawerBundle.putInt(PASSED_RESULT, (int) databaseHelper.getMostRecentVenue().getRating());
-
-        }
-
-        navDrawerFragment.setArguments(navDrawerBundle);
-        getFragmentManager().beginTransaction()
-                .add(R.id.navDrawer_container, navDrawerFragment).addToBackStack(null).commit();
-
-        //if we've used all of our locations then we lock-it up
-        //todo: new method
-        if (!isLocked) {
-        } else {
-            isLocationAdded = true;
-            //lockingAction();
-            locker.setImageResource(R.drawable.lock_closed);
-            actionButton.setImageResource(R.drawable.icon_submit);
-
-            FABstatus = 3;
-            //todo: LATER we need to include for if we are Locked AND Scored
-            //what is locked and scored
-
-        }
-
-        map.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
-            @Override
-            public void onMapLoaded() {
-                //placeholder
-            }
-        });
         //using existing variables we are going to check which state it is already in
         //on changing state 'actionButton' is going to slide out and then slide back in
         //new sourceImage and newColor (newColor will require 2 new circle backgrounds)
@@ -347,10 +213,8 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
                             popCloseAnimation();
                             actionButton.setVisibility(View.GONE);
 
-
                             markConfirmLayout.setVisibility(View.VISIBLE);
 
-                            //todo: circular reveal
                             markConfirmLayout.startAnimation(slidein);
                             markConfirmCancel.startAnimation(slidein);
                             markConfirmMark.startAnimation(slidein);
@@ -358,17 +222,24 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
                             markConfirmCancel.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    //todo:circular hide
+
                                     markConfirmLayout.startAnimation(slideOut);
                                     markConfirmCancel.startAnimation(slideOut);
                                     markConfirmMark.startAnimation(slideOut);
                                     markConfirmLayout.setVisibility(View.INVISIBLE);
                                     markConfirmCancel.setVisibility(View.INVISIBLE);
                                     markConfirmMark.setVisibility(View.INVISIBLE);
+
+                                    handler.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            actionButton.setVisibility(View.VISIBLE);
+                                            popOpenAnimation();
+                                        }
+                                    }, ANIM_DURATION);
                                 }
                             });
 
-                            //todo: this is where we are going to create our Location
                             markConfirmMark.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -381,7 +252,6 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
                                     backer.startAnimation(leftSlideOut);
                                     backer.setVisibility(View.GONE);
 
-                                    //todo:circular hide
                                     markConfirmLayout.startAnimation(slideOut);
                                     markConfirmCancel.startAnimation(slideOut);
                                     markConfirmMark.startAnimation(slideOut);
@@ -426,33 +296,38 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
                             break;
 
                         case 3: //VenueResult fab
-                            focusLocation.setLocationRating(getResult());
-                            databaseHelper.updateLocationBundle(focusLocation);
-                            preSubmitActivities();
 
-                            //todo: here we need to slide these bad boys out and then back in
-                            if(locker.getVisibility() != View.GONE) {
-                                locker.startAnimation(rightSlideOut);
-                                rightSlideOut.setAnimationListener(new Animation.AnimationListener() {
-                                    @Override
-                                    public void onAnimationStart(Animation animation) {
+                            if(getResult() == -1) { //if we did not initially get the location. goin' get it again
+                                postAdditionActivities(databaseHelper.getAllLocations().get(databaseHelper.getAllLocations().size() - 1));
+                            } else {
+                                focusLocation.setLocationRating(getResult());
+                                databaseHelper.updateLocationBundle(focusLocation);
+                                preSubmitActivities();
 
-                                    }
 
-                                    @Override
-                                    public void onAnimationEnd(Animation animation) {
-                                        locker.setVisibility(View.GONE);
+                                if (locker.getVisibility() != View.GONE) {
+                                    locker.startAnimation(rightSlideOut);
+                                    rightSlideOut.setAnimationListener(new Animation.AnimationListener() {
+                                        @Override
+                                        public void onAnimationStart(Animation animation) {
 
-                                        goText.setVisibility(View.VISIBLE);
-                                        goText.setClickable(true);
-                                        goText.startAnimation(rightSlideIn);
-                                    }
+                                        }
 
-                                    @Override
-                                    public void onAnimationRepeat(Animation animation) {
+                                        @Override
+                                        public void onAnimationEnd(Animation animation) {
+                                            locker.setVisibility(View.GONE);
 
-                                    }
-                                });
+                                            goText.setVisibility(View.VISIBLE);
+                                            goText.setClickable(true);
+                                            goText.startAnimation(rightSlideIn);
+                                        }
+
+                                        @Override
+                                        public void onAnimationRepeat(Animation animation) {
+
+                                        }
+                                    });
+                                }
                             }
 
                             break;
@@ -486,39 +361,11 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
             }
         });
 
-        //todo: we are going to reset our FAB integer and the icons
         goText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                venueFragCursorClose();
                 MapsActivity.this.recreate();
-                /*Log.e(TAG, "jefferson");
-                FABstatus = 0;
-
-                popCloseAnimation();
-                toggleFragment(true, venueFragmentTag);
-                actionButton.setImageResource(R.drawable.icon_location);
-                popOpenAnimation();
-
-                goText.startAnimation(rightSlideOut);
-                rightSlideOut.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        goText.setVisibility(View.GONE);
-                        locker.setImageResource(R.drawable.lock_open);
-                        locker.setVisibility(View.VISIBLE);
-                        locker.startAnimation(rightSlideIn);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });*/
             }
         });
 
@@ -561,7 +408,105 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
         savedInstanceState.putBoolean(SAVED_DIALOG_BOOL, isLocationAdded);
     }
 
+    @Override
+    public void onBackPressed() {
+
+        if (venueFragment != null) {
+            if (venueFragment.isVisible()) {
+                toggleFragment(true, venueFragmentTag);
+
+                popCloseAnimation();
+                actionButton.setVisibility(View.GONE);
+
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        actionButton.setImageResource(R.drawable.icon_submit);
+                        actionButton.setVisibility(View.VISIBLE);
+                        popOpenAnimation();
+
+                    }
+                }, ANIM_DURATION);
+
+                FABstatus--;
+
+            }
+        }
+
+    }
+
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        venueFragCursorClose();
+
+    }
+
     //todo: Google Map methods () {
+
+    public void buildGoogleMapsFragment() {
+        MapFragment mapFragment = (MapFragment) getFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        setUpMapIfNeeded();
+
+        buildGoogleApiClient();
+        options.mapType(GoogleMap.MAP_TYPE_NORMAL)
+                .compassEnabled(false)
+                .rotateGesturesEnabled(false)
+                .tiltGesturesEnabled(false);
+
+        map.getUiSettings().setZoomControlsEnabled(true);
+        map.getUiSettings().setMyLocationButtonEnabled(false);
+        map.setMyLocationEnabled(true);
+
+        //camera
+        if (locationIndex > -1) {
+            focusLocation = databaseHelper.getLocationBundle(locationIndex);
+
+            if (!focusLocation.getLatlng().equals(new LatLng(0.0, 0.0))) { //if there is something present
+            /*this currently gets the first location in their many saved locations...
+            eventually we want to be able to 'page' through all of them
+            */
+                cameraLocation(false, -1, null);
+            }
+
+            isLocked = focusLocation.getIsLocationLocked();
+
+        } else {
+            cameraLocation(true, -1, null);
+        }
+
+
+        //place markers for every saved location
+        for (LocationBundle bund : databaseHelper.getAllLocations()) {
+            try {
+
+                map.addMarker(new MarkerOptions()
+                        .position(bund.getLatlng())
+                        .title(bund.getLocalName())
+                        .snippet(bund.getLocalName()));
+            } catch (CursorIndexOutOfBoundsException e) {
+
+                map.addMarker(new MarkerOptions()
+                        .position(bund.getLatlng())
+                        .title(bund.getLocalName()));
+            }
+        }
+
+
+
+
+        map.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                //placeholder
+            }
+        });
+    }
+
     /**
      * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
      * installed) and the map has not already been instantiated.. This will ensure that we only ever
@@ -598,9 +543,7 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
      * <p/>
      * This should only be called once and when we are sure that {@link #map} is not null.
      */
-//    private void setUpMap() {
-//        map.setInfoWindowAdapter(new CustomInfoWindowAdapter());
-//    }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -617,6 +560,7 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
                 .build();
     }
 
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -628,21 +572,8 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
 
     @Override
     public void onConnected(Bundle bundle) {
-        //todo:new method
-        slidein = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slidin_bottom);
-        slidein.setDuration(ANIM_DURATION);
-        slideOut = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slideout_bottom);
-        slideOut.setDuration(ANIM_DURATION);
-        leftSlideIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slidein_left);
-        leftSlideOut = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slideout_left);
-        fab_pop = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_pop);
-        fab_pop.setDuration(ANIM_DURATION);
-        fab_pop_settle = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_pop_settle);
-        fab_pop_settle.setDuration(ANIM_DURATION);
-        fab_close = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_close);
-        fab_close.setDuration(ANIM_DURATION);
-        rightSlideOut = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.icon_slideout_right);
-        rightSlideIn = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.icon_slidein_right);
+
+        initializeAnimations();
 
         handler = new Handler();
 
@@ -654,12 +585,10 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
         } else {
             handler.postDelayed(new Runnable() {
                 public void run() {
-
                     actionButton.setVisibility(View.VISIBLE);
                     popOpenAnimation();
-
                 }
-            }, 500);
+            }, ANIM_DURATION);
         }
     }
 
@@ -695,42 +624,10 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
         buildAlertMessageNoGps();
     }
 
-    @Override
-    public void onBackPressed() {
 
-        if (venueFragment != null) {
-            if (venueFragment.isVisible()) {
-                toggleFragment(true, venueFragmentTag);
-
-                popCloseAnimation();
-                actionButton.setVisibility(View.GONE);
-
-                handler.postDelayed(new Runnable() {
-                    public void run() {
-                        actionButton.setImageResource(R.drawable.icon_submit);
-                        actionButton.setVisibility(View.VISIBLE);
-                        popOpenAnimation();
-
-                    }
-                }, ANIM_DURATION);
-
-                FABstatus--;
-
-            }
-        }
-
-    }
-
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-    }
 
     @Override
     public void onMapReturn() {
-        //this will show our new FAB
 
     }
 
@@ -743,6 +640,7 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
         actionButton.setImageResource(R.drawable.icon_add);
         actionButton.setVisibility(View.VISIBLE);
         popOpenAnimation();
+
     }
 
     @Override
@@ -750,54 +648,53 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
         venueSelection = selectionInt;
     }
 
+    //todo: init functions
 
-    //todo: animation functions
+    public void initializeElements() {
+        navDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-    public void popOpenAnimation() {
+        backer = (ImageView) findViewById(R.id.back_action);
+        backer.setVisibility(View.GONE);
+        locker = (ImageView) findViewById(R.id.locker);
+        goText = (TextView) findViewById(R.id.newSpot);
+        goText.setVisibility(View.GONE);
+        goText.setClickable(false);
+        actionButton = (ImageButton) findViewById(R.id.floatingActionImageButton);
+        actionButton.setVisibility(View.GONE);
 
-        actionButton.setClickable(false);
-        actionButton.startAnimation(fab_pop);
+        markConfirmLayout = (LinearLayout) findViewById(R.id.markerLayout);
+        markConfirmCancel = (TextView) findViewById(R.id.markerCancel);
+        markConfirmMark = (TextView) findViewById(R.id.markerMark);
+        markConfirmLayout.setVisibility(View.INVISIBLE);
 
-        //TODO: do we want a handler or onAnimationEnd() ???
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                actionButton.startAnimation(fab_pop_settle);
-                actionButton.setClickable(true);
-            }
-        }, fab_pop.getDuration());
+        shadow = (View) findViewById(R.id.dropshadow);
     }
 
-    public void circularReveal() {
-        int centerX = (markConfirmLayout.getLeft() + markConfirmLayout.getRight()) / 2;
-        int centerY = (markConfirmLayout.getTop() + markConfirmLayout.getBottom()) / 2;
-
-        int startRadius = 0;
-        //get the clipping circles final width
-        int endRadius = Math.max(markConfirmLayout.getWidth(), markConfirmLayout.getHeight());
-
-        Animator circularRevealAnim = ViewAnimationUtils.createCircularReveal(markConfirmLayout,
-                centerX, centerY, startRadius, endRadius);
-        markConfirmLayout.setVisibility(View.VISIBLE);
-        circularRevealAnim.start();
+    public void initializeAnimations() {
+        slidein = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slidin_bottom);
+        slidein.setDuration(ANIM_DURATION);
+        slideOut = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slideout_bottom);
+        slideOut.setDuration(ANIM_DURATION);
+        leftSlideIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slidein_left);
+        leftSlideOut = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.icon_slideout_left);
+        fab_pop = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_pop);
+        fab_pop.setDuration(ANIM_DURATION);
+        fab_pop_settle = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_pop_settle);
+        fab_pop_settle.setDuration(ANIM_DURATION);
+        fab_close = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.fab_close);
+        fab_close.setDuration(ANIM_DURATION);
+        rightSlideOut = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.icon_slideout_right);
+        rightSlideIn = AnimationUtils.loadAnimation(MapsActivity.this, R.anim.icon_slidein_right);
     }
 
-    public void circularHide() {
+    public void initializeNavDrawer() {
 
+        ChampionListFragment championListFragment = new ChampionListFragment();
+
+        getFragmentManager().beginTransaction()
+                .add(R.id.navDrawer_container, championListFragment).addToBackStack(null).commit();
     }
 
-    public void popCloseAnimation() {
-
-        actionButton.setClickable(false);
-        actionButton.startAnimation(fab_close);
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                actionButton.setClickable(true);
-            }
-        }, fab_close.getDuration());
-    }
 
     //todo: view functions
 
@@ -884,10 +781,100 @@ public class MapsActivity extends AppCompatActivity implements AdderInterface, V
         }
     }
 
+    public void popOpenAnimation() {
+
+        actionButton.setClickable(false);
+        actionButton.startAnimation(fab_pop);
+
+        //TODO: do we want a handler or onAnimationEnd() ???
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                actionButton.startAnimation(fab_pop_settle);
+                actionButton.setClickable(true);
+            }
+        }, fab_pop.getDuration());
+    }
+
+    public void circularReveal() {
+        int centerX = (markConfirmLayout.getLeft() + markConfirmLayout.getRight()) / 2;
+        int centerY = (markConfirmLayout.getTop() + markConfirmLayout.getBottom()) / 2;
+
+        int startRadius = 0;
+        //get the clipping circles final width
+        int endRadius = Math.max(markConfirmLayout.getWidth(), markConfirmLayout.getHeight());
+
+        Animator circularRevealAnim = ViewAnimationUtils.createCircularReveal(markConfirmLayout,
+                centerX, centerY, startRadius, endRadius);
+        markConfirmLayout.setVisibility(View.VISIBLE);
+        circularRevealAnim.start();
+    }
+
+    public void circularHide() {
+        int centerX = (markConfirmLayout.getLeft() + markConfirmLayout.getRight()) / 2;
+        int centerY = (markConfirmLayout.getTop() + markConfirmLayout.getBottom()) / 2;
+
+        int startRadius = 0;
+        //get the clipping circles final width
+        int endRadius = Math.max(markConfirmLayout.getWidth(), markConfirmLayout.getHeight());
+
+        Animator circularRevealAnim = ViewAnimationUtils.createCircularReveal(markConfirmLayout,
+                centerX, centerY, endRadius, startRadius);
+        markConfirmLayout.setVisibility(View.VISIBLE);
+        circularRevealAnim.start();
+    }
+
+    public void popCloseAnimation() {
+
+        actionButton.setClickable(false);
+        actionButton.startAnimation(fab_close);
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                actionButton.setClickable(true);
+            }
+        }, fab_close.getDuration());
+    }
+
 
     //todo: custom methods
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    public void venueFragCursorClose() {
+        try {
+            ((CursorAdapter) venueFragment.getListView().getAdapter()).getCursor().close();
+        } catch (Exception e) {
+
+        }
+
+    }
+
+    public int getResult() {
+        //logic to account for 0;
+
+        try {
+            Log.e(TAG, "Map Result: " + dividend + "/" + divisor + "=" + dividend / divisor);
+            return dividend / divisor;
+        } catch(Exception e) {
+            Log.e(TAG, String.valueOf(e));
+            return -1;
+        }
+
+    }
+
+    public void setMathResult(float plus) {
+        dividend += plus;
+        divisor += 1;
+    }
+
+    //navigation bar methods
+    public void setDrawerListViewSelection(int selection) {
+        selectionIndex = selection;
+    }
+    public int getDrawerListViewSelection() {
+        return selectionIndex;
+    }
 
 
     private void buildAlertMessageNoGps() {
