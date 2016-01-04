@@ -219,16 +219,21 @@ public class MapsActivity extends AppCompatActivity implements NavDrawerInterfac
                             markConfirmCancel.startAnimation(slidein);
                             markConfirmMark.startAnimation(slidein);
 
+                            backer.startAnimation(leftSlideOut);
+                            backer.setVisibility(View.GONE);
+
                             markConfirmCancel.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
+                                    FABstatus --;
 
                                     markConfirmLayout.startAnimation(slideOut);
                                     markConfirmCancel.startAnimation(slideOut);
                                     markConfirmMark.startAnimation(slideOut);
-                                    markConfirmLayout.setVisibility(View.INVISIBLE);
-                                    markConfirmCancel.setVisibility(View.INVISIBLE);
-                                    markConfirmMark.setVisibility(View.INVISIBLE);
+                                    markConfirmLayout.setVisibility(View.GONE);
+
+                                    backer.setVisibility(View.VISIBLE);
+                                    backer.startAnimation(leftSlideIn);
 
                                     handler.postDelayed(new Runnable() {
                                         @Override
@@ -248,9 +253,6 @@ public class MapsActivity extends AppCompatActivity implements NavDrawerInterfac
 
                                     adderBundle.putDouble(adderFragmentLatitude, currentLatitude);
                                     adderBundle.putDouble(adderFragmentLongitude, currentLongitude);
-
-                                    backer.startAnimation(leftSlideOut);
-                                    backer.setVisibility(View.GONE);
 
                                     markConfirmLayout.startAnimation(slideOut);
                                     markConfirmCancel.startAnimation(slideOut);
@@ -275,7 +277,8 @@ public class MapsActivity extends AppCompatActivity implements NavDrawerInterfac
 
                             break;
 
-                        case 2: //ADDER FRAG SUBMIT
+                        case 2: //Submit ADDER FRAG SUBMIT
+
 
                             if(adderFragment.getEditTextStatus()) {
                                 //add to database. associate division
@@ -290,7 +293,7 @@ public class MapsActivity extends AppCompatActivity implements NavDrawerInterfac
 
                             }
                             else {
-                                Toast.makeText(MapsActivity.this, "Please complete fields", Toast.LENGTH_LONG).show();
+                                Toast.makeText(MapsActivity.this, "Please complete field", Toast.LENGTH_LONG).show();
                             }
 
                             break;
@@ -392,6 +395,21 @@ public class MapsActivity extends AppCompatActivity implements NavDrawerInterfac
                         }
                     }, ANIM_DURATION);
                 }
+                else if (FABstatus == 2) {
+                    popCloseAnimation();
+                    actionButton.setVisibility(View.GONE);
+
+                    //handler is being used for the return action
+                    handler.postDelayed(new Runnable() {
+                        public void run() {
+                            actionButton.setImageResource(R.drawable.icon_add);
+                            actionButton.setVisibility(View.VISIBLE);
+                            popOpenAnimation();
+
+                            FABstatus--;
+                        }
+                    }, ANIM_DURATION);
+                }
             }
         });
     }
@@ -411,7 +429,7 @@ public class MapsActivity extends AppCompatActivity implements NavDrawerInterfac
     @Override
     public void onBackPressed() {
 
-        if (venueFragment != null) {
+        if (venueFragment != null && markConfirmLayout.getVisibility() == View.GONE) {
             if (venueFragment.isVisible()) {
                 toggleFragment(true, venueFragmentTag);
 
@@ -487,7 +505,7 @@ public class MapsActivity extends AppCompatActivity implements NavDrawerInterfac
                 map.addMarker(new MarkerOptions()
                         .position(bund.getLatlng())
                         .title(bund.getLocalName())
-                        .snippet(bund.getLocalName()));
+                        .snippet(String.valueOf(bund.getLocationRating())));
             } catch (CursorIndexOutOfBoundsException e) {
 
                 map.addMarker(new MarkerOptions()
@@ -637,6 +655,9 @@ public class MapsActivity extends AppCompatActivity implements NavDrawerInterfac
         FABstatus --;
         toggleFragment(true, adderFragmentTag);
 
+        backer.setVisibility(View.VISIBLE);
+        backer.startAnimation(leftSlideIn);
+
         actionButton.setImageResource(R.drawable.icon_add);
         actionButton.setVisibility(View.VISIBLE);
         popOpenAnimation();
@@ -716,11 +737,19 @@ public class MapsActivity extends AppCompatActivity implements NavDrawerInterfac
 
             if (isRandom) {
                 int rando = RandomInputs.randInt(1, 4);
-                starterLocation = databaseHelper.getStarterLocationBundle(rando).getLatlng();
+                LocationBundle starterLocBundle = databaseHelper.getStarterLocationBundle(rando);
+                starterLocation = starterLocBundle.getLatlng();
                 //add marker
 
+                /*map.addMarker(new MarkerOptions()
+                        .position(starterLocation))
+                        .title(starterLocBundle.getLocalName())
+                        .sn*/
                 map.addMarker(new MarkerOptions()
-                        .position(databaseHelper.getStarterLocationBundle(rando).getLatlng()));
+                        .position(starterLocation)
+                        .title(starterLocBundle.getLocalName())
+                        .snippet("10"));
+
                 zoom = CameraUpdateFactory.zoomTo(12);
             } else {
                 starterLocation = focusLocation.getLatlng();
@@ -772,6 +801,10 @@ public class MapsActivity extends AppCompatActivity implements NavDrawerInterfac
 
             try {
                 secondary = marker.getSnippet();
+
+                if(secondary.equals(""))
+                    secondary = "Needs Ranking";
+
                 infoSecondary.setText(secondary);
             } catch (NullPointerException e) {
                 infoSecondary.setText("");

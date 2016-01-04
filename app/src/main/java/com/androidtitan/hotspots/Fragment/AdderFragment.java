@@ -157,7 +157,8 @@ public class AdderFragment extends Fragment {
 
     //todo: method to get the contents of our EDITEXT for our activity
     public Boolean getEditTextStatus() {
-        if (firstEdit.getText().toString().matches("")) {
+
+        if (firstEdit!= null && firstEdit.getText().toString().matches("")) {
             return false;
             //Below goes in activity
         } else {
