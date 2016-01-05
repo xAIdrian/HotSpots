@@ -1,6 +1,7 @@
 package com.androidtitan.hotspots.Activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,7 +19,6 @@ public class SplashActivity extends Activity {
     private static final String TAG = "hotspots";
 
     TextView titleTextView;
-    //Typeface customFont;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,15 +26,12 @@ public class SplashActivity extends Activity {
         setContentView(R.layout.activity_splash);
 
         titleTextView = (TextView) findViewById(R.id.splashTitle);
-        //customFont = Typeface.createFromAsset(getAssets(), "gangbangfont.ttf");
-        //titleTextView.setTypeface(customFont);
-
 
         try{
             splashScreen();
 
         } catch (Exception e) {
-            //todo: we could display a picture here as an alternative
+
             Log.e(TAG, String.valueOf(e));
         }
 
@@ -48,11 +45,6 @@ public class SplashActivity extends Activity {
 
 
 
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        return false;
     }
 
     public void splashScreen() {
@@ -78,7 +70,7 @@ public class SplashActivity extends Activity {
 
             @Override
              public boolean onTouch(View v, MotionEvent event) {
-                ((VideoView) v).stopPlayback();
+                //((VideoView) v).stopPlayback();
                 jumpMain();
                 return true;
             }
@@ -86,9 +78,9 @@ public class SplashActivity extends Activity {
     }
 
     private synchronized void jumpMain() {
-        /*Intent intent = new Intent(SplashActivity.this, ChampionActivity.class);
+        Intent intent = new Intent(SplashActivity.this, MapsActivity.class);
         startActivity(intent);
-        finish();*/
+        finish();
     }
 
 }

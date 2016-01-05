@@ -133,28 +133,6 @@
 
         </LinearLayout>
         
-        <RelativeLayout android:id="@+id/splashLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/splashimage">
-            
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="32dp"
-                android:gravity="center_horizontal"
-                style="@style/Base.TextAppearance.AppCompat.Large"
-                android:text="@string/app_name"
-                android:textStyle="bold"
-                android:textColor="@android:color/white"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="32dp"/>
-            
-        </RelativeLayout>
-        
     </RelativeLayout>
     <!-- FRAGMENT CONTAINER -->
     <FrameLayout
