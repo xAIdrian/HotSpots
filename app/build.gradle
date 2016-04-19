@@ -1,15 +1,23 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'com.neenbedankt.android-apt'
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion '22.0.1'
+    compileSdkVersion 23
+    buildToolsVersion "24.0.0 rc1"
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE-FIREBASE.txt'
+        exclude 'META-INF/NOTICE'
+    }
+
     defaultConfig {
-        applicationId 'com.androidtitan.hotspots'
-        minSdkVersion 21
-        targetSdkVersion 22
+        applicationId "com.androidtitan.hotspots"
+        minSdkVersion 16
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
-
     }
     buildTypes {
         release {
@@ -17,31 +25,35 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    sourceSets { main { java.srcDirs = ['src/main/java', 'src/test/java/'] } }
-    productFlavors {
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
     }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile files('src/main/res/libs/swipeactionadapter-1.4.3.jar')
+    testCompile 'junit:junit:4.12'
 
-    compile 'com.android.support:appcompat-v7:22.2.0'
-    compile 'com.google.android.gms:play-services:7.5.0'
-    compile 'com.android.support:design:22.2.0'
 
-    compile 'org.apache.httpcomponents:httpcore:4.4.1'
-    compile 'org.apache.httpcomponents:httpclient:4.5'
-
-    compile group: 'cz.msebera.android' , name: 'httpclient', version: '4.4.1.1'
+    apt 'com.google.dagger:dagger-compiler:2.0'
+    provided 'com.google.dagger:dagger-compiler:2.0'
+    provided 'org.glassfish:javax.annotation:10.0-b28'
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.jakewharton.timber:timber:4.1.2'
+    compile 'com.android.support:design:23.3.0'
+    compile 'com.jakewharton:butterknife:7.0.1'
+    compile 'com.firebase:firebase-client-android:2.3.1'
 }
-
-/*
-If we wanted to be selective with our Google Play Services in order to limit the size of our application,
-we would use these compilers:
-
-Google Location, Activity Recognition, and Places	com.google.android.gms:play-services-location:7.5.0
-Google Maps	                                        com.google.android.gms:play-services-maps:7.5.0
-
-We will experiment with this later when we are sure what we need for this app
- */
+buildscript {
+    ext.kotlin_version = '1.0.1-2'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+repositories {
+    mavenCentral()
+}
