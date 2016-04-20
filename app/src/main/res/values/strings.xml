@@ -14,4 +14,7 @@
     <string name="signup_success">You\'ve been successfully signed up!</string>
     <string name="signup_eror">There was an error signing you up</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

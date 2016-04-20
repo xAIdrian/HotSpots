@@ -1,54 +1,68 @@
-package com.androidtitan.hotspots.main;
+package com.androidtitan.hotspots.main.ui.fragment;
 
-import android.content.Intent;
+
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.androidtitan.hotspots.R;
-import com.androidtitan.hotspots.common.Constants;
-import com.firebase.client.AuthData;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
+import com.androidtitan.hotspots.base.BaseFragment;
+import com.androidtitan.hotspots.main.presenter.UserEntryPresenter;
+import com.androidtitan.hotspots.main.ui.view.UserEntryView;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class LoginActivity extends AppCompatActivity {
+
+public class LoginFragment extends BaseFragment implements UserEntryView {
 
 
-    @Bind(R.id.input_email)
-    EditText emailEditText;
-    @Bind(R.id.input_password)
-    EditText passwordEditText;
-    @Bind(R.id.loginFab)
-    FloatingActionButton fab;
-    @Bind(R.id.signupTextView)
-    TextView signupTextView;
+    @Inject UserEntryPresenter mUserEntryPresenter;
 
-    //todo: Dagger 2
-    final Firebase mRef = new Firebase(Constants.FIREBASE_URL);
+    @Bind(R.id.input_email) EditText emailEditText;
+    @Bind(R.id.input_password) EditText passwordEditText;
+    @Bind(R.id.loginFab) FloatingActionButton fab;
+    @Bind(R.id.signupTextView) TextView signupTextView;
 
+    public LoginFragment() {
+        // Required empty public constructor
+    }
+
+    /*public static LoginFragment newInstance(String param1, String param2) {
+
+    }*/
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        ButterKnife.bind(this);
+        if (getArguments() != null) {
+            //
+        }
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_login, container, false);
+        ButterKnife.bind(v, getActivity());
+        mUserEntryPresenter.attachView(this);
+
 
         signupTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
-                startActivity(intent);
+                mUserEntryPresenter.showSignUpFragment();
+
+                /*//todo: call to Presenter, which calls back down to the activity to launch a new Fragment
+                Intent intent = new Intent(UserEntryActivity.this, SignUpActivity.class);
+                startActivity(intent);*/
             }
         });
 
@@ -70,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 } else {
 
-                    final String emailAddress = email;
+                    /*final String emailAddress = email;
                     //login
                     mRef.authWithPassword(email, password, new Firebase.AuthResultHandler() {
                         @Override
@@ -79,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
                             map.put("email", emailAddress);
                             mRef.child("users").child(authData.getUid()).setValue(map); //uid is the unique id obtained from Auth
 
-                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            Intent intent = new Intent(UserEntryActivity.this, MainActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);
@@ -90,12 +104,26 @@ public class LoginActivity extends AppCompatActivity {
                             Snackbar.make(mView, getResources().getString(R.string.auth_failed), Snackbar.LENGTH_LONG)
                                     .setAction("Action", null).show();
                         }
-                    });
+                    });*/
                 }
             }
         });
 
+        return v;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        mUserEntryPresenter.detachView();
+    }
+
+
+    @Override
+    public void showToast() {
 
     }
+
 
 }
