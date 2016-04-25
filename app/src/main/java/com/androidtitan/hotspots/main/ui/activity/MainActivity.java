@@ -16,8 +16,8 @@ import timber.log.Timber;
 
 public class MainActivity extends BaseActivity implements MainView{
 
-    //todo: component Dagger 2 yo
-    private Firebase mRef;
+    public static final String FIREBASE_URL = "https://androidtitanhotspots.firebaseio.com";
+    Firebase mRef = new Firebase(FIREBASE_URL);
     private String mUserId;
 
 
@@ -29,8 +29,6 @@ public class MainActivity extends BaseActivity implements MainView{
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        //mRef = new Firebase(Constants.FIREBASE_URL);
 
         //todo: put this in our presenter
         if(mRef.getAuth() == null) {

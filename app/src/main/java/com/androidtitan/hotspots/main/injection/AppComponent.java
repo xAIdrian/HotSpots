@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 
 import com.androidtitan.hotspots.base.BaseActivity;
-import com.androidtitan.hotspots.main.data.helper.FirebaseHelper;
 import com.androidtitan.hotspots.main.injection.module.AppModule;
 import com.androidtitan.hotspots.main.injection.module.UserEntryPresenterModule;
 import com.androidtitan.hotspots.main.ui.fragment.LoginFragment;
@@ -28,9 +27,10 @@ public interface AppComponent {
 
     Application getApplication();
     Context getApplicationContext();
-    FirebaseHelper getFirebaseHelper();
 
     void inject(BaseActivity baseActivity);
+
+    //todo: can we replace this with our base fragment
     void inject(LoginFragment loginFragment);
     void inject(SignUpFragment signUpFragment);
 

@@ -13,4 +13,7 @@ public interface UserEntryPresenter {
     void takeActivity(UserEntryActivity activity);
     void showLoginFragment();
     void showSignUpFragment();
+
+    void authenticateLogin(String email, String password);
+
 }

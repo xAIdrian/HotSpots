@@ -1,6 +1,7 @@
 package com.androidtitan.hotspots.main.ui.fragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -11,14 +12,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.androidtitan.hotspots.R;
+import com.androidtitan.hotspots.App;
 import com.androidtitan.hotspots.base.BaseFragment;
 import com.androidtitan.hotspots.main.presenter.UserEntryPresenter;
+import com.androidtitan.hotspots.main.ui.activity.MainActivity;
 import com.androidtitan.hotspots.main.ui.view.UserEntryView;
 
 import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 
 public class LoginFragment extends BaseFragment implements UserEntryView {
@@ -31,17 +35,16 @@ public class LoginFragment extends BaseFragment implements UserEntryView {
     @Bind(R.id.loginFab) FloatingActionButton fab;
     @Bind(R.id.signupTextView) TextView signupTextView;
 
+
     public LoginFragment() {
         // Required empty public constructor
     }
 
-    /*public static LoginFragment newInstance(String param1, String param2) {
-
-    }*/
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        App.getAppComponent().inject(this);
+        Timber.e(String.valueOf(App.getAppComponent() == null));
         if (getArguments() != null) {
             //
         }
@@ -51,18 +54,13 @@ public class LoginFragment extends BaseFragment implements UserEntryView {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_login, container, false);
-        ButterKnife.bind(v, getActivity());
+        ButterKnife.bind(this, v);
         mUserEntryPresenter.attachView(this);
-
 
         signupTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mUserEntryPresenter.showSignUpFragment();
-
-                /*//todo: call to Presenter, which calls back down to the activity to launch a new Fragment
-                Intent intent = new Intent(UserEntryActivity.this, SignUpActivity.class);
-                startActivity(intent);*/
             }
         });
 
@@ -71,7 +69,9 @@ public class LoginFragment extends BaseFragment implements UserEntryView {
             public void onClick(View view) {
                 final View mView = view;
 
-                final String email = emailEditText.getText().toString(); //todo: need to account for special chars
+                //todo: need to account for special chars
+                //todo:     we should also consider using a WidgetObservable here
+                final String email = emailEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
 
                 email.trim();
@@ -84,27 +84,7 @@ public class LoginFragment extends BaseFragment implements UserEntryView {
 
                 } else {
 
-                    /*final String emailAddress = email;
-                    //login
-                    mRef.authWithPassword(email, password, new Firebase.AuthResultHandler() {
-                        @Override
-                        public void onAuthenticated(AuthData authData) { //successful
-                            Map<String, Object> map = new HashMap<String, Object>();
-                            map.put("email", emailAddress);
-                            mRef.child("users").child(authData.getUid()).setValue(map); //uid is the unique id obtained from Auth
-
-                            Intent intent = new Intent(UserEntryActivity.this, MainActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
-                        }
-
-                        @Override
-                        public void onAuthenticationError(FirebaseError firebaseError) { //authentication failed
-                            Snackbar.make(mView, getResources().getString(R.string.auth_failed), Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
-                        }
-                    });*/
+                    mUserEntryPresenter.authenticateLogin(email, password);
                 }
             }
         });
@@ -112,18 +92,27 @@ public class LoginFragment extends BaseFragment implements UserEntryView {
         return v;
     }
 
+
+
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-        mUserEntryPresenter.detachView();
+        //mUserEntryPresenter.detachView();
     }
 
 
     @Override
-    public void showToast() {
+    public void launchMainActivity() {
 
+        Intent intent = new Intent(getActivity(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
-
+    @Override
+    public void showFailureSnack(String message) {
+        Snackbar.make(getView(), message, Snackbar.LENGTH_LONG).show();
+    }
 }

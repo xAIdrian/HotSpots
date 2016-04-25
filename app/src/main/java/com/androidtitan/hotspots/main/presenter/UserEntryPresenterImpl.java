@@ -1,7 +1,11 @@
 package com.androidtitan.hotspots.main.presenter;
 
+import android.content.Context;
+
+import com.androidtitan.hotspots.R;
 import com.androidtitan.hotspots.base.BasePresenter;
-import com.androidtitan.hotspots.main.data.DataManager;
+import com.androidtitan.hotspots.main.data.UserEntryInteractor;
+import com.androidtitan.hotspots.main.data.UserEntryInteractorImpl;
 import com.androidtitan.hotspots.main.ui.activity.UserEntryActivity;
 import com.androidtitan.hotspots.main.ui.view.UserEntryView;
 
@@ -10,16 +14,19 @@ import javax.inject.Inject;
 /**
  * Created by amohnacs on 4/19/16.
  */
-public class UserEntryPresenterImpl extends BasePresenter<UserEntryView> implements UserEntryPresenter {
+public class UserEntryPresenterImpl extends BasePresenter<UserEntryView> implements UserEntryPresenter,
+        UserEntryInteractor.OnLoginFinishedListener {
 
-    private final DataManager mDataManager;
+    private Context mContext;
+    private UserEntryInteractor mInteractor;
     //private Subscription mSubscription
 
     private UserEntryActivity mActivity;
 
     @Inject
-    public UserEntryPresenterImpl(DataManager dataManager) {
-        mDataManager = dataManager;
+    public UserEntryPresenterImpl(Context context) {
+        mContext = context;
+        this.mInteractor = new UserEntryInteractorImpl();
     }
 
     @Override
@@ -40,17 +47,33 @@ public class UserEntryPresenterImpl extends BasePresenter<UserEntryView> impleme
 
     @Override
     public void showLoginFragment() {
-
+        mActivity.showLoginFragment();
     }
 
     @Override
     public void showSignUpFragment() {
+        mActivity.showSignUpFragment();
+    }
+
+    @Override
+    public void authenticateLogin(String email, String password) {
+        mInteractor.authenticateLogin(email, password, this);
+    }
+
+    @Override
+    public void onAuthenticationSuccess() {
+        getMvpView().launchMainActivity();
+    }
+
+    @Override
+    public void onAuthenticationFailure() {
+        getMvpView().showFailureSnack(mContext.getResources().getString(R.string.missing_field));
 
     }
 
-    public void samepleMethod() {
-        getMvpView().showToast();
-    }
+
+
+
 
     /* todo: this is where we convert our Observables from the Datamanager to Results
     public void loadRibots() {

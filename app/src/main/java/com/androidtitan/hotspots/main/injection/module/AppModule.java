@@ -3,8 +3,6 @@ package com.androidtitan.hotspots.main.injection.module;
 import android.app.Application;
 import android.content.Context;
 
-import com.androidtitan.hotspots.main.data.helper.FirebaseHelper;
-
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -32,8 +30,4 @@ public class AppModule {
         return application.getBaseContext();
     }
 
-    @Provides @Singleton
-    FirebaseHelper providesFirebaseHelper() {
-        return new FirebaseHelper();
-    }
 }

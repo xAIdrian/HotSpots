@@ -1,11 +1,11 @@
-package com.androidtitan.hotspots.base;
+package com.androidtitan.hotspots;
 
 import android.app.Application;
 
 import com.androidtitan.hotspots.BuildConfig;
 import com.androidtitan.hotspots.main.injection.AppComponent;
-import com.androidtitan.hotspots.main.injection.module.AppModule;
 import com.androidtitan.hotspots.main.injection.DaggerAppComponent;
+import com.androidtitan.hotspots.main.injection.module.AppModule;
 import com.firebase.client.Firebase;
 
 import timber.log.Timber;

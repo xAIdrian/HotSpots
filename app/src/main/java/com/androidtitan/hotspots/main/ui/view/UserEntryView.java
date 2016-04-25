@@ -7,7 +7,8 @@ import com.androidtitan.hotspots.base.MvpView;
  */
 public interface UserEntryView extends MvpView {
 
-    void showToast();
+    void launchMainActivity();
+    void showFailureSnack(String message);
     /*
     void showRibots(List<Ribot> ribots);
 

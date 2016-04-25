@@ -14,6 +14,8 @@ import com.androidtitan.hotspots.main.ui.view.UserEntryView;
 
 import javax.inject.Inject;
 
+import timber.log.Timber;
+
 public class UserEntryActivity extends BaseActivity  {
 
     private FragmentTransaction mFragmentTransaction;
@@ -27,6 +29,7 @@ public class UserEntryActivity extends BaseActivity  {
 
         mLoginFrag = new LoginFragment();
         mSignUpFrag = new SignUpFragment();
+
 
         //do we need this everytime
         mFragmentTransaction = getSupportFragmentManager().beginTransaction();
