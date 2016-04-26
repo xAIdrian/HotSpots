@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">HotSpots</string>
+    <string name="app_name">SpotScore</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_main">MainActivity</string>
 
