@@ -14,6 +14,9 @@
 
     <dimen name="small_fab_size">48dp</dimen>
 
-    <dimen name="wiki_negative_margin">-55dp</dimen>
+    <dimen name="landing_title_text">40dp</dimen>
+    <dimen name="score_number_Text">128dp</dimen>
+
+    <dimen name="default__margin">8dp</dimen>
 
 </resources>

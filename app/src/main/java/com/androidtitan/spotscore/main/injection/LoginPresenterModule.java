@@ -3,8 +3,8 @@ package com.androidtitan.spotscore.main.injection;
 import android.content.Context;
 
 
-import com.androidtitan.spotscore.main.presenter.LoginPresenter;
-import com.androidtitan.spotscore.main.presenter.LoginPresenterImpl;
+import com.androidtitan.spotscore.main.login.presenter.LoginPresenter;
+import com.androidtitan.spotscore.main.login.presenter.LoginPresenterImpl;
 
 import dagger.Module;
 import dagger.Provides;

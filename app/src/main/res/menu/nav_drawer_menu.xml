@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group
+        android:id="@+id/primaryGroup"
+        android:checkableBehavior="single" >
+
+        <item
+            android:id="@+id/nav_drawer_play"
+            android:checked="true"
+            android:title="@string/play" />
+
+        <item
+            android:id="@+id/nav_drawer_boards"
+            android:checked="false"
+            android:title="@string/leaderboards" />
+
+        <item
+            android:id="@+id/nav_drawer_past_spots"
+            android:checked="false"
+            android:title="@string/past_spots" />
+
+    </group>
+
+    <group
+        android:id="@+id/secondary_group"
+        android:checkableBehavior="single" >
+
+        <item
+            android:id="@+id/nav_drawer_logout"
+            android:checked="false"
+            android:title="@string/action_logout" />
+
+    </group>
+
+</menu>

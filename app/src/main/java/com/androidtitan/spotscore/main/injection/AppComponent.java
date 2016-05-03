@@ -4,9 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 
-import com.androidtitan.spotscore.main.ui.activity.LoginActivity;
-import com.androidtitan.spotscore.main.ui.fragment.LoginFragment;
-import com.androidtitan.spotscore.main.ui.fragment.SignUpFragment;
+import com.androidtitan.spotscore.main.login.ui.LoginActivity;
 
 import javax.inject.Singleton;
 

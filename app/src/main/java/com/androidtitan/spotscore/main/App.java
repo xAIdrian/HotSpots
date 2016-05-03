@@ -2,6 +2,7 @@ package com.androidtitan.spotscore.main;
 
 import android.app.Application;
 
+
 import com.androidtitan.spotscore.main.injection.AppComponent;
 import com.androidtitan.spotscore.main.injection.AppModule;
 import com.androidtitan.spotscore.main.injection.DaggerAppComponent;
