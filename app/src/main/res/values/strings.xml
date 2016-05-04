@@ -1,4 +1,8 @@
 <resources>
+
+    <string name="foursquare_client_id">EEC54IJWLMNQ04ALPPKOQITOZDWVH5LQA5UQOUWHRCJS40XO</string>
+    <string name="foursquare_client_secret">2XNB1I33DMQBZZOKUQDLCB3GBYSGO14FMTP41ZXYI3LGY21L</string>
+
     <string name="app_name">SpotScore</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_main">MainActivity</string>
@@ -23,8 +27,8 @@
     <string name="saved">Saved</string>
     <string name="title_activity_score">ScoreActivity</string>
 
-    <string name="challenge">Challenge</string>
-    <string name="save">Save this for later</string>
-    <string name="view_venues">View venues</string>
+    <string name="challenge">CHALLENGE</string>
+    <string name="save">Save this bad boy for later</string>
+    <string name="view_venues">See what\'s nearby</string>
 
 </resources>

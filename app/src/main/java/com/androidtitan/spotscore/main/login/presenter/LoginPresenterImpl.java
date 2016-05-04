@@ -45,11 +45,6 @@ public class LoginPresenterImpl extends BasePresenter<LoginView> implements Logi
     }
 
     @Override
-    public void takeActivity(LoginActivity activity) {
-        mActivity = activity;
-    }
-
-    @Override
     public void showLoginFragment() {
         getMvpView().showLoginFragment();
     }

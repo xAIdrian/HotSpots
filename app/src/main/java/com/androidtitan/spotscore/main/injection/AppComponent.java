@@ -5,6 +5,7 @@ import android.content.Context;
 
 
 import com.androidtitan.spotscore.main.login.ui.LoginActivity;
+import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
 
 import javax.inject.Singleton;
 
@@ -13,7 +14,8 @@ import dagger.Component;
 @Singleton
 @Component (
         modules = { AppModule.class,
-                    LoginPresenterModule.class }
+                    LoginPresenterModule.class,
+                    ScorePresenterModule.class }
 )
 public interface AppComponent {
 
@@ -21,5 +23,6 @@ public interface AppComponent {
     Context getApplicationContext();
 
     void inject(LoginActivity activity);
+    void inject(ScoreActivity activity);
 
 }

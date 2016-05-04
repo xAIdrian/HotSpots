@@ -11,7 +11,6 @@ public interface LoginPresenter {
     void attachView(LoginView mvpView);
     void detachView();
 
-    void takeActivity(LoginActivity activity);
     void showLoginFragment();
     void showSignUpFragment();
 

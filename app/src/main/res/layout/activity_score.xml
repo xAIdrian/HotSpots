@@ -52,7 +52,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#EFC244">
+                android:background="#010206">
 
                 <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
                     android:id="@+id/score_card_view"
@@ -148,13 +148,14 @@
                 </android.support.v7.widget.CardView>
 
                 <ImageView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentEnd="true"
                     android:layout_below="@+id/venues_card_view"
+                    android:layout_marginTop="-32dp"
                     android:scaleType="fitXY"
-                    android:src="@drawable/im_score_flatcity" />
+                    android:src="@drawable/im_score_night_city" />
 
             </RelativeLayout>
 
