@@ -12,11 +12,10 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.androidtitan.spotscore.common.BasePresenter;
-import com.androidtitan.spotscore.main.login.ui.LoginView;
 import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
 import com.androidtitan.spotscore.main.play.ui.ScoreView;
-import com.androidtitan.spotscore.main.play.web.ScoreInteractor;
-import com.androidtitan.spotscore.main.play.web.ScoreInteractorImpl;
+import com.androidtitan.spotscore.main.web.DataManager;
+import com.androidtitan.spotscore.main.web.DataManagerImpl;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -32,8 +31,6 @@ import com.google.android.gms.maps.model.LatLng;
 
 import javax.inject.Inject;
 
-import timber.log.Timber;
-
 /**
  * Created by amohnacs on 5/2/16.
  */
@@ -47,7 +44,7 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
     private static final int REQUEST_CHECK_SETTINGS = 2;
 
     private Context mContext;
-    private ScoreInteractor mInteractor;
+    private DataManager mDataManager;
     private GoogleApiClient mGoogleApiClient;
     private ScoreActivity mActivity;
 
@@ -57,7 +54,7 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
     @Inject
     public ScorePresenterImpl(Context context) {
         mContext = context;
-        this.mInteractor = new ScoreInteractorImpl();
+        this.mDataManager = new DataManagerImpl();
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(context)
@@ -142,6 +139,7 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
             }
         }
 
+
         return tempLatLng;
     }
 
@@ -152,7 +150,9 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
             if(grantResults.length == 1
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // We can now safely use the API we requested access to
-                getLastKnownLocation();
+                //todo: same action as StatusCodes.SUCCESS
+                //getLastKnownLocation();
+                Log.e(TAG, "onRequestPermissionResult " + String.valueOf(getLastKnownLocation()));
 
             } else {
                 //todo: Permission was denied or request was cancelled // kick them out of this activity
@@ -183,6 +183,10 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
                         // All location settings are satisfied. The client can
                         // initialize location requests here.
 
+                        //TODO ::
+                        calculatedScore();
+
+                        //Log.e(TAG, "successful status codes " + String.valueOf(getLastKnownLocation()));
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         // Location settings are not satisfied, but this can be fixed
@@ -208,5 +212,14 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
         });
     }
 
+    private int calculatedScore() {
+        LatLng latLng = getLastKnownLocation();
+
+        mDataManager.getVenuesOneByOne(latLng.latitude, latLng.longitude)
+                //.map(venue -> mDataManager.getDetailedVenue(venue.getId()))
+                .subscribe(venue -> Log.e(TAG, venue.getName()));
+
+        return -1;
+    }
 
 }

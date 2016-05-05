@@ -63,14 +63,24 @@
                     android:elevation="16dp"
                     card_view:cardCornerRadius="8dp">
 
+
                     <TextView
                         android:id="@+id/scoreTextView"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:padding="32dp"
+                        android:layout_marginTop="-24dp"
                         android:text="7"
                         android:textSize="@dimen/score_number_Text" />
+
+                    <ImageView
+                        android:id="@+id/locationImageView"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_margin="@dimen/fab_margin"
+                        android:layout_gravity="bottom|end"
+                        android:src="@drawable/ic_location"/>
 
                 </android.support.v7.widget.CardView>
 
