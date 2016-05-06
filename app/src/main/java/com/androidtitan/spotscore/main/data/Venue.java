@@ -1,5 +1,7 @@
 package com.androidtitan.spotscore.main.data;
 
+import android.support.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Generated;
@@ -11,72 +13,91 @@ public class Venue {
 
     @SerializedName("id")
     @Expose
+    @Nullable
     private String id;
     @SerializedName("name")
     @Expose
+    @Nullable
     private String name;
     @SerializedName("contact")
     @Expose
+    @Nullable
     private Contact contact;
     @SerializedName("location")
     @Expose
+    @Nullable
     private Location location;
     @SerializedName("canonicalUrl")
     @Expose
+    @Nullable
     private String canonicalUrl;
     @SerializedName("categories")
     @Expose
+    @Nullable
     private List<Category> categories = new ArrayList<Category>();
     @SerializedName("verified")
     @Expose
+    @Nullable
     private Boolean verified;
     @SerializedName("url")
     @Expose
+    @Nullable
     private String url;
     @SerializedName("hasMenu")
     @Expose
+    @Nullable
     private Boolean hasMenu;
     @SerializedName("like")
     @Expose
+    @Nullable
     private Boolean like;
     @SerializedName("dislike")
     @Expose
+    @Nullable
     private Boolean dislike;
     @SerializedName("ok")
     @Expose
+    @Nullable
     private Boolean ok;
     @SerializedName("rating")
     @Expose
+    @Nullable
     private Double rating;
     @SerializedName("ratingColor")
     @Expose
+    @Nullable
     private String ratingColor;
     @SerializedName("ratingSignals")
     @Expose
+    @Nullable
     private Integer ratingSignals;
     @SerializedName("allowMenuUrlEdit")
     @Expose
+    @Nullable
     private Boolean allowMenuUrlEdit;
     @SerializedName("createdAt")
     @Expose
+    @Nullable
     private Integer createdAt;
     @SerializedName("tags")
     @Expose
+    @Nullable
     private List<String> tags = new ArrayList<String>();
     @SerializedName("shortUrl")
     @Expose
+    @Nullable
     private String shortUrl;
     @SerializedName("timeZone")
     @Expose
+    @Nullable
     private String timeZone;
     @SerializedName("hours")
     @Expose
+    @Nullable
     private Hours hours;
-    @SerializedName("venueChains")
-    @Expose
-    private List<Object> venueChains = new ArrayList<Object>();
     @SerializedName("bestPhoto")
     @Expose
+    @Nullable
     private BestPhoto bestPhoto;
 
     /**
@@ -371,20 +392,6 @@ public class Venue {
      */
     public void setHours(Hours hours) {
         this.hours = hours;
-    }
-
-    /**
-     * @return The venueChains
-     */
-    public List<Object> getVenueChains() {
-        return venueChains;
-    }
-
-    /**
-     * @param venueChains The venueChains
-     */
-    public void setVenueChains(List<Object> venueChains) {
-        this.venueChains = venueChains;
     }
 
     /**

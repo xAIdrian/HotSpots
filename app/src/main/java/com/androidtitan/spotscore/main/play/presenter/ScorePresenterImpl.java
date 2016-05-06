@@ -12,6 +12,7 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.androidtitan.spotscore.common.BasePresenter;
+import com.androidtitan.spotscore.main.data.Venue;
 import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
 import com.androidtitan.spotscore.main.play.ui.ScoreView;
 import com.androidtitan.spotscore.main.web.DataManager;
@@ -30,6 +31,9 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.model.LatLng;
 
 import javax.inject.Inject;
+
+import rx.Observable;
+import rx.Subscriber;
 
 /**
  * Created by amohnacs on 5/2/16.
@@ -183,8 +187,9 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
                         // All location settings are satisfied. The client can
                         // initialize location requests here.
 
-                        //TODO ::
+
                         calculatedScore();
+
 
                         //Log.e(TAG, "successful status codes " + String.valueOf(getLastKnownLocation()));
                         break;
@@ -214,10 +219,29 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
 
     private int calculatedScore() {
         LatLng latLng = getLastKnownLocation();
+        int average = 0;
+        int count = 0;
 
         mDataManager.getVenuesOneByOne(latLng.latitude, latLng.longitude)
-                //.map(venue -> mDataManager.getDetailedVenue(venue.getId()))
-                .subscribe(venue -> Log.e(TAG, venue.getName()));
+                .flatMap(venue -> mDataManager.getDetailedVenue(venue.getId()))
+                .filter(detailedVenue -> detailedVenue.getRating() > 0.0)
+                .subscribe(new Subscriber<Venue>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d(TAG, "Observable complete");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, "RxJava Error :: " + e.toString());
+                    }
+
+                    @Override
+                    public void onNext(Venue venue) {
+                        Log.e(TAG, String.valueOf(venue.getRating()));
+                    }
+                });
+
 
         return -1;
     }

@@ -9,7 +9,9 @@ import com.androidtitan.spotscore.main.App;
 import com.androidtitan.spotscore.main.data.DetailedVenueResponse;
 import com.androidtitan.spotscore.main.data.Venue;
 import com.androidtitan.spotscore.main.data.VenueResponse;
+import com.androidtitan.spotscore.main.web.deserializers.DetailedResponseDeserializer;
 import com.androidtitan.spotscore.main.web.deserializers.ResponseDeserializer;
+import com.androidtitan.spotscore.main.web.deserializers.VenueDeserializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -21,7 +23,10 @@ import javax.inject.Inject;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.GsonConverterFactory;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.RxJavaCallAdapterFactory;
 import rx.Observable;
@@ -84,6 +89,8 @@ public class DataManagerImpl implements DataManager {
     @Override
     public Observable<Venue> getDetailedVenue(String venueIdentifier) {
 
+        Log.e(TAG, "traffic light");
+
         Observable<DetailedVenueResponse> call = newsService.getDetailedVenue(
                 venueIdentifier,
                 mContext.getResources().getString(R.string.foursquare_client_id),
@@ -91,13 +98,41 @@ public class DataManagerImpl implements DataManager {
                 getVersion());
 
         return call.compose(applySchedulers())
-                .map(item -> item.getVenue());
+                .map(detailedVenue -> detailedVenue.getVenue());
+
+        /*newsService = mRetrofit.create(RetrofitEndpointInterface.class);
+        Call<DetailedVenueResponse> call =  newsService.getDetailedVenue(
+                venueIdentifier,
+                mContext.getResources().getString(R.string.foursquare_client_id),
+                mContext.getResources().getString(R.string.foursquare_client_secret),
+                getVersion());
+        call.enqueue(new Callback<DetailedVenueResponse>() {
+            @Override
+            public void onResponse(Response<DetailedVenueResponse> response) {
+                if (response.isSuccess()) {
+                    DetailedVenueResponse resp = response.body();
+                    Log.d(TAG, "response received: " + resp.getVenue() + " : "
+                            + resp.getVenue().getHours() + " articles received");
+
+                } else {
+                    Log.e(TAG, "response fail");
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                t.printStackTrace();
+            }
+        });*/
+
     }
 
     private static GsonConverterFactory buildGsonConverter() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         //adding custom deserializer
         gsonBuilder.registerTypeAdapter(VenueResponse.class, new ResponseDeserializer());
+        gsonBuilder.registerTypeAdapter(DetailedVenueResponse.class, new DetailedResponseDeserializer());
+        gsonBuilder.registerTypeAdapter(Venue.class, new VenueDeserializer());
         gsonBuilder.serializeNulls();
         gsonBuilder.excludeFieldsWithoutExposeAnnotation();
 

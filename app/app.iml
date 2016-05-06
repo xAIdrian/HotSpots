@@ -164,7 +164,6 @@
     <orderEntry type="library" exported="" name="adapter-rxjava-2.0.0-beta3" level="project" />
     <orderEntry type="library" exported="" name="rxandroid-1.1.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-gcm-8.4.0" level="project" />
-    <orderEntry type="library" exported="" name="okhttp-3.1.2" level="project" />
     <orderEntry type="library" exported="" name="play-services-panorama-8.4.0" level="project" />
     <orderEntry type="library" exported="" name="dagger-2.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-appindexing-8.4.0" level="project" />
@@ -182,6 +181,7 @@
     <orderEntry type="library" exported="" name="jsr250-api-1.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-safetynet-8.4.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-appstate-8.4.0" level="project" />
+    <orderEntry type="library" exported="" name="okhttp-3.0.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-games-8.4.0" level="project" />
     <orderEntry type="library" exported="" name="javax.inject-1" level="project" />
     <orderEntry type="library" exported="" name="jackson-core-2.2.2" level="project" />

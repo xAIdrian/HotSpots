@@ -57,11 +57,12 @@ dependencies {
     compile 'com.firebase:firebase-client-android:2.3.1'
 
     compile 'com.google.code.gson:gson:2.6.2'
-    compile 'com.squareup.okhttp3:okhttp:3.1.2'
+    compile 'com.squareup.okhttp3:okhttp:3.0.1'
     compile 'com.squareup.okhttp3:logging-interceptor:3.0.1'
 
     // Retrofit request library
-    compile 'com.squareup.retrofit2:retrofit:2.0.0-beta3'
+
+    compile 'com.squareup.retrofit2:retrofit:2.0.0-SNAPSHOT'
     // A converter which uses Gson for serialization to and from JSON.
     compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta3'
     // RxJava adapter for retrofit
