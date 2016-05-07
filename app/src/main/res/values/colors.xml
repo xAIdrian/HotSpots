@@ -11,4 +11,6 @@
     <color name="colorDivider">#B6B6B6</color>
 
     <color name="colorSky">#E4F0F0</color>
+
+    <color name="blackScreen">#40000000</color>
 </resources>

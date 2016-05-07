@@ -2,6 +2,7 @@ package com.androidtitan.spotscore.main.login.web;
 
 import android.util.Log;
 
+import com.androidtitan.spotscore.common.data.Constants;
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -9,16 +10,13 @@ import com.firebase.client.FirebaseError;
 import java.util.HashMap;
 import java.util.Map;
 
-import timber.log.Timber;
-
 /**
  * Created by amohnacs on 4/21/16.
  */
 public class LoginInteractorImpl implements LoginInteractor{
     private final String TAG = getClass().getSimpleName();
 
-    public static final String FIREBASE_URL = "https://androidtitanhotspots.firebaseio.com";
-    Firebase mRef = new Firebase(FIREBASE_URL);
+    Firebase mRef = new Firebase(Constants.FIREBASE_URL);
 
     private boolean mAuthenticationSuccess;
 
@@ -38,7 +36,7 @@ public class LoginInteractorImpl implements LoginInteractor{
                 map.put("email", emailAddress);
                 mRef.child("users").child(authData.getUid()).setValue(map); //uid is the unique id obtained from Auth
 
-                Log.e(TAG, "success!");
+                Log.e(TAG, "Success!");
 
                 listener.onAuthenticationSuccess();
             }
@@ -59,14 +57,14 @@ public class LoginInteractorImpl implements LoginInteractor{
             @Override
             public void onSuccess() {
 
-                Timber.e("create user success");
+                Log.e(TAG, "User successfully created");
                 listener.onSignUpSuccess();
 
             }
 
             @Override
             public void onError(FirebaseError firebaseError) {
-                Timber.e("create user failure");
+                Log.e(TAG, "User creation failed");
                 listener.onSignUpFailure();
             }
         });

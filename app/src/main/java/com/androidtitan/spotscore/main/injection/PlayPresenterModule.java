@@ -7,6 +7,7 @@ import com.androidtitan.spotscore.main.login.presenter.LoginPresenter;
 import com.androidtitan.spotscore.main.login.presenter.LoginPresenterImpl;
 import com.androidtitan.spotscore.main.play.presenter.ScorePresenter;
 import com.androidtitan.spotscore.main.play.presenter.ScorePresenterImpl;
+import com.androidtitan.spotscore.main.web.DataManager;
 
 import dagger.Module;
 import dagger.Provides;
@@ -16,16 +17,18 @@ import dagger.Provides;
  */
 
 @Module (
-        includes = { AppModule.class }
+        includes = {
+                    AppModule.class,
+                    DataManagerModule.class}
 )
-public class ScorePresenterModule {
+public class PlayPresenterModule {
 
-    public ScorePresenterModule() {
+    public PlayPresenterModule() {
 
     }
 
     @Provides
-    public ScorePresenter providesPlayPresenterModule(Context context) {
-        return new ScorePresenterImpl(context);
+    public ScorePresenter providesPlayPresenterModule(Context context, DataManager manager) {
+        return new ScorePresenterImpl(context, manager);
     }
 }

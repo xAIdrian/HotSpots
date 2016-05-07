@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="200dp">
+
+    <ImageView
+        android:id="@+id/venueListBgImageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/blackScreen"/>
+
+    <TextView
+        android:id="@+id/venueNameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/venueFloatingActionButton"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/venueFloatingActionButton"
+        android:layout_marginStart="@dimen/fab_margin"
+        android:textColor="@android:color/white"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/placeholder"/>
+
+    <TextView
+        android:id="@+id/venueRatingTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignEnd="@+id/venueFloatingActionButton"
+        android:layout_margin="@dimen/fab_margin"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/venue_rating_text"
+        android:textStyle="bold"
+        android:text="0.0"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/venueFloatingActionButton"
+        android:layout_width="@dimen/small_fab_size"
+        android:layout_height="@dimen/small_fab_size"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/ic_info"
+        android:elevation="8dp"/>
+
+
+</RelativeLayout>

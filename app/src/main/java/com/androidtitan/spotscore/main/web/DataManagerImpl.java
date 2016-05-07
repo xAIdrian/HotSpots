@@ -7,11 +7,16 @@ import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.data.Constants;
 import com.androidtitan.spotscore.main.App;
 import com.androidtitan.spotscore.main.data.DetailedVenueResponse;
+import com.androidtitan.spotscore.main.data.User;
 import com.androidtitan.spotscore.main.data.Venue;
 import com.androidtitan.spotscore.main.data.VenueResponse;
 import com.androidtitan.spotscore.main.web.deserializers.DetailedResponseDeserializer;
 import com.androidtitan.spotscore.main.web.deserializers.ResponseDeserializer;
 import com.androidtitan.spotscore.main.web.deserializers.VenueDeserializer;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -39,8 +44,10 @@ import rx.schedulers.Schedulers;
 public class DataManagerImpl implements DataManager {
     private final String TAG = getClass().getSimpleName();
 
-    @Inject Context mContext;
+    private Context mContext;
     private Retrofit mRetrofit;
+
+    private User mUser;
 
     RetrofitEndpointInterface newsService;
 
@@ -48,8 +55,12 @@ public class DataManagerImpl implements DataManager {
             observable -> observable.subscribeOn(Schedulers.newThread())
                                     .observeOn(AndroidSchedulers.mainThread());
 
-    public DataManagerImpl() {
-        App.getAppComponent().inject(this);
+    @Inject
+    public DataManagerImpl(Context context) {
+
+        mContext = context;
+
+        mUser = User.getInstance();
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -71,6 +82,30 @@ public class DataManagerImpl implements DataManager {
     }
 
     @Override
+    public void setNavDrawerUserName(String userId, final MainViewListener listener) {
+        Firebase fb = new Firebase(Constants.FIREBASE_URL + "/users/" + userId + "/email");
+
+        try {
+            //this is used to populate using data from firebase
+            fb.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    mUser.setEmail(dataSnapshot.getValue().toString());
+                    listener.onUsernameFinished(mUser.getEmail());
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                    Log.e(TAG, "Cancelled :" + firebaseError);
+                }
+            });
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public Observable<Venue> getVenuesOneByOne(double latitude, double longitude) {
         //todo: create our observable and return it
 
@@ -87,9 +122,7 @@ public class DataManagerImpl implements DataManager {
     }
 
     @Override
-    public Observable<Venue> getDetailedVenue(String venueIdentifier) {
-
-        Log.e(TAG, "traffic light");
+    public Observable<Venue> getAdditionalVenueInfo(String venueIdentifier) {
 
         Observable<DetailedVenueResponse> call = newsService.getDetailedVenue(
                 venueIdentifier,
@@ -99,31 +132,6 @@ public class DataManagerImpl implements DataManager {
 
         return call.compose(applySchedulers())
                 .map(detailedVenue -> detailedVenue.getVenue());
-
-        /*newsService = mRetrofit.create(RetrofitEndpointInterface.class);
-        Call<DetailedVenueResponse> call =  newsService.getDetailedVenue(
-                venueIdentifier,
-                mContext.getResources().getString(R.string.foursquare_client_id),
-                mContext.getResources().getString(R.string.foursquare_client_secret),
-                getVersion());
-        call.enqueue(new Callback<DetailedVenueResponse>() {
-            @Override
-            public void onResponse(Response<DetailedVenueResponse> response) {
-                if (response.isSuccess()) {
-                    DetailedVenueResponse resp = response.body();
-                    Log.d(TAG, "response received: " + resp.getVenue() + " : "
-                            + resp.getVenue().getHours() + " articles received");
-
-                } else {
-                    Log.e(TAG, "response fail");
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                t.printStackTrace();
-            }
-        });*/
 
     }
 

@@ -15,8 +15,10 @@
     <dimen name="small_fab_size">48dp</dimen>
 
     <dimen name="landing_title_text">40dp</dimen>
-    <dimen name="score_number_Text">128dp</dimen>
+    <dimen name="score_number_text">100dp</dimen>
+    <dimen name="venue_rating_text">35dp</dimen>
 
-    <dimen name="default__margin">8dp</dimen>
+    <dimen name="tight_margin">4dp</dimen>
+    <dimen name="default_margin">8dp</dimen>
 
 </resources>

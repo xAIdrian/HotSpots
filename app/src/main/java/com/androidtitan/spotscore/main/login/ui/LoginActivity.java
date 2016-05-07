@@ -8,7 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.main.App;
 import com.androidtitan.spotscore.main.login.presenter.LoginPresenter;
-import com.androidtitan.spotscore.main.landing.MainActivity;
+import com.androidtitan.spotscore.main.landing.ui.MainActivity;
 
 import javax.inject.Inject;
 

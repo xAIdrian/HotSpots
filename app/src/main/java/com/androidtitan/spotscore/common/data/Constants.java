@@ -5,6 +5,7 @@ package com.androidtitan.spotscore.common.data;
  */
 public class Constants {
 
+    public static String FIREBASE_URL = "https://androidtitanhotspots.firebaseio.com";
     public static String FOURSQUARE_SEARCH_URL = "https://api.foursquare.com/v2/";
 
 }

@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 
 import com.androidtitan.spotscore.R;
+import com.androidtitan.spotscore.common.BaseFragment;
 import com.androidtitan.spotscore.main.App;
 import com.androidtitan.spotscore.main.login.presenter.LoginPresenter;
 import com.androidtitan.spotscore.main.login.ui.LoginActivity;
@@ -22,7 +23,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 
-public class LoginFragment extends Fragment  {
+public class LoginFragment extends BaseFragment {
 
 
     private LoginPresenter mPresenter;

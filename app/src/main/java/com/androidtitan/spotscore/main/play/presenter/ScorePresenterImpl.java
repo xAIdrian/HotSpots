@@ -9,14 +9,20 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.widget.ImageView;
 
+import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.BasePresenter;
 import com.androidtitan.spotscore.main.data.Venue;
 import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
 import com.androidtitan.spotscore.main.play.ui.ScoreView;
+import com.androidtitan.spotscore.main.play.ui.VenueListFragment;
 import com.androidtitan.spotscore.main.web.DataManager;
 import com.androidtitan.spotscore.main.web.DataManagerImpl;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -30,9 +36,11 @@ import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 
-import rx.Observable;
 import rx.Subscriber;
 
 /**
@@ -47,18 +55,23 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
     private static final int REQUEST_LOCATION = 1;
     private static final int REQUEST_CHECK_SETTINGS = 2;
 
+    @Inject DataManager mDataManager;
+
     private Context mContext;
-    private DataManager mDataManager;
     private GoogleApiClient mGoogleApiClient;
     private ScoreActivity mActivity;
 
     private Location mLastLocation;
+    private LatLng latLng;
+    private ArrayList<Venue> mVenueList;
 
+    private double calcAverage;
+    private int calcCount;
 
     @Inject
-    public ScorePresenterImpl(Context context) {
+    public ScorePresenterImpl(Context context, DataManager dataManager) {
         mContext = context;
-        this.mDataManager = new DataManagerImpl();
+        this.mDataManager = dataManager;
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(context)
@@ -107,6 +120,16 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
     }
 
     @Override
+    public void showFragment(Fragment fragment, Bundle args) {
+
+        if(args != null) {
+            fragment.setArguments(args);
+        }
+
+        getMvpView().showFragment(fragment);
+    }
+
+    @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(TAG, "Location services have failed to connected : " + connectionResult);
     }
@@ -123,6 +146,10 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
         Log.d(TAG, "Location services have been suspended : " + i);
     }
 
+    /**
+     * Pretty self explanatory yeah?
+     * @return the user's current location
+     */
     @Override
     public LatLng getLastKnownLocation() {
 
@@ -144,6 +171,7 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
         }
 
 
+        latLng = tempLatLng;
         return tempLatLng;
     }
 
@@ -155,8 +183,8 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // We can now safely use the API we requested access to
                 //todo: same action as StatusCodes.SUCCESS
-                //getLastKnownLocation();
-                Log.e(TAG, "onRequestPermissionResult " + String.valueOf(getLastKnownLocation()));
+
+                calculateAndSetScore();
 
             } else {
                 //todo: Permission was denied or request was cancelled // kick them out of this activity
@@ -164,6 +192,10 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
         }
     }
 
+    /**
+     * For sdk > 21.  Handles runtime permissions and ensures location settings are optimal
+     */
+    //todo: this needs work for older devices after they select to optimize settings
     protected void setupLocationRequest() {
         final LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);
@@ -188,7 +220,8 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
                         // initialize location requests here.
 
 
-                        calculatedScore();
+                        latLng = getLastKnownLocation();
+                        calculateAndSetScore();
 
 
                         //Log.e(TAG, "successful status codes " + String.valueOf(getLastKnownLocation()));
@@ -217,18 +250,24 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
         });
     }
 
-    private int calculatedScore() {
-        LatLng latLng = getLastKnownLocation();
-        int average = 0;
-        int count = 0;
+    /**
+     * DataManager retrieves detailed information of every venues neatvy (0.25 mi) and calculates rating.
+     * Rating is then sent to ui.
+     */
+    @Override
+    public void calculateAndSetScore() {
+
+        mVenueList = new ArrayList<Venue>();
 
         mDataManager.getVenuesOneByOne(latLng.latitude, latLng.longitude)
-                .flatMap(venue -> mDataManager.getDetailedVenue(venue.getId()))
+                .flatMap(venue -> mDataManager.getAdditionalVenueInfo(venue.getId()))
                 .filter(detailedVenue -> detailedVenue.getRating() > 0.0)
                 .subscribe(new Subscriber<Venue>() {
                     @Override
                     public void onCompleted() {
                         Log.d(TAG, "Observable complete");
+
+                        getMvpView().updateScore(calcAverage / calcCount);
                     }
 
                     @Override
@@ -238,12 +277,32 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
 
                     @Override
                     public void onNext(Venue venue) {
-                        Log.e(TAG, String.valueOf(venue.getRating()));
+
+                        mVenueList.add(venue);
+
+                        calcAverage += venue.getRating();
+                        calcCount ++;
+
+                        Log.e(TAG, calcAverage + "," + calcCount);
                     }
                 });
+    }
 
+    @Override
+    public ArrayList<Venue> getNearbyVenuesList() {
 
-        return -1;
+        ArrayList<Venue> tempVenues = new ArrayList<>();
+
+        return mVenueList;
+    }
+
+    @Override
+    public void setNavHeaderImageView(ImageView imageView) {
+        Glide.with(mContext)
+                .load("https://unsplash.it/g/200/200/?random")
+                .skipMemoryCache( true )
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .into(imageView);
     }
 
 }

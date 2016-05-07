@@ -85,6 +85,7 @@ public class VenueDeserializer implements JsonDeserializer<Venue> {
         tempVenue.setTimeZone(obj.has("timeZone") ?
                 obj.get("timeZone").getAsString() : "");
         tempVenue.setHours(context.deserialize(obj.get("hours"), Hours.class));
+
         tempVenue.setBestPhoto(context.deserialize(obj.get("bestPhoto"), BestPhoto.class));
 
         return tempVenue;

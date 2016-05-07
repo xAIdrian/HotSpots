@@ -13,8 +13,12 @@ import rx.Observable;
  */
 public interface DataManager {
 
-    //keep our return listener up here
+    interface MainViewListener {
+        void onUsernameFinished(String userName);
+    }
+
+    void setNavDrawerUserName(String userId, MainViewListener listener);
 
     Observable<Venue> getVenuesOneByOne(double latitude, double longitude);
-    Observable<Venue> getDetailedVenue(String venueIdentifier);
+    Observable<Venue> getAdditionalVenueInfo(String venueIdentifier);
 }

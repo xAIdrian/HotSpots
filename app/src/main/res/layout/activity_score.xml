@@ -8,10 +8,10 @@
     android:fitsSystemWindows="true">
 
     <android.support.design.widget.CoordinatorLayout
-        tools:context=".main.play.ui.ScoreActivity"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        tools:context=".main.play.ui.ScoreActivity">
 
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
@@ -23,153 +23,167 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay" >
+                app:popupTheme="@style/AppTheme.PopupOverlay">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                <ImageView
-                    android:id="@+id/drawer_imageView"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_centerVertical="true"
-                    android:layout_alignParentEnd="true"
-                    android:padding="8dp"
-                    android:src="@drawable/ic_hamburger" />
+                    <ImageView
+                        android:id="@+id/drawer_imageView"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_hamburger" />
 
                 </RelativeLayout>
 
-                </android.support.v7.widget.Toolbar>
+            </android.support.v7.widget.Toolbar>
 
         </android.support.design.widget.AppBarLayout>
 
-        <android.support.v4.widget.NestedScrollView
+        <FrameLayout
+            android:id="@+id/fragment_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginTop="?android:attr/actionBarSize">
 
-            <RelativeLayout
+            <android.support.v4.widget.NestedScrollView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#010206">
+                android:layout_height="wrap_content">
 
-                <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-                    android:id="@+id/score_card_view"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
-                    android:layout_gravity="center"
-                    android:layout_margin="@dimen/default__margin"
-                    android:elevation="16dp"
-                    card_view:cardCornerRadius="8dp">
+                    android:layout_height="match_parent"
+                    android:background="#010206">
 
-
-                    <TextView
-                        android:id="@+id/scoreTextView"
+                    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/score_card_view"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:padding="32dp"
-                        android:layout_marginTop="-24dp"
-                        android:text="7"
-                        android:textSize="@dimen/score_number_Text" />
+                        android:layout_height="300dp"
+                        android:layout_gravity="center"
+                        android:layout_margin="@dimen/tight_margin"
+                        android:elevation="16dp"
+                        card_view:cardCornerRadius="4dp">
+
+                        <ProgressBar
+                            android:id="@+id/scoreIndProgressBar"
+                            style="@style/Widget.AppCompat.ProgressBar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:theme="@style/CircularProgress" />
+
+                        <TextView
+                            android:id="@+id/scoreTextView"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="-24dp"
+                            android:gravity="center"
+                            android:padding="32dp"
+                            android:text="0"
+                            android:textSize="@dimen/score_number_text"
+                            android:visibility="invisible" />
+
+                        <ImageView
+                            android:id="@+id/locationImageView"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_gravity="bottom|end"
+                            android:layout_margin="@dimen/fab_margin"
+                            android:src="@drawable/ic_location" />
+
+                    </android.support.v7.widget.CardView>
+
+                    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/challenge_card_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/score_card_view"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="@dimen/tight_margin"
+                        android:layout_marginEnd="@dimen/tight_margin"
+                        android:layout_marginStart="@dimen/tight_margin"
+                        android:elevation="16dp"
+                        card_view:cardCornerRadius="4dp">
+
+                        <TextView
+                            android:id="@+id/challengeTextView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:padding="16dp"
+                            android:text="@string/challenge"
+                            android:textAppearance="?android:attr/textAppearanceLarge"
+                            android:textColor="@color/colorPrimaryDark"
+                            android:textStyle="bold" />
+
+                    </android.support.v7.widget.CardView>
+
+                    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/save_card_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/challenge_card_view"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="@dimen/tight_margin"
+                        android:layout_marginEnd="@dimen/tight_margin"
+                        android:layout_marginStart="@dimen/tight_margin"
+                        android:elevation="16dp"
+                        card_view:cardCornerRadius="4dp">
+
+                        <TextView
+                            android:id="@+id/saveTextView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:padding="16dp"
+                            android:text="@string/save"
+                            android:textAppearance="?android:attr/textAppearanceLarge"
+                            android:textColor="@color/colorPrimaryDark" />
+
+                    </android.support.v7.widget.CardView>
+
+                    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/venues_card_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/save_card_view"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="@dimen/tight_margin"
+                        android:layout_marginEnd="@dimen/tight_margin"
+                        android:layout_marginStart="@dimen/tight_margin"
+                        android:elevation="16dp"
+                        card_view:cardCornerRadius="4dp">
+
+                        <TextView
+                            android:id="@+id/venuesTextView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:padding="16dp"
+                            android:text="@string/view_venues"
+                            android:textAppearance="?android:attr/textAppearanceLarge"
+                            android:textColor="@color/colorPrimaryDark" />
+
+                    </android.support.v7.widget.CardView>
 
                     <ImageView
-                        android:id="@+id/locationImageView"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_margin="@dimen/fab_margin"
-                        android:layout_gravity="bottom|end"
-                        android:src="@drawable/ic_location"/>
-
-                </android.support.v7.widget.CardView>
-
-                <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-                    android:id="@+id/challenge_card_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/score_card_view"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="@dimen/default__margin"
-                    android:layout_marginEnd="@dimen/default__margin"
-                    android:layout_marginStart="@dimen/default__margin"
-                    android:elevation="16dp"
-                    card_view:cardCornerRadius="8dp">
-
-                    <TextView
-                        android:id="@+id/challengeTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_horizontal"
-                        android:padding="16dp"
-                        android:text="@string/challenge"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textStyle="bold" />
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_below="@+id/venues_card_view"
+                        android:layout_marginTop="-32dp"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/im_score_night_city" />
 
-                </android.support.v7.widget.CardView>
+                </RelativeLayout>
 
-                <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-                    android:id="@+id/save_card_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/challenge_card_view"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="@dimen/default__margin"
-                    android:layout_marginEnd="@dimen/default__margin"
-                    android:layout_marginStart="@dimen/default__margin"
-                    android:elevation="16dp"
-                    card_view:cardCornerRadius="8dp">
-
-                    <TextView
-                        android:id="@+id/saveTextView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_horizontal"
-                        android:padding="16dp"
-                        android:text="@string/save"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
-                        android:textColor="@color/colorPrimaryDark" />
-
-                </android.support.v7.widget.CardView>
-
-                <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-                    android:id="@+id/venues_card_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/save_card_view"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="@dimen/default__margin"
-                    android:layout_marginEnd="@dimen/default__margin"
-                    android:layout_marginStart="@dimen/default__margin"
-                    android:elevation="16dp"
-                    card_view:cardCornerRadius="8dp">
-
-                    <TextView
-                        android:id="@+id/venuesTextView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_horizontal"
-                        android:padding="16dp"
-                        android:text="@string/view_venues"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
-                        android:textColor="@color/colorPrimaryDark" />
-
-                </android.support.v7.widget.CardView>
-
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentEnd="true"
-                    android:layout_below="@+id/venues_card_view"
-                    android:layout_marginTop="-32dp"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/im_score_night_city" />
-
-            </RelativeLayout>
-
-        </android.support.v4.widget.NestedScrollView>
+            </android.support.v4.widget.NestedScrollView>
+        </FrameLayout>
 
     </android.support.design.widget.CoordinatorLayout>
 
@@ -178,7 +192,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="end"
-        app:menu="@menu/nav_drawer_menu"
-        app:headerLayout="@layout/nav_drawer_header" />
+        app:headerLayout="@layout/nav_drawer_header"
+        app:menu="@menu/nav_drawer_menu" />
 
 </android.support.v4.widget.DrawerLayout>

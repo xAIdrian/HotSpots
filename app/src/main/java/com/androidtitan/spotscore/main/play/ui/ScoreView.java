@@ -1,5 +1,8 @@
 package com.androidtitan.spotscore.main.play.ui;
 
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+
 import com.androidtitan.spotscore.common.MvpView;
 
 /**
@@ -7,5 +10,6 @@ import com.androidtitan.spotscore.common.MvpView;
  */
 public interface ScoreView extends MvpView {
 
-
+    void updateScore(double average);
+    void showFragment(Fragment fragment);
 }

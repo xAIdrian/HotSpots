@@ -1,5 +1,7 @@
 package com.androidtitan.spotscore.main.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -99,6 +101,10 @@ public class Venue {
     @Expose
     @Nullable
     private BestPhoto bestPhoto;
+
+    public Venue() {
+
+    }
 
     /**
      * @return The id
@@ -407,4 +413,5 @@ public class Venue {
     public void setBestPhoto(BestPhoto bestPhoto) {
         this.bestPhoto = bestPhoto;
     }
+
 }
