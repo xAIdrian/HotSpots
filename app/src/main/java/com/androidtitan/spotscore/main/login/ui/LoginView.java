@@ -8,7 +8,7 @@ import com.androidtitan.spotscore.common.MvpView;
  */
 public interface LoginView extends MvpView {
 
-    void launchMainActivity();
+    void launchScoreActivity();
     void showLoginFailureSnack(String message);
 
     void showSignUpSuccessDialog();

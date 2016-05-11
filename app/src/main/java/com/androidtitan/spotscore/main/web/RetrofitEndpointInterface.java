@@ -18,8 +18,7 @@ public interface RetrofitEndpointInterface {
     Observable<VenueResponse> getVenues(@Query("client_id") String clientId,
                                         @Query("client_secret") String clientSecret,
                                         @Query("v") String version,
-                                        @Query("ll") String latLang,
-                                        @Query("radius") String radius);
+                                        @Query("ll") String latLang);
 
 
     @GET("venues/{venueId}")

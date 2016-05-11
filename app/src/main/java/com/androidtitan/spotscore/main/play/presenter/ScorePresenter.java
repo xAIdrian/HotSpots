@@ -31,10 +31,8 @@ public interface ScorePresenter {
     LatLng getLastKnownLocation();
     void calculateAndSetScore();
 
-    //accessed from fragments
-
     ArrayList<Venue> getNearbyVenuesList();
 
-
     void setNavHeaderImageView(ImageView mNavDrawerHeaderImage);
+    void setNavDrawerUserName(String mUserId);
 }

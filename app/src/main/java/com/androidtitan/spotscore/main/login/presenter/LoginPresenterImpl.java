@@ -63,7 +63,7 @@ public class LoginPresenterImpl extends BasePresenter<LoginView> implements Logi
     @Override
     public void onAuthenticationSuccess() {
         Log.e(TAG, "authenticate success");
-        getMvpView().launchMainActivity();
+        getMvpView().launchScoreActivity();
     }
 
     @Override

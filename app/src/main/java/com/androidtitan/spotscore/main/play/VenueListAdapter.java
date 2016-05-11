@@ -43,6 +43,7 @@ public class VenueListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         //TODO :: we need to add categories top left!!!
 
         @Bind(R.id.venueListBgImageView) ImageView mBackgroundImage;
+        @Bind(R.id.venueCategoryTextView) TextView mCategoryText;
         @Bind(R.id.venueNameTextView) TextView mTitleText;
         @Bind(R.id.venueRatingTextView) TextView mRatingText;
 
@@ -75,6 +76,7 @@ public class VenueListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         Venue mVenue = mVenueList.get(position);
 
         holder.mTitleText.setText(mVenue.getName());
+        holder.mCategoryText.setText(mVenue.getCategories().get(0).getName());
         holder.mRatingText.setText(String.format("%.1f", mVenue.getRating()));
         holder.mRatingText.setTextColor(Color.parseColor("#" + mVenue.getRatingColor()));
 

@@ -1,25 +1,33 @@
 package com.androidtitan.spotscore.main.play.ui;
 
+import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.androidtitan.spotscore.R;
+import com.androidtitan.spotscore.common.data.Constants;
 import com.androidtitan.spotscore.main.App;
+import com.androidtitan.spotscore.main.login.ui.LoginActivity;
 import com.androidtitan.spotscore.main.play.presenter.ScorePresenter;
+import com.firebase.client.Firebase;
 
 import javax.inject.Inject;
 
@@ -32,18 +40,26 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
     @Inject
     ScorePresenter mScorePresenter;
 
-    @Bind(R.id.activity_drawer_layout) DrawerLayout mDrawer;
+    private Firebase mRef = new Firebase(Constants.FIREBASE_URL);
+    private String mUserId;
+
+    ActionBarDrawerToggle mDrawerToggle;
+    ValueAnimator anim;
+    @Bind(R.id.activity_drawer_layout) DrawerLayout mDrawerLayout;
     @Bind(R.id.activity_drawer_navigation_view) NavigationView mNavigation;
     private ImageView mNavDrawerHeaderImage;
-    private ImageView mDrawerImage;
+    private TextView mUsernameText;
 
-    @Bind(R.id.challenge_card_view) CardView mChallengeCard;
-    @Bind(R.id.save_card_view) CardView mSaveCard;
-    @Bind(R.id.venues_card_view) CardView mVenuesCard;
+    @Bind(R.id.challengeTextView) TextView mChallengeText;
+    @Bind(R.id.saveTextView) TextView mSaveText;
+    @Bind(R.id.venues_card_view) RelativeLayout mVenuesCard;
+    @Bind(R.id.venuesTextView) TextView mVenueText;
 
     @Bind(R.id.scoreIndProgressBar) ProgressBar indeterminateProgress;
     @Bind(R.id.scoreTextView) TextView mScoreText;
-    @Bind(R.id.locationImageView) ImageView mLocationImage;
+    @Bind(R.id.locationFab) FloatingActionButton mLocationFab;
+
+    private boolean mScoreIsLoaded = false;
 
 
     @Override
@@ -57,28 +73,61 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
         mScorePresenter.takeActivity(ScoreActivity.this);
         mScorePresenter.getLastKnownLocation();
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        /**
+         * checking for authentication
+         */
+        if (mRef.getAuth() == null) {
+            //todo: this needs to bounce off of our Presenter
+            loadLoginView();
+        }
+
+        try {
+            mUserId = mRef.getAuth().getUid();
+            mScorePresenter.setNavDrawerUserName(mUserId);
+
+
+        } catch (Exception e) {
+            //todo: this needs to bounce off of our Presenter
+            loadLoginView();
+        }
+
+
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
 
         View headerView = mNavigation.getHeaderView(0);
+        mUsernameText = (TextView) headerView.findViewById(R.id.nav_drawer_header_username);
         mNavDrawerHeaderImage = (ImageView) headerView.findViewById(R.id.nav_header_bg_imageView);
-        mDrawerImage = (ImageView) toolbar.findViewById(R.id.drawer_imageView);
         mScorePresenter.setNavHeaderImageView(mNavDrawerHeaderImage);
 
-        mDrawerImage.setOnClickListener(new View.OnClickListener() {
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this,  mDrawerLayout, mToolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close
+        );
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        mDrawerToggle.syncState();
+
+        anim = ValueAnimator.ofFloat(1, 0); //this does need to change
+        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
-            public void onClick(View v) {
-                mDrawer.openDrawer(mNavigation);
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                float slideOffset = (Float) valueAnimator.getAnimatedValue();
+                mDrawerToggle.onDrawerSlide(mDrawerLayout, slideOffset);
             }
         });
+        anim.setInterpolator(new DecelerateInterpolator());
+// You can change this duration to more closely match that of the default animation.
+        anim.setDuration(500);
+        anim.start();
 
         mNavigation.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem item) {
                         //Handle switching Fragments here
-                        mDrawer.closeDrawers();
+                        mDrawerLayout.closeDrawers();
 
                         switch (item.getItemId()) {
 
@@ -101,20 +150,27 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
                     }
                 });
 
-        mLocationImage.setOnClickListener(new View.OnClickListener() {
+        mLocationFab.hide();
+        mLocationFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mScoreIsLoaded = false;
+
+                mLocationFab.hide();
                 mScoreText.setVisibility(View.INVISIBLE);
                 indeterminateProgress.setVisibility(View.VISIBLE);
                 mScorePresenter.getLastKnownLocation();
                 mScorePresenter.calculateAndSetScore();
+
+                //todo: as we add functionality disable the colors
+
+                mVenueText.setTextColor(ContextCompat.getColor(ScoreActivity.this, R.color.colorDivider));
             }
         });
 
-        mChallengeCard.setOnClickListener(this);
-        mSaveCard.setOnClickListener(this);
+        mChallengeText.setOnClickListener(this);
+        mSaveText.setOnClickListener(this);
         mVenuesCard.setOnClickListener(this);
-
 
     }
 
@@ -125,21 +181,24 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
     @Override
     public void onClick(View view) {
 
-        switch (view.getId()) {
-            case R.id.challenge_card_view:
-                Snackbar.make(getCurrentFocus(), "Under Construction", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                break;
+        if(mScoreIsLoaded) {
 
-            case R.id.save_card_view:
-                Snackbar.make(getCurrentFocus(), "Under Construction", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                break;
+            switch (view.getId()) {
+                case R.id.saveTextView:
+                    Snackbar.make(getCurrentFocus(), "Under Construction", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                    break;
 
-            case R.id.venues_card_view:
-                mScorePresenter.showFragment(new VenueListFragment(), null);
+                case R.id.challengeTextView:
+                    Snackbar.make(getCurrentFocus(), "Under Construction", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                    break;
 
-                break;
+                case R.id.venues_card_view:
+                    mScorePresenter.showFragment(new VenueListFragment(), null);
+
+                    break;
+            }
         }
     }
 
@@ -195,11 +254,17 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
 
     @Override
     public void updateScore(double average) {
-        //todo: in here we need to "unlock" our get venues item
 
+        mScoreIsLoaded = true;
+
+        mLocationFab.show();
         mScoreText.setText(String.format("%.1f", average));
         indeterminateProgress.setVisibility(View.INVISIBLE);
         mScoreText.setVisibility(View.VISIBLE);
+
+        //todo: as we add functionality enable the colors
+
+        mVenueText.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
     }
 
     @Override
@@ -208,8 +273,22 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
         FragmentTransaction fragTran = getSupportFragmentManager().beginTransaction();
         fragTran.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_right,
                 R.anim.enter_from_right, R.anim.exit_to_right);
-        fragTran.replace(R.id.fragment_container, fragment)
+        fragTran.add(R.id.fragment_container, fragment)
                 .addToBackStack(null).commit();
 
     }
+
+    private void loadLoginView() {
+        //prevents the user from going back to the main activity when pressing back
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
+    @Override
+    public void setNavDrawerUserName(String userName) {
+        mUsernameText.setText(userName);
+    }
+
 }

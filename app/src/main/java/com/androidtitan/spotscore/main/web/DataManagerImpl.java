@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.data.Constants;
-import com.androidtitan.spotscore.main.App;
 import com.androidtitan.spotscore.main.data.DetailedVenueResponse;
 import com.androidtitan.spotscore.main.data.User;
 import com.androidtitan.spotscore.main.data.Venue;
@@ -28,10 +27,7 @@ import javax.inject.Inject;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.GsonConverterFactory;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.RxJavaCallAdapterFactory;
 import rx.Observable;
@@ -82,7 +78,7 @@ public class DataManagerImpl implements DataManager {
     }
 
     @Override
-    public void setNavDrawerUserName(String userId, final MainViewListener listener) {
+    public void setNavDrawerUserName(String userId, final ScoreViewListener listener) {
         Firebase fb = new Firebase(Constants.FIREBASE_URL + "/users/" + userId + "/email");
 
         try {
@@ -113,8 +109,7 @@ public class DataManagerImpl implements DataManager {
                 mContext.getResources().getString(R.string.foursquare_client_id),
                 mContext.getResources().getString(R.string.foursquare_client_secret),
                 getVersion(),
-                latitude + "," + longitude,
-                "400");
+                latitude + "," + longitude);
 
         return call.compose(applySchedulers())
                         .flatMap(result -> Observable.from(result.getVenues()));

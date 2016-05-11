@@ -8,7 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.main.App;
 import com.androidtitan.spotscore.main.login.presenter.LoginPresenter;
-import com.androidtitan.spotscore.main.landing.ui.MainActivity;
+import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
 
 import javax.inject.Inject;
 
@@ -65,8 +65,8 @@ public class LoginActivity extends AppCompatActivity implements LoginView {
     }
 
     @Override
-    public void launchMainActivity() {
-        Intent intent = new Intent(this, MainActivity.class);
+    public void launchScoreActivity() {
+        Intent intent = new Intent(this, ScoreActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

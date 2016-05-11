@@ -13,14 +13,11 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.BasePresenter;
 import com.androidtitan.spotscore.main.data.Venue;
 import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
 import com.androidtitan.spotscore.main.play.ui.ScoreView;
-import com.androidtitan.spotscore.main.play.ui.VenueListFragment;
 import com.androidtitan.spotscore.main.web.DataManager;
-import com.androidtitan.spotscore.main.web.DataManagerImpl;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.gms.common.ConnectionResult;
@@ -37,7 +34,6 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -47,6 +43,7 @@ import rx.Subscriber;
  * Created by amohnacs on 5/2/16.
  */
 public class ScorePresenterImpl extends BasePresenter<ScoreView> implements ScorePresenter,
+        DataManager.ScoreViewListener,
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks,
         ActivityCompat.OnRequestPermissionsResultCallback
 {
@@ -282,8 +279,6 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
 
                         calcAverage += venue.getRating();
                         calcCount ++;
-
-                        Log.e(TAG, calcAverage + "," + calcCount);
                     }
                 });
     }
@@ -305,4 +300,14 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
                 .into(imageView);
     }
 
+    @Override
+    public void setNavDrawerUserName(String userId) {
+        mDataManager.setNavDrawerUserName(userId, this);
+
+    }
+
+    @Override
+    public void onUsernameFinished(String userName) {
+        getMvpView().setNavDrawerUserName(userName);
+    }
 }

@@ -12,4 +12,6 @@ public interface ScoreView extends MvpView {
 
     void updateScore(double average);
     void showFragment(Fragment fragment);
+
+    void setNavDrawerUserName(String userName);
 }
