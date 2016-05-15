@@ -9,11 +9,13 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -43,8 +45,7 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
     private Firebase mRef = new Firebase(Constants.FIREBASE_URL);
     private String mUserId;
 
-    ActionBarDrawerToggle mDrawerToggle;
-    ValueAnimator anim;
+    ActionBarDrawerToggle mActionToggle;
     @Bind(R.id.activity_drawer_layout) DrawerLayout mDrawerLayout;
     @Bind(R.id.activity_drawer_navigation_view) NavigationView mNavigation;
     private ImageView mNavDrawerHeaderImage;
@@ -60,6 +61,7 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
     @Bind(R.id.locationFab) FloatingActionButton mLocationFab;
 
     private boolean mScoreIsLoaded = false;
+    private boolean mFragmentIsShown = false;
 
 
     @Override
@@ -91,36 +93,28 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
             loadLoginView();
         }
 
-
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         View headerView = mNavigation.getHeaderView(0);
         mUsernameText = (TextView) headerView.findViewById(R.id.nav_drawer_header_username);
         mNavDrawerHeaderImage = (ImageView) headerView.findViewById(R.id.nav_header_bg_imageView);
         mScorePresenter.setNavHeaderImageView(mNavDrawerHeaderImage);
 
-        mDrawerToggle = new ActionBarDrawerToggle(
-                this,  mDrawerLayout, mToolbar,
-                R.string.navigation_drawer_open, R.string.navigation_drawer_close
+        mActionToggle = new ActionBarDrawerToggle(
+                this,  mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         );
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        mDrawerToggle.syncState();
+        mActionToggle.setDrawerIndicatorEnabled(true);
+        mDrawerLayout.setDrawerListener(mActionToggle);
 
-        anim = ValueAnimator.ofFloat(1, 0); //this does need to change
-        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        mActionToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
             @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                float slideOffset = (Float) valueAnimator.getAnimatedValue();
-                mDrawerToggle.onDrawerSlide(mDrawerLayout, slideOffset);
+            public void onClick(View v) {
+                Log.e(TAG, "HOME");
             }
         });
-        anim.setInterpolator(new DecelerateInterpolator());
-// You can change this duration to more closely match that of the default animation.
-        anim.setDuration(500);
-        anim.start();
 
         mNavigation.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
@@ -133,11 +127,9 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
 
                             case R.id.nav_drawer_logout:
 
-                                /*
                                 mRef.unauth();
                                 //todo: this needs to bounce off of our Presenter
                                 loadLoginView();
-                                */
 
                                 break;
 
@@ -207,11 +199,19 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
         switch (item.getItemId()) {
             case android.R.id.home:
 
+                Log.e(TAG, "Option");
+
                 if(getSupportFragmentManager().getBackStackEntryCount() > 0) {
+
                     getSupportFragmentManager().popBackStack();
+                    animationUpIndicator(false);
+                    mLocationFab.show();
+
                 } else {
-                    ScoreActivity.this.finish();
+
+                    mDrawerLayout.openDrawer(GravityCompat.START);
                 }
+
                 return true;
 
             default:
@@ -220,6 +220,26 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
                 break;
         }
         return false;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(getSupportFragmentManager().getBackStackEntryCount() > 0) {
+
+            getSupportFragmentManager().popBackStack();
+            animationUpIndicator(false);
+            mLocationFab.show();
+
+        } else {
+
+            this.finish();
+        }
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mActionToggle.syncState();
     }
 
     @Override
@@ -252,6 +272,36 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
         return mScorePresenter;
     }
 
+    private void loadLoginView() {
+        //prevents the user from going back to the main activity when pressing back
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
+    private void animationUpIndicator(boolean animateToArrow) {
+
+        ValueAnimator anim;
+
+        if(animateToArrow) {
+            anim = ValueAnimator.ofFloat(0, 1);
+        } else {
+            anim = ValueAnimator.ofFloat(1, 0);
+        }
+
+        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                float slideOffset = (Float) valueAnimator.getAnimatedValue();
+                mActionToggle.onDrawerSlide(mDrawerLayout, slideOffset);
+            }
+        });
+        anim.setInterpolator(new DecelerateInterpolator());
+        anim.setDuration(300);
+        anim.start();
+    }
+
     @Override
     public void updateScore(double average) {
 
@@ -262,7 +312,7 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
         indeterminateProgress.setVisibility(View.INVISIBLE);
         mScoreText.setVisibility(View.VISIBLE);
 
-        //todo: as we add functionality enable the colors
+        //todo: as we add functionality enable the colors for the other clickable textviews
 
         mVenueText.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
     }
@@ -270,20 +320,18 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
     @Override
     public void showFragment(Fragment fragment) {
 
+        /*getSupportActionBar().setDisplayShowHomeEnabled(true);
+        mActionToggle.syncState();*/
+        mLocationFab.hide();
+
         FragmentTransaction fragTran = getSupportFragmentManager().beginTransaction();
         fragTran.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_right,
                 R.anim.enter_from_right, R.anim.exit_to_right);
         fragTran.add(R.id.fragment_container, fragment)
                 .addToBackStack(null).commit();
 
-    }
+        animationUpIndicator(true);
 
-    private void loadLoginView() {
-        //prevents the user from going back to the main activity when pressing back
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
     }
 
     @Override

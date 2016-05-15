@@ -15,6 +15,9 @@
         <item name="actionMenuTextColor">@android:color/white</item>
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
 
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

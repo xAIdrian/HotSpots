@@ -24,7 +24,6 @@
             android:screenOrientation="portrait"/>
         <activity
             android:name=".main.play.ui.ScoreActivity"
-            android:label="@string/title_activity_score"
             android:theme="@style/AppTheme"
             android:screenOrientation="portrait">
             <intent-filter>

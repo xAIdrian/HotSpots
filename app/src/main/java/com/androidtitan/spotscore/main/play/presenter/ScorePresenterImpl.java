@@ -294,7 +294,7 @@ public class ScorePresenterImpl extends BasePresenter<ScoreView> implements Scor
     @Override
     public void setNavHeaderImageView(ImageView imageView) {
         Glide.with(mContext)
-                .load("https://unsplash.it/g/200/200/?random")
+                .load("https://unsplash.it/200/200/?random")
                 .skipMemoryCache( true )
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(imageView);
