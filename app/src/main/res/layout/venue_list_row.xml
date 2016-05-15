@@ -13,43 +13,44 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/blackScreen"/>
+        android:background="@color/blackScreen" />
 
     <TextView
         android:id="@+id/venueCategoryTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/venueRatingTextView"
         android:layout_alignParentStart="true"
+        android:layout_alignTop="@+id/venueRatingTextView"
         android:layout_margin="@dimen/fab_margin"
+        android:text="@string/placeholder"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@android:color/white"
-        android:text="@string/placeholder"/>
+        android:textColor="@android:color/white" />
 
     <TextView
         android:id="@+id/venueNameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/venueFloatingActionButton"
-        android:layout_alignParentStart="true"
         android:layout_toStartOf="@+id/venueFloatingActionButton"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="24dp"
         android:layout_marginStart="@dimen/fab_margin"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/placeholder"/>
+        android:text="@string/placeholder"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
         android:id="@+id/venueRatingTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
         android:layout_alignEnd="@+id/venueFloatingActionButton"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginTop="@dimen/tight_margin"
         android:padding="8dp"
+        android:text="0.0"
         android:textSize="@dimen/venue_rating_text"
-        android:textStyle="bold"
-        android:text="0.0"/>
+        android:textStyle="bold" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/venueFloatingActionButton"
@@ -58,19 +59,61 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_info"
-        android:elevation="8dp"/>
+        android:elevation="8dp"
+        android:src="@drawable/ic_info" />
 
-    <!--<RelativeLayout
+    <RelativeLayout
         android:id="@+id/circularRevealView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorAccent"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark" >
+        android:theme="@style/ThemeOverlay.AppCompat.Dark"
+        android:visibility="gone">
 
+        <ImageView
+            android:id="@+id/venueIconImageView"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_margin="@dimen/default_margin"
+            android:padding="8dp"
+            android:src="@drawable/ic_city"/>
 
+        <ImageView
+            android:id="@+id/venueCallImageView"
+            android:layout_width="@dimen/fab_size"
+            android:layout_height="@dimen/fab_size"
+            android:layout_toStartOf="@+id/venueMapImageView"
+            android:layout_centerVertical="true"
+            android:layout_margin="@dimen/fab_margin"
+            android:padding="16dp"
+            android:background="@drawable/bg_rounded_corner_white"
+            android:src="@drawable/ic_phone"
+            android:visibility="gone"/>
 
+        <ImageView
+            android:id="@+id/venueMapImageView"
+            android:layout_width="@dimen/fab_size"
+            android:layout_height="@dimen/fab_size"
+            android:layout_centerInParent="true"
+            android:layout_margin="@dimen/fab_margin"
+            android:padding="16dp"
+            android:background="@drawable/bg_rounded_corner_white"
+            android:src="@drawable/ic_map_marker"
+            android:visibility="gone" />
 
+        <ImageView
+            android:id="@+id/venueFoursqareImageView"
+            android:layout_width="@dimen/fab_size"
+            android:layout_height="@dimen/fab_size"
+            android:layout_toEndOf="@+id/venueMapImageView"
+            android:layout_centerVertical="true"
+            android:layout_margin="@dimen/fab_margin"
+            android:padding="16dp"
+            android:background="@drawable/bg_rounded_corner_white"
+            android:src="@drawable/ic_foursquare"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/venueCloseImageView"
@@ -82,7 +125,8 @@
             android:padding="8dp"
             android:src="@drawable/ic_delete"
             android:elevation="8dp"/>
-        </RelativeLayout>-->
+
+    </RelativeLayout>
 
 
 </RelativeLayout>

@@ -1,5 +1,6 @@
 package com.androidtitan.spotscore.main.data;
 
+import com.bumptech.glide.Glide;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 

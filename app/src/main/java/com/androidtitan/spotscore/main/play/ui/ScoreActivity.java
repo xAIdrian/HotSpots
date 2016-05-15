@@ -46,19 +46,28 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
     private String mUserId;
 
     ActionBarDrawerToggle mActionToggle;
-    @Bind(R.id.activity_drawer_layout) DrawerLayout mDrawerLayout;
-    @Bind(R.id.activity_drawer_navigation_view) NavigationView mNavigation;
+    @Bind(R.id.activity_drawer_layout)
+    DrawerLayout mDrawerLayout;
+    @Bind(R.id.activity_drawer_navigation_view)
+    NavigationView mNavigation;
     private ImageView mNavDrawerHeaderImage;
     private TextView mUsernameText;
 
-    @Bind(R.id.challengeTextView) TextView mChallengeText;
-    @Bind(R.id.saveTextView) TextView mSaveText;
-    @Bind(R.id.venues_card_view) RelativeLayout mVenuesCard;
-    @Bind(R.id.venuesTextView) TextView mVenueText;
+    @Bind(R.id.challengeTextView)
+    TextView mChallengeText;
+    @Bind(R.id.saveTextView)
+    TextView mSaveText;
+    @Bind(R.id.venues_card_view)
+    RelativeLayout mVenuesCard;
+    @Bind(R.id.venuesTextView)
+    TextView mVenueText;
 
-    @Bind(R.id.scoreIndProgressBar) ProgressBar indeterminateProgress;
-    @Bind(R.id.scoreTextView) TextView mScoreText;
-    @Bind(R.id.locationFab) FloatingActionButton mLocationFab;
+    @Bind(R.id.scoreIndProgressBar)
+    ProgressBar indeterminateProgress;
+    @Bind(R.id.scoreTextView)
+    TextView mScoreText;
+    @Bind(R.id.locationFab)
+    FloatingActionButton mLocationFab;
 
     private boolean mScoreIsLoaded = false;
     private boolean mFragmentIsShown = false;
@@ -73,7 +82,6 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
 
         mScorePresenter.attachView(this);
         mScorePresenter.takeActivity(ScoreActivity.this);
-        mScorePresenter.getLastKnownLocation();
 
         /**
          * checking for authentication
@@ -88,92 +96,93 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
             mScorePresenter.setNavDrawerUserName(mUserId);
 
 
+            Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(mToolbar);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+
+            View headerView = mNavigation.getHeaderView(0);
+            mUsernameText = (TextView) headerView.findViewById(R.id.nav_drawer_header_username);
+            mNavDrawerHeaderImage = (ImageView) headerView.findViewById(R.id.nav_header_bg_imageView);
+            mScorePresenter.setNavHeaderImageView(mNavDrawerHeaderImage);
+
+            mActionToggle = new ActionBarDrawerToggle(
+                    this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+            );
+            mActionToggle.setDrawerIndicatorEnabled(true);
+            mDrawerLayout.setDrawerListener(mActionToggle);
+
+            mActionToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.e(TAG, "HOME");
+                }
+            });
+
+            mNavigation.setNavigationItemSelectedListener(
+                    new NavigationView.OnNavigationItemSelectedListener() {
+                        @Override
+                        public boolean onNavigationItemSelected(MenuItem item) {
+                            //Handle switching Fragments here
+                            mDrawerLayout.closeDrawers();
+
+                            switch (item.getItemId()) {
+
+                                case R.id.nav_drawer_logout:
+
+                                    mRef.unauth();
+                                    //todo: this needs to bounce off of our Presenter
+                                    loadLoginView();
+
+                                    break;
+
+                                default:
+                                    Log.e(TAG, "Incorrect nav drawer item selected");
+                                    return false;
+                            }
+
+                            return true;
+                        }
+                    });
+
+            //mLocationFab.hide();
+            mLocationFab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mScoreIsLoaded = false;
+
+                    mLocationFab.hide();
+                    mScoreText.setVisibility(View.INVISIBLE);
+                    indeterminateProgress.setVisibility(View.VISIBLE);
+                    mScorePresenter.getLastKnownLocation();
+                    mScorePresenter.calculateAndSetScore();
+
+                    //todo: as we add functionality disable the colors
+
+                    mVenueText.setTextColor(ContextCompat.getColor(ScoreActivity.this, R.color.colorDivider));
+                }
+            });
+
+            mChallengeText.setOnClickListener(this);
+            mSaveText.setOnClickListener(this);
+            mVenuesCard.setOnClickListener(this);
+
         } catch (Exception e) {
             //todo: this needs to bounce off of our Presenter
             loadLoginView();
         }
 
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-
-        View headerView = mNavigation.getHeaderView(0);
-        mUsernameText = (TextView) headerView.findViewById(R.id.nav_drawer_header_username);
-        mNavDrawerHeaderImage = (ImageView) headerView.findViewById(R.id.nav_header_bg_imageView);
-        mScorePresenter.setNavHeaderImageView(mNavDrawerHeaderImage);
-
-        mActionToggle = new ActionBarDrawerToggle(
-                this,  mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close
-        );
-        mActionToggle.setDrawerIndicatorEnabled(true);
-        mDrawerLayout.setDrawerListener(mActionToggle);
-
-        mActionToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.e(TAG, "HOME");
-            }
-        });
-
-        mNavigation.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem item) {
-                        //Handle switching Fragments here
-                        mDrawerLayout.closeDrawers();
-
-                        switch (item.getItemId()) {
-
-                            case R.id.nav_drawer_logout:
-
-                                mRef.unauth();
-                                //todo: this needs to bounce off of our Presenter
-                                loadLoginView();
-
-                                break;
-
-                            default:
-                                Log.e(TAG, "Incorrect nav drawer item selected");
-                                return false;
-                        }
-
-                        return true;
-                    }
-                });
-
-        mLocationFab.hide();
-        mLocationFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mScoreIsLoaded = false;
-
-                mLocationFab.hide();
-                mScoreText.setVisibility(View.INVISIBLE);
-                indeterminateProgress.setVisibility(View.VISIBLE);
-                mScorePresenter.getLastKnownLocation();
-                mScorePresenter.calculateAndSetScore();
-
-                //todo: as we add functionality disable the colors
-
-                mVenueText.setTextColor(ContextCompat.getColor(ScoreActivity.this, R.color.colorDivider));
-            }
-        });
-
-        mChallengeText.setOnClickListener(this);
-        mSaveText.setOnClickListener(this);
-        mVenuesCard.setOnClickListener(this);
-
     }
 
     /**
      * Used strictly for actions taken when clicking on cards
+     *
      * @param view
      */
     @Override
     public void onClick(View view) {
 
-        if(mScoreIsLoaded) {
+        if (mScoreIsLoaded) {
 
             switch (view.getId()) {
                 case R.id.saveTextView:
@@ -199,9 +208,7 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
         switch (item.getItemId()) {
             case android.R.id.home:
 
-                Log.e(TAG, "Option");
-
-                if(getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
 
                     getSupportFragmentManager().popBackStack();
                     animationUpIndicator(false);
@@ -224,7 +231,7 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
 
     @Override
     public void onBackPressed() {
-        if(getSupportFragmentManager().getBackStackEntryCount() > 0) {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
 
             getSupportFragmentManager().popBackStack();
             animationUpIndicator(false);
@@ -246,6 +253,14 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
     protected void onStart() {
         mScorePresenter.connectGoogleApiClient();
         super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mScorePresenter.getLastKnownLocation();
+        mScorePresenter.calculateAndSetScore();
     }
 
     @Override
@@ -284,7 +299,7 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
 
         ValueAnimator anim;
 
-        if(animateToArrow) {
+        if (animateToArrow) {
             anim = ValueAnimator.ofFloat(0, 1);
         } else {
             anim = ValueAnimator.ofFloat(1, 0);

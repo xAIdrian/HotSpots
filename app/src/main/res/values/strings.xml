@@ -38,4 +38,6 @@
     <string name="navigation_drawer_open">navigationdraweropen</string>
     <string name="navigation_drawer_close">navigationdrawerclosed</string>
 
+    <string name="intent_chooser_title">Which would you like to use?</string>
+
 </resources>

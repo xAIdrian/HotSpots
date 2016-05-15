@@ -2,20 +2,16 @@ package com.androidtitan.spotscore.main.play.ui;
 
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.BaseFragment;
-import com.androidtitan.spotscore.main.data.Venue;
-import com.androidtitan.spotscore.main.play.VenueListAdapter;
+import com.androidtitan.spotscore.main.play.adapter.VenueListAdapter;
 import com.androidtitan.spotscore.main.play.presenter.ScorePresenter;
 
 import butterknife.Bind;
