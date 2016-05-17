@@ -2,8 +2,8 @@ package com.androidtitan.spotscore.main.injection;
 
 import android.content.Context;
 
+import com.androidtitan.spotscore.main.play.PlayMvp;
 import com.androidtitan.spotscore.main.web.DataManager;
-import com.androidtitan.spotscore.main.web.DataManagerImpl;
 
 import dagger.Module;
 import dagger.Provides;
@@ -21,8 +21,8 @@ public class DataManagerModule {
     }
 
     @Provides
-    public DataManager providesDataManagerModule(Context context) {
-        return new DataManagerImpl(context);
+    public PlayMvp.Model providesDataManagerModule(Context context) {
+        return new DataManager(context);
     }
 
 }

@@ -3,8 +3,8 @@ package com.androidtitan.spotscore.main.injection;
 import android.content.Context;
 
 
+import com.androidtitan.spotscore.main.login.LoginMvp;
 import com.androidtitan.spotscore.main.login.presenter.LoginPresenter;
-import com.androidtitan.spotscore.main.login.presenter.LoginPresenterImpl;
 
 import dagger.Module;
 import dagger.Provides;
@@ -22,8 +22,8 @@ public class LoginPresenterModule {
     }
 
     @Provides
-    public LoginPresenter providesLoginPresenterModule(Context context) {
-        return new LoginPresenterImpl(context);
+    public LoginMvp.Presenter providesLoginPresenterModule(Context context) {
+        return new LoginPresenter(context);
     }
 
 }

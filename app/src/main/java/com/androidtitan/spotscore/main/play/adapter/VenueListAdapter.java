@@ -24,7 +24,7 @@ import android.widget.TextView;
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.main.data.BestPhoto;
 import com.androidtitan.spotscore.main.data.Venue;
-import com.androidtitan.spotscore.main.play.presenter.ScorePresenter;
+import com.androidtitan.spotscore.main.play.PlayMvp;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
@@ -39,13 +39,13 @@ public class VenueListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private final String TAG = getClass().getSimpleName();
 
     private Context mContext;
-    private ScorePresenter mScorePresenter;
+    private PlayMvp.Presenter mPlayPresenter;
 
     private ArrayList<Venue> mVenueList;
 
-    public VenueListAdapter(Context context, ScorePresenter scorePresenter, ArrayList<Venue> venues) {
+    public VenueListAdapter(Context context, PlayMvp.Presenter playPresenter, ArrayList<Venue> venues) {
         mContext = context;
-        mScorePresenter = scorePresenter;
+        mPlayPresenter = playPresenter;
         mVenueList = venues;
     }
 

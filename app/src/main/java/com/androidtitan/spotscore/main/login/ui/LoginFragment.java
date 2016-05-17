@@ -3,7 +3,6 @@ package com.androidtitan.spotscore.main.login.ui;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,8 +15,7 @@ import android.widget.TextView;
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.BaseFragment;
 import com.androidtitan.spotscore.main.App;
-import com.androidtitan.spotscore.main.login.presenter.LoginPresenter;
-import com.androidtitan.spotscore.main.login.ui.LoginActivity;
+import com.androidtitan.spotscore.main.login.LoginMvp;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -26,15 +24,12 @@ import butterknife.ButterKnife;
 public class LoginFragment extends BaseFragment {
 
 
-    private LoginPresenter mPresenter;
+    private LoginMvp.Presenter mPresenter;
 
-    @Bind(R.id.input_email)
-    EditText emailEditText;
+    @Bind(R.id.input_email) EditText emailEditText;
     @Bind(R.id.input_password) EditText passwordEditText;
-    @Bind(R.id.loginFab)
-    FloatingActionButton fab;
-    @Bind(R.id.signupTextView)
-    TextView signupTextView;
+    @Bind(R.id.loginFab) FloatingActionButton fab;
+    @Bind(R.id.signupTextView) TextView signupTextView;
 
 
     public LoginFragment() {

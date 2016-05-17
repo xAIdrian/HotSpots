@@ -7,28 +7,38 @@
         <item
             android:id="@+id/nav_drawer_play"
             android:checked="true"
-            android:title="@string/play" />
+            android:title="@string/play"
+            android:icon="@drawable/ic_controller"/>
 
         <item
             android:id="@+id/nav_drawer_boards"
             android:checked="false"
-            android:title="@string/leaderboards" />
+            android:title="@string/leaderboards"
+            android:icon="@drawable/ic_trophy"/>
 
         <item
             android:id="@+id/nav_drawer_past_spots"
             android:checked="false"
-            android:title="@string/past_spots" />
+            android:title="@string/past_spots"
+            android:icon="@drawable/ic_globe"/>
 
     </group>
 
     <group
-        android:id="@+id/secondary_group"
+        android:id="@+id/last"
         android:checkableBehavior="single" >
+
+        <item
+            android:id="@+id/nav_drawer_profile"
+            android:checked="false"
+            android:title="@string/profile"
+            android:icon="@drawable/ic_stash" />
 
         <item
             android:id="@+id/nav_drawer_logout"
             android:checked="false"
-            android:title="@string/action_logout" />
+            android:title="@string/action_logout"
+            android:icon="@drawable/ic_logout"/>
 
     </group>
 

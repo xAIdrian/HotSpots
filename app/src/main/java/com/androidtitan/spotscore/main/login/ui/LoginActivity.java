@@ -7,16 +7,16 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.main.App;
-import com.androidtitan.spotscore.main.login.presenter.LoginPresenter;
+import com.androidtitan.spotscore.main.login.LoginMvp;
 import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
 
 import javax.inject.Inject;
 
 
-public class LoginActivity extends AppCompatActivity implements LoginView {
+public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
 
     @Inject
-    LoginPresenter mLoginPresenter;
+    LoginMvp.Presenter mLoginPresenter;
 
     private FragmentTransaction mFragmentTransaction;
     private LoginFragment mLoginFrag;
@@ -46,7 +46,7 @@ public class LoginActivity extends AppCompatActivity implements LoginView {
         mLoginPresenter.detachView();
     }
 
-    public LoginPresenter getPresenter() {
+    public LoginMvp.Presenter getPresenter() {
         return mLoginPresenter;
     }
 

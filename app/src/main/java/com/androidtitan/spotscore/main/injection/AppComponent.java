@@ -5,8 +5,8 @@ import android.content.Context;
 
 
 import com.androidtitan.spotscore.main.login.ui.LoginActivity;
+import com.androidtitan.spotscore.main.play.PlayMvp;
 import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
-import com.androidtitan.spotscore.main.web.DataManager;
 
 import javax.inject.Singleton;
 
@@ -23,7 +23,8 @@ public interface AppComponent {
 
     Application getApplication();
     Context getApplicationContext();
-    DataManager getDataManager();
+    PlayMvp.Model getPlayDataManagerInterface();
+    //todo: we need additional getters for our additional Model interfaces
 
     void inject(LoginActivity activity);
     void inject(ScoreActivity activity);

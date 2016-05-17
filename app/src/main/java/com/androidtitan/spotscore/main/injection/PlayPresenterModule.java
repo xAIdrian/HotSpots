@@ -2,12 +2,8 @@ package com.androidtitan.spotscore.main.injection;
 
 import android.content.Context;
 
-import com.androidtitan.spotscore.main.App;
-import com.androidtitan.spotscore.main.login.presenter.LoginPresenter;
-import com.androidtitan.spotscore.main.login.presenter.LoginPresenterImpl;
+import com.androidtitan.spotscore.main.play.PlayMvp;
 import com.androidtitan.spotscore.main.play.presenter.ScorePresenter;
-import com.androidtitan.spotscore.main.play.presenter.ScorePresenterImpl;
-import com.androidtitan.spotscore.main.web.DataManager;
 
 import dagger.Module;
 import dagger.Provides;
@@ -28,7 +24,7 @@ public class PlayPresenterModule {
     }
 
     @Provides
-    public ScorePresenter providesPlayPresenterModule(Context context, DataManager manager) {
-        return new ScorePresenterImpl(context, manager);
+    public PlayMvp.Presenter providesPlayPresenterModule(Context context, PlayMvp.Model manager) {
+        return new ScorePresenter(context, manager);
     }
 }

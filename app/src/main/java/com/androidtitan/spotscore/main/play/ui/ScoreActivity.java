@@ -15,9 +15,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -28,7 +26,7 @@ import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.data.Constants;
 import com.androidtitan.spotscore.main.App;
 import com.androidtitan.spotscore.main.login.ui.LoginActivity;
-import com.androidtitan.spotscore.main.play.presenter.ScorePresenter;
+import com.androidtitan.spotscore.main.play.PlayMvp;
 import com.firebase.client.Firebase;
 
 import javax.inject.Inject;
@@ -36,11 +34,11 @@ import javax.inject.Inject;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class ScoreActivity extends AppCompatActivity implements ScoreView, View.OnClickListener {
+public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, android.view.View.OnClickListener {
     private final String TAG = getClass().getSimpleName();
 
     @Inject
-    ScorePresenter mScorePresenter;
+    PlayMvp.Presenter mPlayPresenter;
 
     private Firebase mRef = new Firebase(Constants.FIREBASE_URL);
     private String mUserId;
@@ -80,20 +78,15 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
         App.getAppComponent().inject(this);
         ButterKnife.bind(this);
 
-        mScorePresenter.attachView(this);
-        mScorePresenter.takeActivity(ScoreActivity.this);
+        mPlayPresenter.attachView(this);
+        mPlayPresenter.takeActivity(ScoreActivity.this);
 
         /**
          * checking for authentication
          */
-        if (mRef.getAuth() == null) {
-            //todo: this needs to bounce off of our Presenter
-            loadLoginView();
-        }
 
-        try {
             mUserId = mRef.getAuth().getUid();
-            mScorePresenter.setNavDrawerUserName(mUserId);
+            mPlayPresenter.setNavDrawerUserName(mUserId);
 
 
             Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -101,10 +94,10 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
 
-            View headerView = mNavigation.getHeaderView(0);
+            android.view.View headerView = mNavigation.getHeaderView(0);
             mUsernameText = (TextView) headerView.findViewById(R.id.nav_drawer_header_username);
             mNavDrawerHeaderImage = (ImageView) headerView.findViewById(R.id.nav_header_bg_imageView);
-            mScorePresenter.setNavHeaderImageView(mNavDrawerHeaderImage);
+            mPlayPresenter.setNavHeaderImageView(mNavDrawerHeaderImage);
 
             mActionToggle = new ActionBarDrawerToggle(
                     this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close
@@ -112,9 +105,9 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
             mActionToggle.setDrawerIndicatorEnabled(true);
             mDrawerLayout.setDrawerListener(mActionToggle);
 
-            mActionToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+            mActionToggle.setToolbarNavigationClickListener(new android.view.View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
+                public void onClick(android.view.View v) {
                     Log.e(TAG, "HOME");
                 }
             });
@@ -146,16 +139,16 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
                     });
 
             //mLocationFab.hide();
-            mLocationFab.setOnClickListener(new View.OnClickListener() {
+            mLocationFab.setOnClickListener(new android.view.View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
+                public void onClick(android.view.View v) {
                     mScoreIsLoaded = false;
 
                     mLocationFab.hide();
-                    mScoreText.setVisibility(View.INVISIBLE);
-                    indeterminateProgress.setVisibility(View.VISIBLE);
-                    mScorePresenter.getLastKnownLocation();
-                    mScorePresenter.calculateAndSetScore();
+                    mScoreText.setVisibility(android.view.View.INVISIBLE);
+                    indeterminateProgress.setVisibility(android.view.View.VISIBLE);
+                    mPlayPresenter.getLastKnownLocation();
+                    mPlayPresenter.calculateAndSetScore();
 
                     //todo: as we add functionality disable the colors
 
@@ -167,10 +160,6 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
             mSaveText.setOnClickListener(this);
             mVenuesCard.setOnClickListener(this);
 
-        } catch (Exception e) {
-            //todo: this needs to bounce off of our Presenter
-            loadLoginView();
-        }
 
     }
 
@@ -180,7 +169,7 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
      * @param view
      */
     @Override
-    public void onClick(View view) {
+    public void onClick(android.view.View view) {
 
         if (mScoreIsLoaded) {
 
@@ -196,7 +185,7 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
                     break;
 
                 case R.id.venues_card_view:
-                    mScorePresenter.showFragment(new VenueListFragment(), null);
+                    mPlayPresenter.showFragment(new VenueListFragment(), null);
 
                     break;
             }
@@ -251,7 +240,7 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
 
     @Override
     protected void onStart() {
-        mScorePresenter.connectGoogleApiClient();
+        mPlayPresenter.connectGoogleApiClient();
         super.onStart();
     }
 
@@ -259,40 +248,32 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
     protected void onResume() {
         super.onResume();
 
-        mScorePresenter.getLastKnownLocation();
-        mScorePresenter.calculateAndSetScore();
+        mPlayPresenter.getLastKnownLocation();
+        mPlayPresenter.calculateAndSetScore();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (mScorePresenter.googleApiIsConnected()) {
-            mScorePresenter.disconnectGoogleApiClient();
+        if (mPlayPresenter.googleApiIsConnected()) {
+            mPlayPresenter.disconnectGoogleApiClient();
         }
     }
 
     @Override
     protected void onStop() {
-        mScorePresenter.disconnectGoogleApiClient();
+        mPlayPresenter.disconnectGoogleApiClient();
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mScorePresenter.detachView();
+        mPlayPresenter.detachView();
     }
 
-    public ScorePresenter getScorePresenter() {
-        return mScorePresenter;
-    }
-
-    private void loadLoginView() {
-        //prevents the user from going back to the main activity when pressing back
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+    public PlayMvp.Presenter getScorePresenter() {
+        return mPlayPresenter;
     }
 
     private void animationUpIndicator(boolean animateToArrow) {
@@ -324,8 +305,8 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
 
         mLocationFab.show();
         mScoreText.setText(String.format("%.1f", average));
-        indeterminateProgress.setVisibility(View.INVISIBLE);
-        mScoreText.setVisibility(View.VISIBLE);
+        indeterminateProgress.setVisibility(android.view.View.INVISIBLE);
+        mScoreText.setVisibility(android.view.View.VISIBLE);
 
         //todo: as we add functionality enable the colors for the other clickable textviews
 
@@ -352,6 +333,14 @@ public class ScoreActivity extends AppCompatActivity implements ScoreView, View.
     @Override
     public void setNavDrawerUserName(String userName) {
         mUsernameText.setText(userName);
+    }
+
+    private void loadLoginView() {
+        //prevents the user from going back to the main activity when pressing back
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
 }

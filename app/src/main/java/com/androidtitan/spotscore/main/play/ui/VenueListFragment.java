@@ -11,8 +11,8 @@ import android.view.ViewGroup;
 
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.BaseFragment;
+import com.androidtitan.spotscore.main.play.PlayMvp;
 import com.androidtitan.spotscore.main.play.adapter.VenueListAdapter;
-import com.androidtitan.spotscore.main.play.presenter.ScorePresenter;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -23,7 +23,7 @@ import butterknife.ButterKnife;
 public class VenueListFragment extends BaseFragment {
     private final String TAG = getClass().getSimpleName();
 
-    private ScorePresenter mScorePresenter;
+    private PlayMvp.Presenter mPlayPresenter;
 
     @Bind(R.id.list) RecyclerView mRecyclerView;
     private VenueListAdapter mAdapter;
@@ -37,7 +37,7 @@ public class VenueListFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mScorePresenter = ((ScoreActivity)getActivity()).getScorePresenter();
+        mPlayPresenter = ((ScoreActivity)getActivity()).getScorePresenter();
 
     }
 
@@ -51,7 +51,7 @@ public class VenueListFragment extends BaseFragment {
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
-        mAdapter = new VenueListAdapter(getActivity(), mScorePresenter, mScorePresenter.getNearbyVenuesList());
+        mAdapter = new VenueListAdapter(getActivity(), mPlayPresenter, mPlayPresenter.getNearbyVenuesList());
         mRecyclerView.setAdapter(mAdapter);
 
         return v;
