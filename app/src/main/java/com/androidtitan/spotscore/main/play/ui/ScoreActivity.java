@@ -27,6 +27,7 @@ import com.androidtitan.spotscore.common.data.Constants;
 import com.androidtitan.spotscore.main.App;
 import com.androidtitan.spotscore.main.login.ui.LoginActivity;
 import com.androidtitan.spotscore.main.play.PlayMvp;
+import com.androidtitan.spotscore.main.settings.ui.SettingsActivity;
 import com.firebase.client.Firebase;
 
 import javax.inject.Inject;
@@ -36,6 +37,9 @@ import butterknife.ButterKnife;
 
 public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, android.view.View.OnClickListener {
     private final String TAG = getClass().getSimpleName();
+
+    public static String LAUNCH_SETTINGS_EXTRA = "scoreactivity.launchsettingsextra";
+    public static int LAUNCH_SETTINGS = 1;
 
     @Inject
     PlayMvp.Presenter mPlayPresenter;
@@ -55,7 +59,7 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
     TextView mChallengeText;
     @Bind(R.id.saveTextView)
     TextView mSaveText;
-    @Bind(R.id.venues_card_view)
+    @Bind(R.id.venuesListTextView)
     RelativeLayout mVenuesCard;
     @Bind(R.id.venuesTextView)
     TextView mVenueText;
@@ -121,6 +125,17 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
 
                             switch (item.getItemId()) {
 
+
+
+
+                                case R.id.nav_drawer_profile:
+
+                                    Intent profileIntent = new Intent(ScoreActivity.this, SettingsActivity.class);
+                                    profileIntent.putExtra(LAUNCH_SETTINGS_EXTRA, LAUNCH_SETTINGS);
+                                    startActivity(profileIntent);
+
+                                    break;
+
                                 case R.id.nav_drawer_logout:
 
                                     mRef.unauth();
@@ -184,7 +199,7 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
                             .setAction("Action", null).show();
                     break;
 
-                case R.id.venues_card_view:
+                case R.id.venuesListTextView:
                     mPlayPresenter.showFragment(new VenueListFragment(), null);
 
                     break;

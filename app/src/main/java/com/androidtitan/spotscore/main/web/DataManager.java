@@ -10,6 +10,7 @@ import com.androidtitan.spotscore.main.data.User;
 import com.androidtitan.spotscore.main.data.Venue;
 import com.androidtitan.spotscore.main.data.VenueResponse;
 import com.androidtitan.spotscore.main.play.PlayMvp;
+import com.androidtitan.spotscore.main.settings.SettingsMvp;
 import com.androidtitan.spotscore.main.web.deserializers.DetailedResponseDeserializer;
 import com.androidtitan.spotscore.main.web.deserializers.ResponseDeserializer;
 import com.androidtitan.spotscore.main.web.deserializers.VenueDeserializer;
@@ -38,7 +39,7 @@ import rx.schedulers.Schedulers;
 /**
  * Created by amohnacs on 5/3/16.
  */
-public class DataManager implements PlayMvp.Model {
+public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
     private final String TAG = getClass().getSimpleName();
 
     private Context mContext;

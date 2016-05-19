@@ -64,6 +64,7 @@ dependencies {
     compile 'io.reactivex:rxjava:1.0.10'
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'de.hdodenhof:circleimageview:2.0.0'
 }
 /*
 If we wanted to be selective with our Google Play Services in order to limit the size of our application,

@@ -294,7 +294,7 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
     @Override
     public void setNavHeaderImageView(ImageView imageView) {
         Glide.with(mContext)
-                .load("https://unsplash.it/200/200/?random")
+                .load("https://unsplash.it/200/200/?random&blur")
                 .skipMemoryCache( true )
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(imageView);
