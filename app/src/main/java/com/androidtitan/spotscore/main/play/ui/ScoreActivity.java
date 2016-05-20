@@ -2,6 +2,7 @@ package com.androidtitan.spotscore.main.play.ui;
 
 import android.animation.ValueAnimator;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -25,6 +26,7 @@ import android.widget.TextView;
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.data.Constants;
 import com.androidtitan.spotscore.main.App;
+import com.androidtitan.spotscore.main.data.User;
 import com.androidtitan.spotscore.main.login.ui.LoginActivity;
 import com.androidtitan.spotscore.main.play.PlayMvp;
 import com.androidtitan.spotscore.main.settings.ui.SettingsActivity;
@@ -45,7 +47,7 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
     PlayMvp.Presenter mPlayPresenter;
 
     private Firebase mRef = new Firebase(Constants.FIREBASE_URL);
-    private String mUserId;
+    private User mUser;
 
     ActionBarDrawerToggle mActionToggle;
     @Bind(R.id.activity_drawer_layout)
@@ -54,6 +56,7 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
     NavigationView mNavigation;
     private ImageView mNavDrawerHeaderImage;
     private TextView mUsernameText;
+    private ImageView mProfileImage;
 
     @Bind(R.id.challengeTextView)
     TextView mChallengeText;
@@ -72,7 +75,6 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
     FloatingActionButton mLocationFab;
 
     private boolean mScoreIsLoaded = false;
-    private boolean mFragmentIsShown = false;
 
 
     @Override
@@ -85,97 +87,95 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
         mPlayPresenter.attachView(this);
         mPlayPresenter.takeActivity(ScoreActivity.this);
 
-        /**
-         * checking for authentication
-         */
+        mUser = User.getInstance();
 
-            mUserId = mRef.getAuth().getUid();
-            mPlayPresenter.setNavDrawerUserName(mUserId);
+        mPlayPresenter.setUpUserProfile();
 
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
-            Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
-            setSupportActionBar(mToolbar);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setHomeButtonEnabled(true);
+        android.view.View headerView = mNavigation.getHeaderView(0);
+        mUsernameText = (TextView) headerView.findViewById(R.id.nav_drawer_header_username);
+        mNavDrawerHeaderImage = (ImageView) headerView.findViewById(R.id.nav_header_bg_imageView);
+        mPlayPresenter.setNavHeaderImageView(mNavDrawerHeaderImage);
+        mProfileImage = (ImageView) headerView.findViewById(R.id.profileCircleImageView);
+        //todo: mProfileImage.setImageBitmap(mUser.getProfileImage());
 
-            android.view.View headerView = mNavigation.getHeaderView(0);
-            mUsernameText = (TextView) headerView.findViewById(R.id.nav_drawer_header_username);
-            mNavDrawerHeaderImage = (ImageView) headerView.findViewById(R.id.nav_header_bg_imageView);
-            mPlayPresenter.setNavHeaderImageView(mNavDrawerHeaderImage);
+        mActionToggle = new ActionBarDrawerToggle(
+                this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+        );
+        mActionToggle.setDrawerIndicatorEnabled(true);
+        mDrawerLayout.setDrawerListener(mActionToggle);
 
-            mActionToggle = new ActionBarDrawerToggle(
-                    this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close
-            );
-            mActionToggle.setDrawerIndicatorEnabled(true);
-            mDrawerLayout.setDrawerListener(mActionToggle);
+        mActionToggle.setToolbarNavigationClickListener(new android.view.View.OnClickListener() {
+            @Override
+            public void onClick(android.view.View v) {
+                Log.e(TAG, "HOME");
+            }
+        });
 
-            mActionToggle.setToolbarNavigationClickListener(new android.view.View.OnClickListener() {
-                @Override
-                public void onClick(android.view.View v) {
-                    Log.e(TAG, "HOME");
-                }
-            });
+        mNavigation.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem item) {
+                        //Handle switching Fragments here
+                        mDrawerLayout.closeDrawers();
 
-            mNavigation.setNavigationItemSelectedListener(
-                    new NavigationView.OnNavigationItemSelectedListener() {
-                        @Override
-                        public boolean onNavigationItemSelected(MenuItem item) {
-                            //Handle switching Fragments here
-                            mDrawerLayout.closeDrawers();
-
-                            switch (item.getItemId()) {
+                        switch (item.getItemId()) {
 
 
+                            case R.id.nav_drawer_profile:
 
+                                Intent profileIntent = new Intent(ScoreActivity.this, SettingsActivity.class);
+                                profileIntent.putExtra(LAUNCH_SETTINGS_EXTRA, LAUNCH_SETTINGS);
+                                startActivity(profileIntent);
 
-                                case R.id.nav_drawer_profile:
+                                break;
 
-                                    Intent profileIntent = new Intent(ScoreActivity.this, SettingsActivity.class);
-                                    profileIntent.putExtra(LAUNCH_SETTINGS_EXTRA, LAUNCH_SETTINGS);
-                                    startActivity(profileIntent);
+                            case R.id.nav_drawer_logout:
 
-                                    break;
+                                mRef.unauth();
+                                //todo: this needs to bounce off of our Presenter
+                                loadLoginView();
 
-                                case R.id.nav_drawer_logout:
+                                break;
 
-                                    mRef.unauth();
-                                    //todo: this needs to bounce off of our Presenter
-                                    loadLoginView();
-
-                                    break;
-
-                                default:
-                                    Log.e(TAG, "Incorrect nav drawer item selected");
-                                    return false;
-                            }
-
-                            return true;
+                            default:
+                                Log.e(TAG, "Incorrect nav drawer item selected");
+                                return false;
                         }
-                    });
 
-            //mLocationFab.hide();
-            mLocationFab.setOnClickListener(new android.view.View.OnClickListener() {
-                @Override
-                public void onClick(android.view.View v) {
-                    mScoreIsLoaded = false;
+                        return true;
+                    }
+                });
 
-                    mLocationFab.hide();
-                    mScoreText.setVisibility(android.view.View.INVISIBLE);
-                    indeterminateProgress.setVisibility(android.view.View.VISIBLE);
-                    mPlayPresenter.getLastKnownLocation();
-                    mPlayPresenter.calculateAndSetScore();
+        //mLocationFab.hide();
+        mLocationFab.setOnClickListener(new android.view.View.OnClickListener() {
+            @Override
+            public void onClick(android.view.View v) {
+                mScoreIsLoaded = false;
 
-                    //todo: as we add functionality disable the colors
+                mLocationFab.hide();
+                mScoreText.setVisibility(android.view.View.INVISIBLE);
+                indeterminateProgress.setVisibility(android.view.View.VISIBLE);
+                mPlayPresenter.getLastKnownLocation();
+                mPlayPresenter.calculateAndSetScore();
 
-                    mVenueText.setTextColor(ContextCompat.getColor(ScoreActivity.this, R.color.colorDivider));
-                }
-            });
+                //todo: as we add functionality disable the colors
 
-            mChallengeText.setOnClickListener(this);
-            mSaveText.setOnClickListener(this);
-            mVenuesCard.setOnClickListener(this);
+                mVenueText.setTextColor(ContextCompat.getColor(ScoreActivity.this, R.color.colorDivider));
+            }
+        });
+
+        mChallengeText.setOnClickListener(this);
+        mSaveText.setOnClickListener(this);
+        mVenuesCard.setOnClickListener(this);
 
 
+        //sets our user Model objects
+        mPlayPresenter.setUserProfile();
     }
 
     /**
@@ -190,6 +190,7 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
 
             switch (view.getId()) {
                 case R.id.saveTextView:
+
                     Snackbar.make(getCurrentFocus(), "Under Construction", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                     break;
@@ -346,8 +347,10 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
     }
 
     @Override
-    public void setNavDrawerUserName(String userName) {
-        mUsernameText.setText(userName);
+    public void onUserProfileSetFinished() {
+
+        mProfileImage.setImageBitmap(mUser.getProfileImage());
+        mUsernameText.setText(mUser.getEmail());
     }
 
     private void loadLoginView() {

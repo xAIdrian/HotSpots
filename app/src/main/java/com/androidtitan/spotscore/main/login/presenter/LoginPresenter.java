@@ -26,6 +26,15 @@ public class LoginPresenter extends BasePresenter<LoginMvp.View> implements Logi
 
     private LoginActivity mActivity;
 
+    //todo////////////////////////////////
+
+    /* todo
+            Upon login we need to pull information from shared preferences and firbase and populate
+            our user objects.
+     */
+
+    //todo///////////////////////////////
+
     @Inject
     public LoginPresenter(Context context) {
         mContext = context;

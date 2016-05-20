@@ -1,27 +1,45 @@
 package com.androidtitan.spotscore.main.settings.ui;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 
 import com.androidtitan.spotscore.R;
+import com.androidtitan.spotscore.main.App;
+import com.androidtitan.spotscore.main.data.User;
+import com.androidtitan.spotscore.main.play.PlayMvp;
 import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
 import com.androidtitan.spotscore.main.settings.SettingsMvp;
+import com.androidtitan.spotscore.main.settings.presenter.SettingsPresenter;
 
-public class SettingsActivity extends AppCompatActivity implements SettingsMvp.View, android.view.View.OnClickListener{
+import javax.inject.Inject;
 
+public class SettingsActivity extends AppCompatActivity implements SettingsMvp.View {
+    private final String TAG = getClass().getSimpleName();
+
+    @Inject
+    SettingsMvp.Presenter mSettingsPresenter;
 
     private ProfileFragment mProfileFrag;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        App.getAppComponent().inject(this);
+
+        mSettingsPresenter.attachView(this);
+        mSettingsPresenter.takeActivity(SettingsActivity.this);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if(getIntent().getExtras() != null) {
 
@@ -35,12 +53,23 @@ public class SettingsActivity extends AppCompatActivity implements SettingsMvp.V
 
         }
 
+        //todo: this needs to be replaced with a simple GET!
+        //mSettingsPresenter.getStoredProfileImageFromFirebase();
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
-    public void onClick(View v) {
+    protected void onDestroy() {
+        super.onDestroy();
+        mSettingsPresenter.detachView();
+    }
 
+    public SettingsMvp.Presenter getPresenter() {
+        return mSettingsPresenter;
+    }
+
+    @Override
+    public void setProfileImage(Bitmap bm) {
+        mProfileFrag.setProfileImage(bm);
     }
 }

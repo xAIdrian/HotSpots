@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -51,7 +52,7 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
     private static final int REQUEST_LOCATION = 1;
     private static final int REQUEST_CHECK_SETTINGS = 2;
 
-    @Inject
+    //@Inject
     PlayMvp.Model mDataManager;
 
     private Context mContext;
@@ -301,13 +302,18 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
     }
 
     @Override
-    public void setNavDrawerUserName(String userId) {
-        mDataManager.setNavDrawerUserName(userId, this);
+    public void setUpUserProfile() {
+        mDataManager.setUserProfile(this);
 
     }
 
     @Override
-    public void onUsernameFinished(String userName) {
-        getMvpView().setNavDrawerUserName(userName);
+    public void setUserProfile() {
+        mDataManager.setUserProfile(this);
+    }
+
+    @Override
+    public void onUserProfileSetFinished() {
+        getMvpView().onUserProfileSetFinished();
     }
 }

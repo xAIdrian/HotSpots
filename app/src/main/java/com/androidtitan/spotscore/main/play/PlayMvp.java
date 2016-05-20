@@ -1,5 +1,6 @@
 package com.androidtitan.spotscore.main.play;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.widget.ImageView;
@@ -21,10 +22,10 @@ public interface PlayMvp {
     interface Model {
 
         interface ScoreViewListener {
-            void onUsernameFinished(String userName);
+            void onUserProfileSetFinished();
         }
 
-        void setNavDrawerUserName(String userId, ScoreViewListener listener);
+        void setUserProfile(ScoreViewListener listener);
 
         Observable<Venue> getVenuesOneByOne(double latitude, double longitude);
         Observable<Venue> getAdditionalVenueInfo(String venueIdentifier);
@@ -35,7 +36,7 @@ public interface PlayMvp {
         void updateScore(double average);
         void showFragment(Fragment fragment);
 
-        void setNavDrawerUserName(String userName);
+        void onUserProfileSetFinished();
     }
 
     interface Presenter {
@@ -57,6 +58,8 @@ public interface PlayMvp {
         ArrayList<Venue> getNearbyVenuesList();
 
         void setNavHeaderImageView(ImageView mNavDrawerHeaderImage);
-        void setNavDrawerUserName(String mUserId);
+        void setUpUserProfile();
+
+        void setUserProfile();
     }
 }

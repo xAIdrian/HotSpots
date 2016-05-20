@@ -1,6 +1,9 @@
 package com.androidtitan.spotscore.main.web;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.util.Log;
 
 import com.androidtitan.spotscore.R;
@@ -45,6 +48,8 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
     private Context mContext;
     private Retrofit mRetrofit;
 
+    private Firebase mRef = new Firebase(Constants.FIREBASE_URL);
+    Firebase mRefUserBase;
     private User mUser;
 
     RetrofitEndpointInterface newsService;
@@ -53,12 +58,18 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
             observable -> observable.subscribeOn(Schedulers.newThread())
                                     .observeOn(AndroidSchedulers.mainThread());
 
+
+    Bitmap tempBitmap;
+    String tempEmail;
+
     @Inject
     public DataManager(Context context) {
 
         mContext = context;
 
         mUser = User.getInstance();
+        mUser.setUserId(mRef.getAuth().getUid());
+        mRefUserBase = new Firebase(Constants.FIREBASE_URL + "/users/" + mUser.getUserId());
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -74,23 +85,58 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
         newsService = mRetrofit.create(RetrofitEndpointInterface.class);
     }
 
+    private static GsonConverterFactory buildGsonConverter() {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        //adding custom deserializer
+        gsonBuilder.registerTypeAdapter(VenueResponse.class, new ResponseDeserializer());
+        gsonBuilder.registerTypeAdapter(DetailedVenueResponse.class, new DetailedResponseDeserializer());
+        gsonBuilder.registerTypeAdapter(Venue.class, new VenueDeserializer());
+        gsonBuilder.serializeNulls();
+        gsonBuilder.excludeFieldsWithoutExposeAnnotation();
+
+        Gson myGson = gsonBuilder.create();
+
+        return GsonConverterFactory.create(myGson);
+    }
+
     @SuppressWarnings("unchecked")
     private <T> Observable.Transformer<T, T> applySchedulers() {
         return (Observable.Transformer<T, T>) mScheduleTransformer;
     }
 
+
     @Override
-    public void setNavDrawerUserName(String userId, final ScoreViewListener listener) {
-        Firebase fb = new Firebase(Constants.FIREBASE_URL + "/users/" + userId + "/email");
+    public void setUserProfile(final ScoreViewListener listener) {
+
+        //todo: our FireBaseQueries are asynchronous so they are finishing after our call back down
+
+        mRefUserBase.child("profile_image").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                String base64Image = (String) dataSnapshot.getValue();
+                byte[] imageAsBytes = Base64.decode(base64Image.getBytes(), Base64.DEFAULT);
+                Bitmap bm = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
+
+                mUser.setProfileImage(bm);
+                listener.onUserProfileSetFinished();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Log.e(TAG, "onCancelled :: " + firebaseError);
+            }
+        });
 
         try {
             //this is used to populate using data from firebase
-            fb.addValueEventListener(new ValueEventListener() {
+            mRefUserBase.child("email").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
 
-                    mUser.setEmail(dataSnapshot.getValue().toString());
-                    listener.onUsernameFinished(mUser.getEmail());
+                    String temper = dataSnapshot.getValue().toString();
+                    mUser.setEmail(temper);
+                    listener.onUserProfileSetFinished();
                 }
 
                 @Override
@@ -101,6 +147,8 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
+
+
     }
 
     @Override
@@ -132,24 +180,44 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
 
     }
 
-    private static GsonConverterFactory buildGsonConverter() {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        //adding custom deserializer
-        gsonBuilder.registerTypeAdapter(VenueResponse.class, new ResponseDeserializer());
-        gsonBuilder.registerTypeAdapter(DetailedVenueResponse.class, new DetailedResponseDeserializer());
-        gsonBuilder.registerTypeAdapter(Venue.class, new VenueDeserializer());
-        gsonBuilder.serializeNulls();
-        gsonBuilder.excludeFieldsWithoutExposeAnnotation();
-
-        Gson myGson = gsonBuilder.create();
-
-        return GsonConverterFactory.create(myGson);
-    }
-
     private String getVersion() {
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         return sdf.format(date).toString();
+    }
+
+    @Override
+    public void saveProfileImageToFirebase(String base64Image) {
+
+        mRefUserBase.child("profile_image").setValue(base64Image, new Firebase.CompletionListener() {
+            @Override
+            public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+                if(firebaseError != null) {
+                    Log.e(TAG, "Error saving data");
+                } else {
+                    Log.e(TAG, "Success saving data");
+                }
+            }
+        });
+        Log.e(TAG, "Stored image " + base64Image.toString());
+    }
+
+    @Override
+    public void getProfileImageFromFirebase(SettingsViewListener listener) {
+
+        mRefUserBase.child("profile_image").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                String base64Image = (String) dataSnapshot.getValue();
+                listener.onProfileImageFinished(base64Image);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Log.e(TAG, "onCancelled :: " + firebaseError);
+            }
+        });
     }
 
 }

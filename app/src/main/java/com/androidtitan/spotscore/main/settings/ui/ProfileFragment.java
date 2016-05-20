@@ -1,11 +1,7 @@
 package com.androidtitan.spotscore.main.settings.ui;
 
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapRegionDecoder;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -18,10 +14,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.androidtitan.spotscore.R;
-import com.androidtitan.spotscore.utils.BitmapUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
+import com.androidtitan.spotscore.main.data.User;
+import com.androidtitan.spotscore.main.settings.SettingsMvp;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -31,14 +25,22 @@ public class ProfileFragment extends Fragment {
 
     private int PICK_IMAGE_REQUEST = 1;
 
+    private SettingsMvp.Presenter mPresenter;
+
+    private User mUser;
+
     @Bind(R.id.profileCircleImageView) ImageView mProfileImage;
 
     public ProfileFragment() {
+
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mPresenter = ((SettingsActivity)getActivity()).getPresenter();
+        mUser = User.getInstance();
 
     }
 
@@ -49,6 +51,7 @@ public class ProfileFragment extends Fragment {
         ButterKnife.bind(this, v);
 
 
+        mProfileImage.setImageBitmap(mUser.getProfileImage());
         mProfileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -82,22 +85,25 @@ public class ProfileFragment extends Fragment {
                          MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri),
                          mProfileImage.getWidth(), mProfileImage.getHeight(), false);
 
+                 /*This is used to load the bitmap in Regions.  Used for large images.
+
                  InputStream inputStream = null;
                  ContentResolver contentResolver = getActivity().getContentResolver();
                  inputStream = contentResolver.openInputStream(uri);
                  BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(inputStream, false);
-                 Bitmap region = decoder.decodeRegion(new Rect(10, 10, 50, 50), null);
-                 int i = 0;
-
-
-                 //todo:mPresenter.saveImageToFireBase(Bitmap bitmap)
-                 //     todo: have our NavDrawer image call set our Firebase image
+                 Bitmap region = decoder.decodeRegion(new Rect(10, 10, 50, 50), null);*/
 
                  mProfileImage.setImageBitmap(imageBitmap);
+                 Log.e(TAG, String.valueOf(mPresenter == null));
+                 mPresenter.storeProfileImageToFirebase(imageBitmap);
 
              } catch (Exception e) {
                 e.printStackTrace();
              }
          }
         }
+
+    public void setProfileImage(Bitmap bm) {
+        mProfileImage.setImageBitmap(bm);
+    }
 }
