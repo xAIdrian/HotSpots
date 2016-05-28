@@ -49,7 +49,8 @@ public class SettingsActivity extends AppCompatActivity implements SettingsMvp.V
                 FragmentTransaction fragTran = getSupportFragmentManager().beginTransaction();
                 fragTran.add(R.id.fragment_container, mProfileFrag)
                         .addToBackStack(null).commit();
-            }
+
+            } //else if
 
         }
 
@@ -62,6 +63,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsMvp.V
     protected void onDestroy() {
         super.onDestroy();
         mSettingsPresenter.detachView();
+        mSettingsPresenter = null;
     }
 
     public SettingsMvp.Presenter getPresenter() {

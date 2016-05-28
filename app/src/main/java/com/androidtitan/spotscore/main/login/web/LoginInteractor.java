@@ -1,12 +1,20 @@
 package com.androidtitan.spotscore.main.login.web;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.util.Log;
 
+import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.data.Constants;
+import com.androidtitan.spotscore.main.data.User;
 import com.androidtitan.spotscore.main.login.LoginMvp;
 import com.firebase.client.AuthData;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,11 +25,21 @@ import java.util.Map;
 public class LoginInteractor implements LoginMvp.Model {
     private final String TAG = getClass().getSimpleName();
 
+    private Context mContext;
+
+    private final User mUser;
+    private Firebase mRefUserBase;
+
     Firebase mRef = new Firebase(Constants.FIREBASE_URL);
 
     private boolean mAuthenticationSuccess;
 
-    public LoginInteractor() {
+    public LoginInteractor(Context context) {
+
+        mContext = context;
+
+        mUser = User.getInstance();
+        mRefUserBase = new Firebase(Constants.FIREBASE_URL + "/users/" + mUser.getUserId());
     }
 
     @Override
@@ -35,7 +53,8 @@ public class LoginInteractor implements LoginMvp.Model {
             public void onAuthenticated(AuthData authData) { //successful
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("email", emailAddress);
-                mRef.child("users").child(authData.getUid()).setValue(map); //uid is the unique id obtained from Auth
+                //todo: this bad bitch is causing me problems...must have spent some time in the dog fighting rings of Mexico.
+                mRef.child("users").child(authData.getUid()).updateChildren(map); //uid is the unique id obtained from Auth
 
                 Log.e(TAG, "Success!");
 

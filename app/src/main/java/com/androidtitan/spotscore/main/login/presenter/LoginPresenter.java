@@ -38,7 +38,7 @@ public class LoginPresenter extends BasePresenter<LoginMvp.View> implements Logi
     @Inject
     public LoginPresenter(Context context) {
         mContext = context;
-        this.mInteractor = new LoginInteractor();
+        this.mInteractor = new LoginInteractor(context);
     }
 
     @Override

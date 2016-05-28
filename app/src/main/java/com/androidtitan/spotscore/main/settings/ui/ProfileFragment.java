@@ -2,6 +2,7 @@ package com.androidtitan.spotscore.main.settings.ui;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -11,14 +12,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.main.data.User;
 import com.androidtitan.spotscore.main.settings.SettingsMvp;
+import com.androidtitan.spotscore.utils.BitmapUtils;
+import com.jakewharton.rxbinding.widget.RxTextView;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import rx.Observable;
 
 public class ProfileFragment extends Fragment {
     private final String TAG = getClass().getSimpleName();
@@ -30,6 +39,7 @@ public class ProfileFragment extends Fragment {
     private User mUser;
 
     @Bind(R.id.profileCircleImageView) ImageView mProfileImage;
+    @Bind(R.id.emailInput) EditText mEmailEdit;
 
     public ProfileFragment() {
 
@@ -63,6 +73,12 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+        RxTextView.textChanges(mEmailEdit)
+                .debounce(1000, TimeUnit.MILLISECONDS)
+                .map(initTextInput -> (initTextInput.length() == 0))
+                .distinctUntilChanged()
+                .subscribe(textInput -> Log.e(TAG, textInput.toString()));
+
         return v;
     }
 
@@ -76,26 +92,34 @@ public class ProfileFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-         if (requestCode == PICK_IMAGE_REQUEST && resultCode == getActivity().RESULT_OK && data != null && data.getData() != null) {
+         if (requestCode == PICK_IMAGE_REQUEST && resultCode == getActivity().RESULT_OK
+                 && data != null && data.getData() != null) {
 
              Uri uri = data.getData();
              try {
 
-                 Bitmap imageBitmap = Bitmap.createScaledBitmap(
+                 Bitmap startBitmap = Bitmap.createScaledBitmap(
                          MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri),
                          mProfileImage.getWidth(), mProfileImage.getHeight(), false);
 
-                 /*This is used to load the bitmap in Regions.  Used for large images.
 
-                 InputStream inputStream = null;
-                 ContentResolver contentResolver = getActivity().getContentResolver();
-                 inputStream = contentResolver.openInputStream(uri);
-                 BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(inputStream, false);
-                 Bitmap region = decoder.decodeRegion(new Rect(10, 10, 50, 50), null);*/
+                 Uri tempUri = BitmapUtils.getImageUri(getActivity(), startBitmap);
+                 String path = BitmapUtils.getRealPathFromURI(getActivity(), tempUri);
+
+                 //get bitmap orientation from EXIF
+                 ExifInterface exif = null;
+                 try {
+                    exif = new ExifInterface(path);
+                 } catch (IOException e) {
+                    e.printStackTrace();
+                 }
+                 int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                         ExifInterface.ORIENTATION_UNDEFINED);
+                 Bitmap imageBitmap = BitmapUtils.rotateBitmap(startBitmap, orientation);
 
                  mProfileImage.setImageBitmap(imageBitmap);
                  Log.e(TAG, String.valueOf(mPresenter == null));
-                 mPresenter.storeProfileImageToFirebase(imageBitmap);
+                 mPresenter.storeProfileImageToFirebase(startBitmap);
 
              } catch (Exception e) {
                 e.printStackTrace();
@@ -107,3 +131,11 @@ public class ProfileFragment extends Fragment {
         mProfileImage.setImageBitmap(bm);
     }
 }
+
+/*This is used to load the bitmap in Regions.  Used for large images.
+
+                 InputStream inputStream = null;
+                 ContentResolver contentResolver = getActivity().getContentResolver();
+                 inputStream = contentResolver.openInputStream(uri);
+                 BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(inputStream, false);
+                 Bitmap region = decoder.decodeRegion(new Rect(10, 10, 50, 50), null);*/

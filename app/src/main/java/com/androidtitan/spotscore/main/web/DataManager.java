@@ -27,6 +27,8 @@ import com.google.gson.GsonBuilder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import javax.inject.Inject;
 
@@ -56,7 +58,7 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
 
     private final Observable.Transformer<Observable, Observable> mScheduleTransformer =
             observable -> observable.subscribeOn(Schedulers.newThread())
-                                    .observeOn(AndroidSchedulers.mainThread());
+                    .observeOn(AndroidSchedulers.mainThread());
 
 
     Bitmap tempBitmap;
@@ -106,52 +108,6 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
 
 
     @Override
-    public void setUserProfile(final ScoreViewListener listener) {
-
-        //todo: our FireBaseQueries are asynchronous so they are finishing after our call back down
-
-        mRefUserBase.child("profile_image").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                String base64Image = (String) dataSnapshot.getValue();
-                byte[] imageAsBytes = Base64.decode(base64Image.getBytes(), Base64.DEFAULT);
-                Bitmap bm = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
-
-                mUser.setProfileImage(bm);
-                listener.onUserProfileSetFinished();
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                Log.e(TAG, "onCancelled :: " + firebaseError);
-            }
-        });
-
-        try {
-            //this is used to populate using data from firebase
-            mRefUserBase.child("email").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    String temper = dataSnapshot.getValue().toString();
-                    mUser.setEmail(temper);
-                    listener.onUserProfileSetFinished();
-                }
-
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-                    Log.e(TAG, "Cancelled :" + firebaseError);
-                }
-            });
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
-
-
-    }
-
-    @Override
     public Observable<Venue> getVenuesOneByOne(double latitude, double longitude) {
         //todo: create our observable and return it
 
@@ -162,7 +118,7 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
                 latitude + "," + longitude);
 
         return call.compose(applySchedulers())
-                        .flatMap(result -> Observable.from(result.getVenues()));
+                .flatMap(result -> Observable.from(result.getVenues()));
 
     }
 
@@ -180,6 +136,60 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
 
     }
 
+    @Override
+    public void setUserProfile(final ScoreViewListener listener) {
+
+        //todo: our FireBaseQueries are asynchronous so they are finishing after our call back down
+
+        mRefUserBase.child("profile_image").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                String base64Image = (String) dataSnapshot.getValue();
+
+                if(base64Image != null) {
+                    byte[] imageAsBytes = Base64.decode(base64Image.getBytes(), Base64.DEFAULT);
+                    Bitmap bm = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
+
+                    mUser.setProfileImage(bm);
+
+                } /*else {
+                    mUser.setProfileImage(BitmapFactory.decodeResource(
+                            mContext.getResources(), R.drawable.im_profile_placeholder));
+                }*/
+
+                listener.onUserProfileSetFinished();
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Log.e(TAG, "onCancelled :: " + firebaseError);
+            }
+        });
+
+        try {
+            //this is used to populate using data from firebase
+            mRefUserBase.child("email").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    String temper = dataSnapshot.getValue().toString();
+                    mUser.setEmail(temper);
+                    //listener.onUserProfileSetFinished();
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                    Log.e(TAG, "Cancelled :" + firebaseError);
+                }
+            });
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     private String getVersion() {
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -189,10 +199,13 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
     @Override
     public void saveProfileImageToFirebase(String base64Image) {
 
-        mRefUserBase.child("profile_image").setValue(base64Image, new Firebase.CompletionListener() {
+        HashMap<String,Object> imageMap = new HashMap<>();
+        imageMap.put("profile_image", base64Image);
+
+        mRefUserBase.updateChildren(imageMap, new Firebase.CompletionListener() {
             @Override
             public void onComplete(FirebaseError firebaseError, Firebase firebase) {
-                if(firebaseError != null) {
+                if (firebaseError != null) {
                     Log.e(TAG, "Error saving data");
                 } else {
                     Log.e(TAG, "Success saving data");

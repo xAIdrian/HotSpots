@@ -44,6 +44,7 @@ public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
     protected void onDestroy() {
         super.onDestroy();
         mLoginPresenter.detachView();
+        mLoginPresenter = null;
     }
 
     public LoginMvp.Presenter getPresenter() {
@@ -66,6 +67,9 @@ public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
 
     @Override
     public void launchScoreActivity() {
+
+        //mLoginPresenter.setupUser();
+
         Intent intent = new Intent(this, ScoreActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);

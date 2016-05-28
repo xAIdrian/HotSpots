@@ -2,7 +2,6 @@ package com.androidtitan.spotscore.main.play.ui;
 
 import android.animation.ValueAnimator;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -55,7 +54,7 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
     @Bind(R.id.activity_drawer_navigation_view)
     NavigationView mNavigation;
     private ImageView mNavDrawerHeaderImage;
-    private TextView mUsernameText;
+    private TextView mProfileText;
     private ImageView mProfileImage;
 
     @Bind(R.id.challengeTextView)
@@ -89,15 +88,13 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
 
         mUser = User.getInstance();
 
-        mPlayPresenter.setUpUserProfile();
-
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
         android.view.View headerView = mNavigation.getHeaderView(0);
-        mUsernameText = (TextView) headerView.findViewById(R.id.nav_drawer_header_username);
+        mProfileText = (TextView) headerView.findViewById(R.id.nav_drawer_header_username);
         mNavDrawerHeaderImage = (ImageView) headerView.findViewById(R.id.nav_header_bg_imageView);
         mPlayPresenter.setNavHeaderImageView(mNavDrawerHeaderImage);
         mProfileImage = (ImageView) headerView.findViewById(R.id.profileCircleImageView);
@@ -173,9 +170,16 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
         mSaveText.setOnClickListener(this);
         mVenuesCard.setOnClickListener(this);
 
+        //there is a chance there will be a NPE if it is the first run and the user profile has not been set up
+        /*if(mUser.getProfileImage() != null) {
+            mProfileImage.setImageBitmap(mUser.getProfileImage());
+            mProfileText.setText(mUser.getEmail());
 
-        //sets our user Model objects
-        mPlayPresenter.setUserProfile();
+        } else { //replace with our placeholder values
+            mProfileImage.setImageResource(R.drawable.im_profile_placeholder);
+*/
+            mPlayPresenter.setupUserProfile();
+        //}
     }
 
     /**
@@ -286,6 +290,7 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
     protected void onDestroy() {
         super.onDestroy();
         mPlayPresenter.detachView();
+        mPlayPresenter = null;
     }
 
     public PlayMvp.Presenter getScorePresenter() {
@@ -348,14 +353,14 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
 
     @Override
     public void onUserProfileSetFinished() {
-
         mProfileImage.setImageBitmap(mUser.getProfileImage());
-        mUsernameText.setText(mUser.getEmail());
+        mProfileText.setText(mUser.getEmail());
     }
 
+
     private void loadLoginView() {
-        //prevents the user from going back to the main activity when pressing back
         Intent intent = new Intent(this, LoginActivity.class);
+        //prevents the user from going back to the main activity when pressing back
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

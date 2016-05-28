@@ -44,5 +44,6 @@ public interface LoginMvp {
 
         void authenticateLogin(String email, String password);
         void createAuthenticatedUser(String email, String password);
+
     }
 }

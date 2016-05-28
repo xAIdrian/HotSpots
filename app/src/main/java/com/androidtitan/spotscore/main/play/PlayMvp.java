@@ -7,6 +7,7 @@ import android.widget.ImageView;
 
 import com.androidtitan.spotscore.common.MvpView;
 import com.androidtitan.spotscore.main.data.Venue;
+import com.androidtitan.spotscore.main.play.presenter.ScorePresenter;
 import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -25,10 +26,12 @@ public interface PlayMvp {
             void onUserProfileSetFinished();
         }
 
-        void setUserProfile(ScoreViewListener listener);
 
         Observable<Venue> getVenuesOneByOne(double latitude, double longitude);
         Observable<Venue> getAdditionalVenueInfo(String venueIdentifier);
+
+        void setUserProfile(ScoreViewListener listener);
+
     }
 
     interface View extends MvpView {
@@ -50,6 +53,8 @@ public interface PlayMvp {
         void disconnectGoogleApiClient();
         boolean googleApiIsConnected();
 
+        void setupUserProfile();
+
         void showFragment(Fragment fragment, Bundle arguments);
 
         LatLng getLastKnownLocation();
@@ -58,8 +63,6 @@ public interface PlayMvp {
         ArrayList<Venue> getNearbyVenuesList();
 
         void setNavHeaderImageView(ImageView mNavDrawerHeaderImage);
-        void setUpUserProfile();
 
-        void setUserProfile();
     }
 }

@@ -1,4 +1,4 @@
-package com.androidtitan.spotscore.main.login.ui;
+package com.androidtitan.spotscore.main;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.data.Constants;
+import com.androidtitan.spotscore.main.login.ui.LoginActivity;
 import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
 import com.firebase.client.Firebase;
 

@@ -81,7 +81,7 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
         setupLocationRequest();
     }
 
-    @Override
+    @Override //todo: can we inject this into our shit
     public void attachView(PlayMvp.View mvpView) {
         super.attachView(mvpView);
     }
@@ -144,6 +144,25 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
         Log.d(TAG, "Location services have been suspended : " + i);
     }
 
+    @Override
+    public void setupUserProfile() {
+        mDataManager.setUserProfile(this);
+
+    }
+
+    @Override
+    public void onUserProfileSetFinished() {
+        getMvpView().onUserProfileSetFinished();
+    }
+
+    @Override
+    public void setNavHeaderImageView(ImageView imageView) {
+        Glide.with(mContext)
+                .load("https://unsplash.it/200/200/?random&blur")
+                .skipMemoryCache( true )
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .into(imageView);
+    }
     /**
      * Pretty self explanatory yeah?
      * @return the user's current location
@@ -265,7 +284,11 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
                     public void onCompleted() {
                         Log.d(TAG, "Observable complete");
 
-                        getMvpView().updateScore(calcAverage / calcCount);
+                        try {
+                            getMvpView().updateScore(calcAverage / calcCount);
+                        } catch (NullPointerException e) {
+                            e.printStackTrace();
+                        }
                     }
 
                     @Override
@@ -292,28 +315,6 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
         return mVenueList;
     }
 
-    @Override
-    public void setNavHeaderImageView(ImageView imageView) {
-        Glide.with(mContext)
-                .load("https://unsplash.it/200/200/?random&blur")
-                .skipMemoryCache( true )
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .into(imageView);
-    }
 
-    @Override
-    public void setUpUserProfile() {
-        mDataManager.setUserProfile(this);
 
-    }
-
-    @Override
-    public void setUserProfile() {
-        mDataManager.setUserProfile(this);
-    }
-
-    @Override
-    public void onUserProfileSetFinished() {
-        getMvpView().onUserProfileSetFinished();
-    }
 }
