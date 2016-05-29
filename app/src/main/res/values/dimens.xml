@@ -24,7 +24,7 @@
 
     <dimen name="card_margin">12dp</dimen>
     <dimen name="card_margin_half">6dp</dimen>
-    <dimen name="app_bar_height">250dp</dimen>
+    <dimen name="app_bar_height">275dp</dimen>
     <dimen name="text_margin">16dp</dimen>
 
 </resources>

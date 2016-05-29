@@ -1,7 +1,10 @@
 package com.androidtitan.spotscore.main.settings.ui;
 
 import android.content.Intent;
+
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -95,36 +98,11 @@ public class ProfileFragment extends Fragment {
          if (requestCode == PICK_IMAGE_REQUEST && resultCode == getActivity().RESULT_OK
                  && data != null && data.getData() != null) {
 
-             Uri uri = data.getData();
-             try {
+             Uri imageUri = data.getData();
+             mPresenter.storeProfileImageToFirebase(mProfileImage, imageUri);
 
-                 Bitmap startBitmap = Bitmap.createScaledBitmap(
-                         MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri),
-                         mProfileImage.getWidth(), mProfileImage.getHeight(), false);
-
-
-                 Uri tempUri = BitmapUtils.getImageUri(getActivity(), startBitmap);
-                 String path = BitmapUtils.getRealPathFromURI(getActivity(), tempUri);
-
-                 //get bitmap orientation from EXIF
-                 ExifInterface exif = null;
-                 try {
-                    exif = new ExifInterface(path);
-                 } catch (IOException e) {
-                    e.printStackTrace();
-                 }
-                 int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
-                         ExifInterface.ORIENTATION_UNDEFINED);
-                 Bitmap imageBitmap = BitmapUtils.rotateBitmap(startBitmap, orientation);
-
-                 mProfileImage.setImageBitmap(imageBitmap);
-                 mPresenter.storeProfileImageToFirebase(startBitmap);
-
-             } catch (Exception e) {
-                e.printStackTrace();
-             }
          }
-        }
+    }
 
     public void setProfileImage(Bitmap bm) {
         mProfileImage.setImageBitmap(bm);

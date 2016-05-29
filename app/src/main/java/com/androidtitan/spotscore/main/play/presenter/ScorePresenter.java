@@ -152,7 +152,11 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
 
     @Override
     public void onUserProfileSetFinished() {
-        getMvpView().onUserProfileSetFinished();
+        try {
+            getMvpView().onUserProfileSetFinished();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

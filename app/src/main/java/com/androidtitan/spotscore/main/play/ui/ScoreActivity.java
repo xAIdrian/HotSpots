@@ -99,10 +99,9 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
         mNavDrawerHeaderImage = (ImageView) headerView.findViewById(R.id.nav_header_bg_imageView);
         mPlayPresenter.setNavHeaderImageView(mNavDrawerHeaderImage);
         mProfileImage = (ImageView) headerView.findViewById(R.id.profileCircleImageView);
-        //todo: mProfileImage.setImageBitmap(mUser.getProfileImage());
 
-        GridLayoutManager linearLayoutManager = new GridLayoutManager(this, 1);
-        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
         mAdapter = new ScoreOptionsAdapter(this, mPlayPresenter);
@@ -129,8 +128,6 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
                         mDrawerLayout.closeDrawers();
 
                         switch (item.getItemId()) {
-
-
                             case R.id.nav_drawer_profile:
 
                                 Intent profileIntent = new Intent(ScoreActivity.this, SettingsActivity.class);
@@ -173,18 +170,7 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
                 //todo mVenueText.setTextColor(ContextCompat.getColor(ScoreActivity.this, R.color.colorDivider));
             }
         });
-
-
-        //there is a chance there will be a NPE if it is the first run and the user profile has not been set up
-        /*if(mUser.getProfileImage() != null) {
-            mProfileImage.setImageBitmap(mUser.getProfileImage());
-            mProfileText.setText(mUser.getEmail());
-
-        } else { //replace with our placeholder values
-            mProfileImage.setImageResource(R.drawable.im_profile_placeholder);
-*/
             mPlayPresenter.setupUserProfile();
-        //}
     }
 
     /**

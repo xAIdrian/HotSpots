@@ -1,6 +1,8 @@
 package com.androidtitan.spotscore.main.settings;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.widget.ImageView;
 
 import com.androidtitan.spotscore.common.MvpView;
 import com.androidtitan.spotscore.main.settings.ui.SettingsActivity;
@@ -31,7 +33,7 @@ public interface SettingsMvp {
         void detachView();
         void takeActivity(SettingsActivity activity);
 
-        void storeProfileImageToFirebase(Bitmap bm);
+        void storeProfileImageToFirebase(ImageView imageView, Uri uri);
         void getStoredProfileImageFromFirebase();
 
 
