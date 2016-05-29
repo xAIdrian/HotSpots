@@ -158,7 +158,9 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
                             mContext.getResources(), R.drawable.im_profile_placeholder));
                 }*/
 
-                listener.onUserProfileSetFinished();
+                if (listener != null) {
+                    listener.onUserProfileSetFinished();
+                }
 
             }
 

@@ -15,10 +15,16 @@
 
 
     <dimen name="landing_title_text">40dp</dimen>
-    <dimen name="score_number_text">100dp</dimen>
+    <dimen name="score_number_text">64dp</dimen>
     <dimen name="venue_rating_text">35dp</dimen>
+    <dimen name="card_size">150dp</dimen>
 
     <dimen name="tight_margin">4dp</dimen>
     <dimen name="default_margin">8dp</dimen>
+
+    <dimen name="card_margin">12dp</dimen>
+    <dimen name="card_margin_half">6dp</dimen>
+    <dimen name="app_bar_height">250dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
 
 </resources>

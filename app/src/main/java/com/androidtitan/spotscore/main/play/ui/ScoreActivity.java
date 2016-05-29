@@ -13,9 +13,13 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -28,6 +32,8 @@ import com.androidtitan.spotscore.main.App;
 import com.androidtitan.spotscore.main.data.User;
 import com.androidtitan.spotscore.main.login.ui.LoginActivity;
 import com.androidtitan.spotscore.main.play.PlayMvp;
+import com.androidtitan.spotscore.main.play.adapter.ScoreOptionsAdapter;
+import com.androidtitan.spotscore.main.play.adapter.VenueListAdapter;
 import com.androidtitan.spotscore.main.settings.ui.SettingsActivity;
 import com.firebase.client.Firebase;
 
@@ -57,21 +63,16 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
     private TextView mProfileText;
     private ImageView mProfileImage;
 
-    @Bind(R.id.challengeTextView)
-    TextView mChallengeText;
-    @Bind(R.id.saveTextView)
-    TextView mSaveText;
-    @Bind(R.id.venuesListTextView)
-    RelativeLayout mVenuesCard;
-    @Bind(R.id.venuesTextView)
-    TextView mVenueText;
-
     @Bind(R.id.scoreIndProgressBar)
     ProgressBar indeterminateProgress;
     @Bind(R.id.scoreTextView)
     TextView mScoreText;
     @Bind(R.id.locationFab)
+
     FloatingActionButton mLocationFab;
+    @Bind(R.id.scoreList)
+    RecyclerView mRecyclerView;
+    private ScoreOptionsAdapter mAdapter;
 
     private boolean mScoreIsLoaded = false;
 
@@ -99,6 +100,13 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
         mPlayPresenter.setNavHeaderImageView(mNavDrawerHeaderImage);
         mProfileImage = (ImageView) headerView.findViewById(R.id.profileCircleImageView);
         //todo: mProfileImage.setImageBitmap(mUser.getProfileImage());
+
+        GridLayoutManager linearLayoutManager = new GridLayoutManager(this, 1);
+        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+
+        mAdapter = new ScoreOptionsAdapter(this, mPlayPresenter);
+        mRecyclerView.setAdapter(mAdapter);
 
         mActionToggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close
@@ -162,13 +170,10 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
 
                 //todo: as we add functionality disable the colors
 
-                mVenueText.setTextColor(ContextCompat.getColor(ScoreActivity.this, R.color.colorDivider));
+                //todo mVenueText.setTextColor(ContextCompat.getColor(ScoreActivity.this, R.color.colorDivider));
             }
         });
 
-        mChallengeText.setOnClickListener(this);
-        mSaveText.setOnClickListener(this);
-        mVenuesCard.setOnClickListener(this);
 
         //there is a chance there will be a NPE if it is the first run and the user profile has not been set up
         /*if(mUser.getProfileImage() != null) {
@@ -190,7 +195,7 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
     @Override
     public void onClick(android.view.View view) {
 
-        if (mScoreIsLoaded) {
+        /*if (mScoreIsLoaded) {
 
             switch (view.getId()) {
                 case R.id.saveTextView:
@@ -205,11 +210,12 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
                     break;
 
                 case R.id.venuesListTextView:
-                    mPlayPresenter.showFragment(new VenueListFragment(), null);
+                    //todo: move this down to the adapter
+
 
                     break;
             }
-        }
+        }*/
     }
 
     @Override
@@ -331,7 +337,7 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
 
         //todo: as we add functionality enable the colors for the other clickable textviews
 
-        mVenueText.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        //mVenueText.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
     }
 
     @Override

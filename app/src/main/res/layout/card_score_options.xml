@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/placeCard"
+    android:layout_width="@dimen/card_size"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/card_margin"
+    android:layout_marginEnd="@dimen/card_margin"
+    android:layout_marginStart="@dimen/card_margin"
+    android:layout_marginBottom="@dimen/card_margin"
+    android:background="@drawable/bg_rounded_corner_black"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?selectableItemBackground">
+
+    <ImageView
+        android:id="@+id/scoreOptionImageView"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_centerInParent="true"
+        android:layout_margin="16dp" />
+
+    <TextView
+        android:id="@+id/scoreOptionsTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/scoreOptionImageView"
+        android:layout_centerHorizontal="true"
+        android:padding="8dp"
+        android:layout_margin="16dp"
+        android:text="@string/placeholder"
+        android:textStyle="bold" />
+
+</RelativeLayout>

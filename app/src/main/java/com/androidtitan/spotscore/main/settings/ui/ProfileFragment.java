@@ -118,7 +118,6 @@ public class ProfileFragment extends Fragment {
                  Bitmap imageBitmap = BitmapUtils.rotateBitmap(startBitmap, orientation);
 
                  mProfileImage.setImageBitmap(imageBitmap);
-                 Log.e(TAG, String.valueOf(mPresenter == null));
                  mPresenter.storeProfileImageToFirebase(startBitmap);
 
              } catch (Exception e) {
