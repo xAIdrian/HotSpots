@@ -8,18 +8,15 @@ import android.graphics.Matrix;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.androidtitan.spotscore.common.BasePresenter;
 import com.androidtitan.spotscore.main.data.User;
-import com.androidtitan.spotscore.main.play.PlayMvp;
-import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
+import com.androidtitan.spotscore.main.settings.CredentialsFragmentInterface;
 import com.androidtitan.spotscore.main.settings.SettingsMvp;
 import com.androidtitan.spotscore.main.settings.ui.SettingsActivity;
 import com.androidtitan.spotscore.utils.BitmapUtils;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,12 +28,14 @@ import javax.inject.Inject;
  */
 public class SettingsPresenter extends BasePresenter<SettingsMvp.View> implements SettingsMvp.Presenter,
     SettingsMvp.Model.SettingsViewListener {
+    private final String TAG = getClass().getSimpleName();
 
     //@Inject
     SettingsMvp.Model mDataManager;
 
     private Context mContext;
     private SettingsActivity mActivity;
+    private CredentialsFragmentInterface mDialogInterface;
 
     private User mUser;
 
@@ -63,6 +62,11 @@ public class SettingsPresenter extends BasePresenter<SettingsMvp.View> implement
     @Override
     public void takeActivity(SettingsActivity activity) {
         mActivity = activity;
+    }
+
+    @Override
+    public void takeDialogInterface(CredentialsFragmentInterface credentialsInterface) {
+        mDialogInterface = credentialsInterface;
     }
 
     /**
@@ -118,8 +122,13 @@ public class SettingsPresenter extends BasePresenter<SettingsMvp.View> implement
     }
 
     @Override
-    public void getStoredProfileImageFromFirebase() {
-        mDataManager.getProfileImageFromFirebase(this);
+    public void storeProfileInformationToFirebase(String username, String name, String location) {
+        mDataManager.saveProfileInformationToFirebase(this, username, name, location);
+    }
+
+    @Override
+    public void changeUserCredentials(String email, String existingPassword, String newPassword) {
+        mDataManager.changeUserCredentials(this, email, existingPassword, newPassword);
     }
 
     @Override
@@ -129,5 +138,23 @@ public class SettingsPresenter extends BasePresenter<SettingsMvp.View> implement
         Bitmap bm = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
 
         getMvpView().setProfileImage(bm);
+    }
+
+    @Override
+    public void onProfileInformationFinished() {
+        getMvpView().showSnackbar("Profile updated successfully!");
+    }
+
+    @Override
+    public void onCredentialsChangeFinished(boolean results) {
+
+        if (results) {
+//            Log.e(TAG, "credential change success");
+            mDialogInterface.showSnackbar("Credentials updated successfully!");
+        } else {
+//            Log.e(TAG, "credential change failure");
+            mDialogInterface.showSnackbar("Something went wrong. Please try again.");
+
+        }
     }
 }

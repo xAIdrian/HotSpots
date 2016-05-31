@@ -81,7 +81,7 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
         setupLocationRequest();
     }
 
-    @Override //todo: can we inject this into our shit
+    @Override
     public void attachView(PlayMvp.View mvpView) {
         super.attachView(mvpView);
     }
@@ -99,11 +99,13 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
 
     @Override
     public void connectGoogleApiClient() {
+        Log.d(TAG, "connectGoogleApiClient()");
         mGoogleApiClient.connect();
     }
 
     @Override
     public void disconnectGoogleApiClient() {
+        Log.d(TAG, "disconnectGoogleApiClient()");
         mGoogleApiClient.disconnect();
     }
 
@@ -136,7 +138,8 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(TAG, "Location services have been successfully connected");
 
-        //Log.e(TAG, String.valueOf(getLastKnownLocation()));
+//        getLastKnownLocation();
+        calculateAndSetScore();
     }
 
     @Override
@@ -158,7 +161,7 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
             e.printStackTrace();
         }
     }
-
+/*
     @Override
     public void setNavHeaderImageView(ImageView imageView) {
         Glide.with(mContext)
@@ -166,7 +169,7 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
                 .skipMemoryCache( true )
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(imageView);
-    }
+    }*/
     /**
      * Pretty self explanatory yeah?
      * @return the user's current location
@@ -203,12 +206,14 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
             if(grantResults.length == 1
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // We can now safely use the API we requested access to
-                //todo: same action as StatusCodes.SUCCESS
+                // same action as StatusCodes.SUCCESS
+                Log.d(TAG, "onRequestPermissionResult : StatusCode.SUCCESS");
 
                 calculateAndSetScore();
 
             } else {
                 //todo: Permission was denied or request was cancelled // kick them out of this activity
+                Log.d(TAG, "onRequestPermissionResult : StatusCode.FAIL");
             }
         }
     }
@@ -239,19 +244,17 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
                     case LocationSettingsStatusCodes.SUCCESS:
                         // All location settings are satisfied. The client can
                         // initialize location requests here.
-
-
-                        latLng = getLastKnownLocation();
+                        Log.d(TAG, "LocationSettingsStatusCodes.SUCCESS");
+//                        latLng = getLastKnownLocation();
                         calculateAndSetScore();
 
-
-                        //Log.e(TAG, "successful status codes " + String.valueOf(getLastKnownLocation()));
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         // Location settings are not satisfied, but this can be fixed
                         // by showing the user a dialog.
+                        Log.d(TAG, "LocationSettingsStatusCodes.RESOLUTION_REQUIRED");
                         try {
-                            // todo: Show the dialog by calling startResolutionForResult(),
+                            // Show the dialog by calling startResolutionForResult(),
                             // and check the result in onActivityResult().
                             status.startResolutionForResult(
                                     mActivity,
@@ -259,11 +262,13 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
 
                         } catch (IntentSender.SendIntentException e) {
                             // Ignore the error.
+                            e.printStackTrace();
                         }
                         break;
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                         // Location settings are not satisfied. However, we have no way
                         // to fix the settings so we won't show the dialog.
+                        Log.d(TAG, "LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
 
                         break;
                 }
@@ -278,6 +283,7 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
     @Override
     public void calculateAndSetScore() {
 
+        getLastKnownLocation();
         mVenueList = new ArrayList<Venue>();
 
         mDataManager.getVenuesOneByOne(latLng.latitude, latLng.longitude)

@@ -8,6 +8,7 @@ import com.androidtitan.spotscore.main.login.ui.LoginActivity;
 import com.androidtitan.spotscore.main.play.PlayMvp;
 import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
 import com.androidtitan.spotscore.main.settings.SettingsMvp;
+import com.androidtitan.spotscore.main.settings.ui.CredentialsFragmentDialog;
 import com.androidtitan.spotscore.main.settings.ui.SettingsActivity;
 
 import javax.inject.Singleton;
@@ -33,5 +34,7 @@ public interface AppComponent {
     void inject(LoginActivity activity);
     void inject(ScoreActivity activity);
     void inject(SettingsActivity activity);
+
+    void inject(CredentialsFragmentDialog fragment);
 
 }

@@ -2,6 +2,7 @@ package com.androidtitan.spotscore.main.settings.ui;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -73,5 +74,10 @@ public class SettingsActivity extends AppCompatActivity implements SettingsMvp.V
     @Override
     public void setProfileImage(Bitmap bm) {
         mProfileFrag.setProfileImage(bm);
+    }
+
+    @Override
+    public void showSnackbar(String message) {
+        Snackbar.make(getCurrentFocus(), message, Snackbar.LENGTH_LONG).show();
     }
 }

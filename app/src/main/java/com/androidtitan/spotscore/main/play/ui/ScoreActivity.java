@@ -42,7 +42,7 @@ import javax.inject.Inject;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, android.view.View.OnClickListener {
+public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
     private final String TAG = getClass().getSimpleName();
 
     public static String LAUNCH_SETTINGS_EXTRA = "scoreactivity.launchsettingsextra";
@@ -97,7 +97,6 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
         android.view.View headerView = mNavigation.getHeaderView(0);
         mProfileText = (TextView) headerView.findViewById(R.id.nav_drawer_header_username);
         mNavDrawerHeaderImage = (ImageView) headerView.findViewById(R.id.nav_header_bg_imageView);
-        mPlayPresenter.setNavHeaderImageView(mNavDrawerHeaderImage);
         mProfileImage = (ImageView) headerView.findViewById(R.id.profileCircleImageView);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -162,7 +161,8 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
                 mLocationFab.hide();
                 mScoreText.setVisibility(android.view.View.INVISIBLE);
                 indeterminateProgress.setVisibility(android.view.View.VISIBLE);
-                mPlayPresenter.getLastKnownLocation();
+
+//                mPlayPresenter.getLastKnownLocation();
                 mPlayPresenter.calculateAndSetScore();
 
                 //todo: as we add functionality disable the colors
@@ -170,39 +170,11 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
                 //todo mVenueText.setTextColor(ContextCompat.getColor(ScoreActivity.this, R.color.colorDivider));
             }
         });
-            mPlayPresenter.setupUserProfile();
+
+        //additional tasks for setting things up.
+        mPlayPresenter.setupUserProfile();
     }
 
-    /**
-     * Used strictly for actions taken when clicking on cards
-     *
-     * @param view
-     */
-    @Override
-    public void onClick(android.view.View view) {
-
-        /*if (mScoreIsLoaded) {
-
-            switch (view.getId()) {
-                case R.id.saveTextView:
-
-                    Snackbar.make(getCurrentFocus(), "Under Construction", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                    break;
-
-                case R.id.challengeTextView:
-                    Snackbar.make(getCurrentFocus(), "Under Construction", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                    break;
-
-                case R.id.venuesListTextView:
-                    //todo: move this down to the adapter
-
-
-                    break;
-            }
-        }*/
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -253,6 +225,10 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
     @Override
     protected void onStart() {
         mPlayPresenter.connectGoogleApiClient();
+
+//        mPlayPresenter.getLastKnownLocation();
+        mPlayPresenter.calculateAndSetScore();
+
         super.onStart();
     }
 
@@ -260,7 +236,10 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
     protected void onResume() {
         super.onResume();
 
-        mPlayPresenter.getLastKnownLocation();
+        if (!mPlayPresenter.googleApiIsConnected()) {
+            mPlayPresenter.connectGoogleApiClient();
+        }
+//        mPlayPresenter.getLastKnownLocation();
         mPlayPresenter.calculateAndSetScore();
     }
 
@@ -320,10 +299,6 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
         mScoreText.setText(String.format("%.1f", average));
         indeterminateProgress.setVisibility(android.view.View.INVISIBLE);
         mScoreText.setVisibility(android.view.View.VISIBLE);
-
-        //todo: as we add functionality enable the colors for the other clickable textviews
-
-        //mVenueText.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
     }
 
     @Override
@@ -346,7 +321,7 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View, an
     @Override
     public void onUserProfileSetFinished() {
         mProfileImage.setImageBitmap(mUser.getProfileImage());
-        mProfileText.setText(mUser.getEmail());
+        mProfileText.setText(mUser.getName());
     }
 
 

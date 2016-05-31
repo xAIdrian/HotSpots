@@ -28,7 +28,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import javax.inject.Inject;
 
@@ -109,7 +108,6 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
 
     @Override
     public Observable<Venue> getVenuesOneByOne(double latitude, double longitude) {
-        //todo: create our observable and return it
 
         Observable<VenueResponse> call = newsService.getVenues(
                 mContext.getResources().getString(R.string.foursquare_client_id),
@@ -139,8 +137,6 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
     @Override
     public void setUserProfile(final ScoreViewListener listener) {
 
-        //todo: our FireBaseQueries are asynchronous so they are finishing after our call back down
-
         mRefUserBase.child("profile_image").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -153,10 +149,7 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
 
                     mUser.setProfileImage(bm);
 
-                } /*else {
-                    mUser.setProfileImage(BitmapFactory.decodeResource(
-                            mContext.getResources(), R.drawable.im_profile_placeholder));
-                }*/
+                }
 
                 if (listener != null) {
                     listener.onUserProfileSetFinished();
@@ -170,15 +163,17 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
             }
         });
 
+        //TODO: edit with changeEmail
         try {
             //this is used to populate using data from firebase
             mRefUserBase.child("email").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
 
-                    String temper = dataSnapshot.getValue().toString();
-                    mUser.setEmail(temper);
-                    //listener.onUserProfileSetFinished();
+                    if (dataSnapshot != null) {
+                        String temper = dataSnapshot.getValue().toString();
+                        mUser.setEmail(temper);
+                    }
                 }
 
                 @Override
@@ -186,6 +181,73 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
                     Log.e(TAG, "Cancelled :" + firebaseError);
                 }
             });
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+        try {
+
+            mRefUserBase.child("profile_location").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot != null) {
+                        String temper = dataSnapshot.getValue().toString();
+                        mUser.setLocation(temper);
+                    }
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                    Log.e(TAG, "Cancelled :" + firebaseError);
+                }
+            });
+
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+        try {
+
+            mRefUserBase.child("profile_name").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot != null) {
+                        String temper = dataSnapshot.getValue().toString();
+                        mUser.setName(temper);
+
+                        if (listener != null) {
+                            listener.onUserProfileSetFinished();
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                    Log.e(TAG, "Cancelled :" + firebaseError);
+                }
+            });
+
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+        try {
+
+            mRefUserBase.child("profile_username").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot != null) {
+                        String temper = dataSnapshot.getValue().toString();
+                        mUser.setUsername(temper);
+                    }
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+
+                }
+            });
+
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
@@ -218,6 +280,64 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
     }
 
     @Override
+    public void saveProfileInformationToFirebase(SettingsViewListener listener, String username, String name, String location) {
+
+        HashMap<String, Object> profileMap = new HashMap<>();
+        profileMap.put("profile_username", username);
+        profileMap.put("profile_name", name);
+        profileMap.put("profile_location", location);
+
+        mRefUserBase.updateChildren(profileMap, new Firebase.CompletionListener() {
+            @Override
+            public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+                if (firebaseError != null) {
+                    Log.e(TAG, "Error saving data");
+                } else {
+                    Log.e(TAG, "Success saving data");
+                    listener.onProfileInformationFinished();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void changeUserCredentials(SettingsViewListener listener, String email, String existingPassword, String newPassword) {
+
+        //if this email is different that mUser.getEmail then we are going to call changeEmail
+        if (!email.equals(mUser.getEmail())) {
+            mRef.changeEmail(mUser.getEmail(), existingPassword, email, new Firebase.ResultHandler() {
+                @Override
+                public void onSuccess() {
+
+                    mUser.setEmail(email);
+                    listener.onCredentialsChangeFinished(true);
+                }
+
+                @Override
+                public void onError(FirebaseError firebaseError) {
+                    listener.onCredentialsChangeFinished(false);
+                    firebaseError.toException().printStackTrace();
+                }
+            });
+        }
+
+        if (!existingPassword.isEmpty() && !newPassword.isEmpty()) {
+            mRef.changePassword(email, existingPassword, newPassword, new Firebase.ResultHandler() {
+                @Override
+                public void onSuccess() {
+                    listener.onCredentialsChangeFinished(true);
+                }
+
+                @Override
+                public void onError(FirebaseError firebaseError) {
+                    listener.onCredentialsChangeFinished(false);
+                    firebaseError.toException().printStackTrace();
+                }
+            });
+        }
+    }
+
+    /*@Override
     public void getProfileImageFromFirebase(SettingsViewListener listener) {
 
         mRefUserBase.child("profile_image").addValueEventListener(new ValueEventListener() {
@@ -233,6 +353,6 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
                 Log.e(TAG, "onCancelled :: " + firebaseError);
             }
         });
-    }
+    }*/
 
 }

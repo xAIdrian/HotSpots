@@ -33,8 +33,7 @@
                     android:id="@+id/score_card_view"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:layout_margin="@dimen/default_margin">
+                    android:layout_gravity="center">
 
                     <ProgressBar
                         android:id="@+id/scoreIndProgressBar"
@@ -63,7 +62,7 @@
                         android:background="@drawable/bg_rounded_corner_white"
                         android:gravity="center"
                         android:padding="8dp"
-                        android:layout_marginBottom="8dp"
+                        android:layout_margin="8dp"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:textColor="@android:color/white"
                         android:text="@string/challenge" />
@@ -116,7 +115,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        app:headerLayout="@layout/nav_drawer_header"
+        app:headerLayout="@layout/header_nav_drawer"
         app:menu="@menu/nav_drawer_menu" />
 
 </android.support.v4.widget.DrawerLayout>

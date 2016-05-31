@@ -6,20 +6,22 @@
 
         <item
             android:id="@+id/nav_drawer_play"
-            android:checked="true"
             android:title="@string/play"
             android:icon="@drawable/ic_controller"/>
 
         <item
+            android:id="@+id/nav_drawer_save"
+            android:title="@string/save"
+            android:icon="@drawable/ic_floppy_grey" />
+
+        <item
             android:id="@+id/nav_drawer_boards"
-            android:checked="false"
             android:title="@string/leaderboards"
             android:icon="@drawable/ic_trophy"/>
 
         <item
             android:id="@+id/nav_drawer_past_spots"
-            android:checked="false"
-            android:title="@string/past_spots"
+            android:title="@string/embers"
             android:icon="@drawable/ic_globe"/>
 
     </group>

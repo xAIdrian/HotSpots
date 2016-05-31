@@ -2,35 +2,27 @@ package com.androidtitan.spotscore.main.settings.ui;
 
 import android.content.Intent;
 
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.media.ExifInterface;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.main.data.User;
 import com.androidtitan.spotscore.main.settings.SettingsMvp;
-import com.androidtitan.spotscore.utils.BitmapUtils;
-import com.jakewharton.rxbinding.widget.RxTextView;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import rx.Observable;
 
 public class ProfileFragment extends Fragment {
     private final String TAG = getClass().getSimpleName();
@@ -42,7 +34,17 @@ public class ProfileFragment extends Fragment {
     private User mUser;
 
     @Bind(R.id.profileCircleImageView) ImageView mProfileImage;
-    @Bind(R.id.emailInput) EditText mEmailEdit;
+    @Bind(R.id.usernameInput)
+    EditText mUserNameEdit;
+    @Bind(R.id.nameInput)
+    EditText mNameEdit;
+    @Bind(R.id.locationInput)
+    EditText mLocationEdit;
+
+    @Bind(R.id.changePasswordTextView)
+    TextView mChangePasswordText;
+    @Bind(R.id.saveTextView)
+    TextView mSaveText;
 
     public ProfileFragment() {
 
@@ -63,8 +65,11 @@ public class ProfileFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
         ButterKnife.bind(this, v);
 
-
         mProfileImage.setImageBitmap(mUser.getProfileImage());
+        mUserNameEdit.setText(mUser.getUsername(), TextView.BufferType.EDITABLE);
+        mNameEdit.setText(mUser.getName(), TextView.BufferType.EDITABLE);
+        mLocationEdit.setText(mUser.getLocation(), TextView.BufferType.EDITABLE);
+
         mProfileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -76,11 +81,42 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        RxTextView.textChanges(mEmailEdit)
-                .debounce(1000, TimeUnit.MILLISECONDS)
-                .map(initTextInput -> (initTextInput.length() == 0))
-                .distinctUntilChanged()
-                .subscribe(textInput -> Log.e(TAG, textInput.toString()));
+        mLocationEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    mSaveText.callOnClick();
+
+                }
+                return false;
+            }
+        });
+
+        mChangePasswordText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CredentialsFragmentDialog fragDag = new CredentialsFragmentDialog();
+                fragDag.show(getFragmentManager(), "CredentialsFragmentDialog");
+            }
+        });
+
+        mSaveText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                if (mUserNameEdit.getText().toString().isEmpty() || mNameEdit.getText().toString().isEmpty()
+                        || mLocationEdit.getText().toString().isEmpty()) {
+
+                    Snackbar.make(getView(), R.string.missing_field, Snackbar.LENGTH_LONG).show();
+
+                } else {
+
+                    mPresenter.storeProfileInformationToFirebase(mUserNameEdit.getText().toString(),
+                            mNameEdit.getText().toString(), mLocationEdit.getText().toString());
+                }
+            }
+        });
 
         return v;
     }

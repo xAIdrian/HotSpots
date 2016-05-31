@@ -26,7 +26,6 @@ public interface PlayMvp {
             void onUserProfileSetFinished();
         }
 
-
         Observable<Venue> getVenuesOneByOne(double latitude, double longitude);
         Observable<Venue> getAdditionalVenueInfo(String venueIdentifier);
 
@@ -61,8 +60,6 @@ public interface PlayMvp {
         void calculateAndSetScore();
 
         ArrayList<Venue> getNearbyVenuesList();
-
-        void setNavHeaderImageView(ImageView mNavDrawerHeaderImage);
 
     }
 }
