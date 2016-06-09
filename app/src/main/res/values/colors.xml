@@ -5,12 +5,14 @@
     <color name="colorPrimaryDark">#D32F2F</color>
     <color name="colorPrimaryLight">#FFCDD2</color>
     <color name="colorAccent">#2196F3</color>
+    <color name="colorAccentDark">#1976D2</color>
 
     <color name="colorPrimaryText">#000000</color>
     <color name="colorSecondaryText">#727272</color>
     <color name="colorDivider">#B6B6B6</color>
 
     <color name="colorSky">#E4F0F0</color>
-
     <color name="blackScreen">#40000000</color>
+    <color name="transparent">#00000000</color>
+
 </resources>

@@ -45,6 +45,7 @@ dependencies {
     apt 'com.google.dagger:dagger-compiler:2.0'
     provided 'com.google.dagger:dagger-compiler:2.0'
     provided 'org.glassfish:javax.annotation:10.0-b28'
+    compile 'io.doorbell:android-sdk:0.2.6@aar'
 
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:design:23.4.0'

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <group
-        android:id="@+id/primaryGroup"
-        android:checkableBehavior="single" >
+        android:id="@+id/game">
 
         <item
             android:id="@+id/nav_drawer_play"
@@ -11,7 +11,7 @@
 
         <item
             android:id="@+id/nav_drawer_save"
-            android:title="@string/save"
+            android:title="@string/saves"
             android:icon="@drawable/ic_floppy_grey" />
 
         <item
@@ -22,25 +22,33 @@
         <item
             android:id="@+id/nav_drawer_past_spots"
             android:title="@string/embers"
-            android:icon="@drawable/ic_globe"/>
+            android:icon="@drawable/ic_globe"
+            app:itemTextColor="@color/colorPrimaryDark"/>
 
     </group>
 
     <group
-        android:id="@+id/last"
-        android:checkableBehavior="single" >
+        android:id="@+id/user">
 
         <item
             android:id="@+id/nav_drawer_profile"
-            android:checked="false"
             android:title="@string/profile"
             android:icon="@drawable/ic_stash" />
 
         <item
             android:id="@+id/nav_drawer_logout"
-            android:checked="false"
             android:title="@string/action_logout"
             android:icon="@drawable/ic_logout"/>
+
+    </group>
+
+    <group
+        android:id="@+id/settings">
+
+        <item
+            android:id="@+id/nav_drawer_feedback"
+            android:title="@string/feedback"
+            android:icon="@drawable/ic_feedback_grey" />
 
     </group>
 

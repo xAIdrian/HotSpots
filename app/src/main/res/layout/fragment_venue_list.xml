@@ -8,7 +8,25 @@
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#042663"
+        android:background="@color/colorAccentDark"
         android:clipToPadding="false" />
+
+    <ProgressBar
+        android:id="@+id/venueIndProgressBar"
+        style="@style/Widget.AppCompat.ProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:theme="@style/CircularProgress" />
+
+    <TextView
+        android:id="@+id/venueListEmptyState"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="32dp"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:text="@string/venue_empty_state"
+        android:visibility="gone"/>
 
 </FrameLayout>

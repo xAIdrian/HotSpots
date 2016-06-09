@@ -51,7 +51,7 @@ public class SignUpFragment extends BaseFragment{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mPresenter = ((LoginActivity)getActivity()).getPresenter();
+
 
         if (getArguments() != null) {
             // was something passed to us?

@@ -138,7 +138,7 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(TAG, "Location services have been successfully connected");
 
-//        getLastKnownLocation();
+        getLastKnownLocation();
         calculateAndSetScore();
     }
 

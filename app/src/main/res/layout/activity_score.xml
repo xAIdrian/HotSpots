@@ -22,7 +22,7 @@
             android:theme="@style/AppTheme.AppBarOverlay">
 
             <android.support.design.widget.CollapsingToolbarLayout
-                android:id="@+id/toolbar_layout"
+                android:id="@+id/collapsing_toolbar_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:fitsSystemWindows="true"
@@ -77,28 +77,11 @@
                     app:contentInsetEnd="0dp"
                     app:contentInsetStart="0dp"
                     app:layout_collapseMode="pin"
-                    app:popupTheme="@style/AppTheme.PopupOverlay">
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <ImageView
-                            android:id="@+id/map_imageView"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:padding="8dp"
-                            android:src="@drawable/ic_map" />
-
-                    </RelativeLayout>
-
-                </android.support.v7.widget.Toolbar>
+                    app:popupTheme="@style/AppTheme.PopupOverlay"/>
             </android.support.design.widget.CollapsingToolbarLayout>
         </android.support.design.widget.AppBarLayout>
 
-        <include layout="@layout/content_scrolling" />
+        <include layout="@layout/content_score" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/locationFab"
@@ -116,6 +99,6 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/header_nav_drawer"
-        app:menu="@menu/nav_drawer_menu" />
+        app:menu="@menu/menu_navdrawer" />
 
 </android.support.v4.widget.DrawerLayout>

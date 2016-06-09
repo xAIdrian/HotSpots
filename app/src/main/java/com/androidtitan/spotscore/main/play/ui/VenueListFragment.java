@@ -8,11 +8,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.BaseFragment;
+import com.androidtitan.spotscore.main.data.Venue;
 import com.androidtitan.spotscore.main.play.PlayMvp;
 import com.androidtitan.spotscore.main.play.adapter.VenueListAdapter;
+
+import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -25,8 +30,12 @@ public class VenueListFragment extends BaseFragment {
 
     private PlayMvp.Presenter mPlayPresenter;
 
+    @Bind(R.id.venueListEmptyState) TextView mEmptyState;
+    @Bind(R.id.venueIndProgressBar) ProgressBar mProgress;
     @Bind(R.id.list) RecyclerView mRecyclerView;
     private VenueListAdapter mAdapter;
+
+    private ArrayList<Venue> mVenueList;
 
 
     public VenueListFragment() {
@@ -38,7 +47,7 @@ public class VenueListFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
 
         mPlayPresenter = ((ScoreActivity)getActivity()).getScorePresenter();
-
+        mVenueList = mPlayPresenter.getNearbyVenuesList();
     }
 
     @Override
@@ -51,11 +60,31 @@ public class VenueListFragment extends BaseFragment {
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
-        mAdapter = new VenueListAdapter(getActivity(), mPlayPresenter, mPlayPresenter.getNearbyVenuesList());
+        if(mVenueList.size() == 0) {
+            //empty state
+            mEmptyState.setVisibility(View.VISIBLE);
+            mProgress.setVisibility(View.GONE);
+        } else {
+            mProgress.setVisibility(View.GONE);
+        }
+
+        mAdapter = new VenueListAdapter(getActivity(), mPlayPresenter, mVenueList);
         mRecyclerView.setAdapter(mAdapter);
 
         return v;
     }
 
+    /**
+     * When true, we are displaying the progressbar
+     * When false, we are hiding the progressbar
+     */
+    private void progressVisibility(boolean setVisible) {
 
+        if(setVisible) {
+            mProgress.setVisibility(View.GONE);
+        } else {
+            mProgress.setVisibility(View.VISIBLE);
+        }
+
+    }
 }

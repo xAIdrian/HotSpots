@@ -2,6 +2,7 @@
 
     <string name="foursquare_client_id">EEC54IJWLMNQ04ALPPKOQITOZDWVH5LQA5UQOUWHRCJS40XO</string>
     <string name="foursquare_client_secret">2XNB1I33DMQBZZOKUQDLCB3GBYSGO14FMTP41ZXYI3LGY21L</string>
+    <string name="doorbellio_api_key">9BHHZZDi6HMycMVw6ai5rp1IV9aXeMCShJjSwZNG7p4JmgjnGhItaIOaiEWtAqvd</string>
 
     <string name="app_name">SpotScore</string>
     <string name="title_activity_login">LoginActivity</string>
@@ -23,7 +24,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <string name="play">Play</string>
-    <string name="leaderboards">Leaderboards</string>
+    <string name="leaderboards">Leaderboard</string>
     <string name="embers">Embers</string>
     <string name="title_activity_maps">Map</string>
     <string name="saved">Saved</string>
@@ -56,8 +57,12 @@
     <string name="pw">New Password</string>
     <string name="reenter_pw">Re-enter password</string>
     <string name="cancel">Cancel</string>
-
     <string name="passwords_no_match">Your passwords must match</string>
-    <string name="lost_password">Lost your </string>
+    <string name="go">GO</string>
+    <string name="forgot_password">Forgot your password?</string>
+
+
+    <string name="feedback">Feedback</string>
+    <string name="venue_empty_state">Nothing is near by. Are you lost?</string>
 
 </resources>

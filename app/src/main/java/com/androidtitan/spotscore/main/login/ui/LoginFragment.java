@@ -26,10 +26,10 @@ public class LoginFragment extends BaseFragment {
 
     private LoginMvp.Presenter mPresenter;
 
-    @Bind(R.id.input_email) EditText emailEditText;
-    @Bind(R.id.input_password) EditText passwordEditText;
+    @Bind(R.id.input_email) EditText mEmailEditText;
+    @Bind(R.id.input_password) EditText mPasswordEditText;
     @Bind(R.id.loginFab) FloatingActionButton fab;
-    @Bind(R.id.signupTextView) TextView signupTextView;
+    @Bind(R.id.signupTextView) TextView mSignupTextView;
 
 
     public LoginFragment() {
@@ -41,7 +41,7 @@ public class LoginFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         App.getAppComponent();
 
-        mPresenter = ((LoginActivity)getActivity()).getPresenter();
+
 
         if (getArguments() != null) {
             //
@@ -55,14 +55,14 @@ public class LoginFragment extends BaseFragment {
         View v = inflater.inflate(R.layout.fragment_login, container, false);
         ButterKnife.bind(this, v);
 
-        signupTextView.setOnClickListener(new View.OnClickListener() {
+        mSignupTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mPresenter.showSignUpFragment();
             }
         });
 
-        passwordEditText.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+        mPasswordEditText.setOnEditorActionListener(new EditText.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -80,8 +80,8 @@ public class LoginFragment extends BaseFragment {
 
                 //todo: need to account for special chars
                 //todo:     we should also consider using a WidgetObservable here
-                final String email = emailEditText.getText().toString();
-                String password = passwordEditText.getText().toString();
+                final String email = mEmailEditText.getText().toString();
+                String password = mPasswordEditText.getText().toString();
 
                 email.trim();
                 password.trim();

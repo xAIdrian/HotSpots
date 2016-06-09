@@ -3,6 +3,7 @@ package com.androidtitan.spotscore.main.play.ui;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -18,6 +19,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -41,6 +44,7 @@ import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import io.doorbell.android.Doorbell;
 
 public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
     private final String TAG = getClass().getSimpleName();
@@ -54,28 +58,22 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
     private Firebase mRef = new Firebase(Constants.FIREBASE_URL);
     private User mUser;
 
-    ActionBarDrawerToggle mActionToggle;
-    @Bind(R.id.activity_drawer_layout)
-    DrawerLayout mDrawerLayout;
-    @Bind(R.id.activity_drawer_navigation_view)
-    NavigationView mNavigation;
+    private ActionBarDrawerToggle mActionToggle;
+    @Bind(R.id.collapsing_toolbar_layout) CollapsingToolbarLayout mCollapsingToolbar;
+
+    @Bind(R.id.activity_drawer_layout) DrawerLayout mDrawerLayout;
+    @Bind(R.id.activity_drawer_navigation_view) NavigationView mNavigation;
     private ImageView mNavDrawerHeaderImage;
     private TextView mProfileText;
     private ImageView mProfileImage;
 
-    @Bind(R.id.scoreIndProgressBar)
-    ProgressBar indeterminateProgress;
-    @Bind(R.id.scoreTextView)
-    TextView mScoreText;
-    @Bind(R.id.locationFab)
-
-    FloatingActionButton mLocationFab;
-    @Bind(R.id.scoreList)
-    RecyclerView mRecyclerView;
+    @Bind(R.id.scoreIndProgressBar) ProgressBar indeterminateProgress;
+    @Bind(R.id.scoreTextView) TextView mScoreText;
+    @Bind(R.id.locationFab) FloatingActionButton mLocationFab;
+    @Bind(R.id.scoreList) RecyclerView mRecyclerView;
     private ScoreOptionsAdapter mAdapter;
 
     private boolean mScoreIsLoaded = false;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +91,9 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+
+        mCollapsingToolbar.setExpandedTitleColor(ContextCompat.getColor(this, R.color.transparent));
+        mCollapsingToolbar.setCollapsedTitleTextColor(ContextCompat.getColor(this, R.color.transparent));
 
         android.view.View headerView = mNavigation.getHeaderView(0);
         mProfileText = (TextView) headerView.findViewById(R.id.nav_drawer_header_username);
@@ -143,6 +144,13 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
 
                                 break;
 
+                            case R.id.nav_drawer_feedback:
+                                new Doorbell(ScoreActivity.this, 3836,
+                                        ScoreActivity.this.getResources().getString(R.string.doorbellio_api_key))
+                                        .setEmail(mUser.getEmail())
+                                        .show();
+                                break;
+
                             default:
                                 Log.e(TAG, "Incorrect nav drawer item selected");
                                 return false;
@@ -175,6 +183,12 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
         mPlayPresenter.setupUserProfile();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_score, menu);
+        return true;
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

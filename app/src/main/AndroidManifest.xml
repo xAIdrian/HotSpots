@@ -27,7 +27,7 @@
             android:name=".main.login.ui.LoginActivity"
             android:label="@string/title_activity_login"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/LoginTheme" />
         <activity
             android:name=".main.play.ui.ScoreActivity"
             android:screenOrientation="portrait"
