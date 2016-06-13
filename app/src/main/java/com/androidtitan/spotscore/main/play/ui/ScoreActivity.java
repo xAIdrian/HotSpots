@@ -3,18 +3,14 @@ package com.androidtitan.spotscore.main.play.ui;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -22,11 +18,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.androidtitan.spotscore.R;
@@ -35,8 +29,7 @@ import com.androidtitan.spotscore.main.App;
 import com.androidtitan.spotscore.main.data.User;
 import com.androidtitan.spotscore.main.login.ui.LoginActivity;
 import com.androidtitan.spotscore.main.play.PlayMvp;
-import com.androidtitan.spotscore.main.play.adapter.ScoreOptionsAdapter;
-import com.androidtitan.spotscore.main.play.adapter.VenueListAdapter;
+import com.androidtitan.spotscore.main.play.adapter.ScoreAdapter;
 import com.androidtitan.spotscore.main.settings.ui.SettingsActivity;
 import com.firebase.client.Firebase;
 
@@ -59,19 +52,18 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
     private User mUser;
 
     private ActionBarDrawerToggle mActionToggle;
-    @Bind(R.id.collapsing_toolbar_layout) CollapsingToolbarLayout mCollapsingToolbar;
 
     @Bind(R.id.activity_drawer_layout) DrawerLayout mDrawerLayout;
     @Bind(R.id.activity_drawer_navigation_view) NavigationView mNavigation;
-    private ImageView mNavDrawerHeaderImage;
     private TextView mProfileText;
     private ImageView mProfileImage;
 
-    @Bind(R.id.scoreIndProgressBar) ProgressBar indeterminateProgress;
     @Bind(R.id.scoreTextView) TextView mScoreText;
+    @Bind(R.id.scoreIndProgressBar) ProgressBar indeterminateProgress;
+
     @Bind(R.id.locationFab) FloatingActionButton mLocationFab;
     @Bind(R.id.scoreList) RecyclerView mRecyclerView;
-    private ScoreOptionsAdapter mAdapter;
+    private ScoreAdapter mAdapter;
 
     private boolean mScoreIsLoaded = false;
 
@@ -92,19 +84,15 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        mCollapsingToolbar.setExpandedTitleColor(ContextCompat.getColor(this, R.color.transparent));
-        mCollapsingToolbar.setCollapsedTitleTextColor(ContextCompat.getColor(this, R.color.transparent));
-
         android.view.View headerView = mNavigation.getHeaderView(0);
         mProfileText = (TextView) headerView.findViewById(R.id.nav_drawer_header_username);
-        mNavDrawerHeaderImage = (ImageView) headerView.findViewById(R.id.nav_header_bg_imageView);
         mProfileImage = (ImageView) headerView.findViewById(R.id.profileCircleImageView);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
-        mAdapter = new ScoreOptionsAdapter(this, mPlayPresenter);
+        mAdapter = new ScoreAdapter(this, mPlayPresenter);
         mRecyclerView.setAdapter(mAdapter);
 
         mActionToggle = new ActionBarDrawerToggle(
@@ -170,12 +158,9 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
                 mScoreText.setVisibility(android.view.View.INVISIBLE);
                 indeterminateProgress.setVisibility(android.view.View.VISIBLE);
 
-//                mPlayPresenter.getLastKnownLocation();
+                mPlayPresenter.getLastKnownLocation();
                 mPlayPresenter.calculateAndSetScore();
 
-                //todo: as we add functionality disable the colors
-
-                //todo mVenueText.setTextColor(ContextCompat.getColor(ScoreActivity.this, R.color.colorDivider));
             }
         });
 
@@ -310,16 +295,16 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
         mScoreIsLoaded = true;
 
         mLocationFab.show();
+
         mScoreText.setText(String.format("%.1f", average));
         indeterminateProgress.setVisibility(android.view.View.INVISIBLE);
         mScoreText.setVisibility(android.view.View.VISIBLE);
+
     }
 
     @Override
     public void showFragment(Fragment fragment) {
 
-        /*getSupportActionBar().setDisplayShowHomeEnabled(true);
-        mActionToggle.syncState();*/
         mLocationFab.hide();
 
         FragmentTransaction fragTran = getSupportFragmentManager().beginTransaction();

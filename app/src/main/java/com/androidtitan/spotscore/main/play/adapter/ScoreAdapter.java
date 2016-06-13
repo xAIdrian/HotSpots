@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -21,7 +22,7 @@ import butterknife.ButterKnife;
 /**
  * Created by amohnacs on 5/28/16.
  */
-public class ScoreOptionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class ScoreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final String TAG = getClass().getSimpleName();
 
     private Context mContext;
@@ -30,17 +31,15 @@ public class ScoreOptionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private ArrayList<String> mOptionsList = new ArrayList<>();
     private ArrayList<String> mOptionsDescList = new ArrayList<>();
 
-    public ScoreOptionsAdapter(Context context, PlayMvp.Presenter playPresenter) {
+    public ScoreAdapter(Context context, PlayMvp.Presenter playPresenter) {
         mContext = context;
         mPlayPresenter = playPresenter;
 
         mOptionsList.add("Save"); //floppydisc
-        mOptionsList.add("Loot!"); //chest
         mOptionsList.add("Leaderboard"); //leaderboard
         mOptionsList.add("Nearby"); //geofence
 
         mOptionsDescList.add("Save this score for later and pull a quick one on everyone else.  Remember, you only get 3 saves.");
-        mOptionsDescList.add("You\'ve been competing and you\'ve been winning.  Take a look at all of your sweet ass loot!");
         mOptionsDescList.add("Find out who\'s the top top and start devising plans to take them out.");
         mOptionsDescList.add("So, you\'re in a cool place.  Find out why and maybe grab a bite to eat.");
     }
@@ -66,27 +65,28 @@ public class ScoreOptionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View v1 = inflater.inflate(R.layout.card_score_options, parent, false);
-        RecyclerView.ViewHolder viewHolder = new OptionsViewHolder(v1);
+        RecyclerView.ViewHolder viewHolder;
+        View optionsView = inflater.inflate(R.layout.card_score_options, parent, false);
+        viewHolder = new OptionsViewHolder(optionsView);
+
+
         return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 
-        initViewHolder((OptionsViewHolder) holder, position);
+        initOptionsViewHolder((OptionsViewHolder) holder, position);
+
 
     }
 
-    private void initViewHolder(OptionsViewHolder holder, int position) {
+    private void initOptionsViewHolder(OptionsViewHolder holder, int position) {
 
-        holder.mRelativeLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        holder.mRelativeLayout.setOnClickListener(v -> {
                 switch (position) {
 
                     case 0:
@@ -98,14 +98,9 @@ public class ScoreOptionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                         break;
 
                     case 2:
-                        //
-                        break;
-
-                    case 3:
                         mPlayPresenter.showFragment(new VenueListFragment(), null);
                         break;
                 }
-            }
         });
 
         holder.mOptionsText.setText(mOptionsList.get(position));
@@ -118,19 +113,14 @@ public class ScoreOptionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 break;
 
             case 1:
-                holder.mOptionImage.setImageResource(R.drawable.ic_treasure);
-
-                break;
-
-            case 2:
                 holder.mOptionImage.setImageResource(R.drawable.ic_leader_trophy);
 
                 break;
 
-            case 3:
+            case 2:
                 holder.mOptionImage.setImageResource(R.drawable.ic_options_location);
-
                 break;
+
         }
     }
 
@@ -138,4 +128,21 @@ public class ScoreOptionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public int getItemCount() {
         return mOptionsList.size();
     }
+
+    /**
+     * Changes the visibility of view items and sets the score
+     * @param setLoading When set to true set the visibility of the score is removed so the progress bar is visible.
+     * @param average When set to -1 we are loading...
+     */
+   /* public void updateCardScoreView(boolean setLoading, double average) {
+        //todo: how do we get access to the PrimaryViewHolder
+
+        *//*if(setLoading) {
+
+
+        } else {
+
+
+        }*//*
+    }*/
 }

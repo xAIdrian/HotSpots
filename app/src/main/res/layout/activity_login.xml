@@ -4,7 +4,7 @@
     android:id="@+id/base"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorAccentDark">
+    android:background="@drawable/im_login_bg">
 
     <!-- This is where our aesthetic is going to go -->
 

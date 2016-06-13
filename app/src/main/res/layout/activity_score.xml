@@ -11,63 +11,15 @@
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
-        tools:context=".main.play.ui.ScoreActivity">
+        tools:context=".main.play.ui.ScoreActivity"
+        android:id="@+id/fragment_container">
 
         <android.support.design.widget.AppBarLayout
             android:id="@+id/app_bar"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/app_bar_height"
+            android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
             android:theme="@style/AppTheme.AppBarOverlay">
-
-            <android.support.design.widget.CollapsingToolbarLayout
-                android:id="@+id/collapsing_toolbar_layout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:fitsSystemWindows="true"
-                app:contentScrim="?attr/colorPrimary"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed">
-
-                <RelativeLayout
-                    android:id="@+id/score_card_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center">
-
-                    <ProgressBar
-                        android:id="@+id/scoreIndProgressBar"
-                        style="@style/Widget.AppCompat.ProgressBar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:theme="@style/CircularProgress" />
-
-                    <TextView
-                        android:id="@+id/scoreTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:padding="16dp"
-                        android:textColor="@android:color/white"
-                        android:text="0"
-                        android:textSize="@dimen/score_number_text"
-                        android:visibility="invisible" />
-
-                    <TextView
-                        android:id="@+id/challengeTextView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@+id/scoreTextView"
-                        android:background="@drawable/bg_rounded_corner_white"
-                        android:gravity="center"
-                        android:padding="8dp"
-                        android:layout_margin="8dp"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:textColor="@android:color/white"
-                        android:text="@string/challenge" />
-
-                </RelativeLayout>
 
                 <android.support.v7.widget.Toolbar
                     android:id="@+id/toolbar"
@@ -78,18 +30,9 @@
                     app:contentInsetStart="0dp"
                     app:layout_collapseMode="pin"
                     app:popupTheme="@style/AppTheme.PopupOverlay"/>
-            </android.support.design.widget.CollapsingToolbarLayout>
         </android.support.design.widget.AppBarLayout>
 
         <include layout="@layout/content_score" />
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/locationFab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            android:src="@drawable/ic_location" />
 
     </android.support.design.widget.CoordinatorLayout>
 
