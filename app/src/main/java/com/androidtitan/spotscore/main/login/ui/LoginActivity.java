@@ -9,6 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -25,6 +29,9 @@ import butterknife.ButterKnife;
 
 
 public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
+    private final String TAG = getClass().getSimpleName();
+
+    private static final int ANIM_DURATION = 300;
 
     @Inject
     LoginMvp.Presenter mPresenter;
@@ -35,8 +42,26 @@ public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
     @Bind(R.id.goTextView) TextView mGoText;
     @Bind(R.id.forgotPasswordTextView) TextView mForgotPwText;
 
+    @Bind(R.id.forgotPasswordCard) CardView mForgotPasswordCard;
+    @Bind(R.id.input_email_pw) EditText mForgottenEmailEditText;
+    @Bind(R.id.sendForgottenTextView) TextView mForgottenSendText;
+    @Bind(R.id.cancelForgotPasswordTextView) TextView mForgottenCancelText;
 
-    /*todo: we are going to replace with logic with an incorrect login
+    @Bind(R.id.signupCard) CardView mSignupCard;
+    @Bind(R.id.signup_input_email) EditText mSignupEmailEditText;
+    @Bind(R.id.signup_input_password) EditText mSignupPasswordEditText;
+    @Bind(R.id.submitSignupTextView) TextView mSignupSendText;
+    @Bind(R.id.cancelSignupTextView) TextView mCancelSignupText;
+
+    @Bind(R.id.signupTextView) TextView mSignupText;
+
+    Animation cardEntryAnim;
+    Animation cardExitAnim;
+    Animation cardHideAnim;
+    Animation cardAppearAnim;
+
+
+    /*todo: SET UP A SIGN-IN BUTTON THAT IS OUTSIDE OF THE ORIGINAL CARD
     @Bind(R.id.mSignupTextView) TextView mSignupTextView;
      */
 
@@ -46,16 +71,19 @@ public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
         setContentView(R.layout.activity_login);
         App.getAppComponent().inject(this);
         ButterKnife.bind(this);
-
         mPresenter.attachView(this);
 
-        mGoText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        cardEntryAnim = AnimationUtils.loadAnimation(this, R.anim.login_card_entry);
+        cardExitAnim = AnimationUtils.loadAnimation(this, R.anim.login_card_exit);
+        cardHideAnim = AnimationUtils.loadAnimation(this, R.anim.login_card_hide);
+        cardHideAnim.setFillAfter(true);
+        cardAppearAnim = AnimationUtils.loadAnimation(this, R.anim.login_card_appear);
+        cardAppearAnim.setFillAfter(true);
+
+
+        mGoText.setOnClickListener(v -> {
                 final View mView = v;
 
-                //todo: need to account for special chars
-                //todo:     we should also consider using a WidgetObservable here
                 final String email = mEmailEditText.getText().toString();
                 String password = mPasswordEditText.getText().toString();
 
@@ -71,7 +99,6 @@ public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
 
                     mPresenter.authenticateLogin(email, password);
                 }
-            }
         });
 
         mPasswordEditText.setOnEditorActionListener(new EditText.OnEditorActionListener() {
@@ -84,6 +111,74 @@ public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
                 return false;
             } });
 
+        mForgotPwText.setOnClickListener(v -> {
+
+            mForgotPasswordCard.setVisibility(View.VISIBLE);
+            mForgotPasswordCard.startAnimation(cardEntryAnim);
+            mLoginCard.startAnimation(cardHideAnim);
+        });
+
+        //these are for when the user forgets their password
+
+        mForgottenCancelText.setOnClickListener(v -> {
+
+            hideForgotPwCard();
+
+        });
+
+        mForgottenSendText.setOnClickListener(v -> {
+            final String email = mForgottenEmailEditText.getText().toString();
+
+            email.trim();
+
+            if(email.isEmpty()) {
+
+                Snackbar.make(v, getResources().getString(R.string.missing_email), Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+
+            } else {
+
+               mPresenter.resetPassword(email);
+            }
+        });
+
+        mForgottenEmailEditText.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    mForgottenSendText.callOnClick();
+                    return true;
+                }
+                return false;
+            } });
+
+        //this is our signup card
+
+
+
+
+        mSignupText.setOnClickListener(v -> {
+
+            AlphaAnimation alphaAnimation = new AlphaAnimation(1, 0);
+            alphaAnimation.setDuration(ANIM_DURATION);
+            mSignupText.startAnimation(alphaAnimation);
+            mSignupText.setVisibility(View.INVISIBLE);
+
+            if(mForgotPasswordCard.getVisibility() == View.VISIBLE) {
+                mSignupCard.setVisibility(View.VISIBLE);
+                mSignupCard.startAnimation(cardEntryAnim);
+                mLoginCard.startAnimation(cardHideAnim);
+                mForgotPasswordCard.startAnimation(cardHideAnim);
+
+            } else {
+
+                mSignupCard.setVisibility(View.VISIBLE);
+                mSignupCard.startAnimation(cardEntryAnim);
+                mLoginCard.startAnimation(cardHideAnim);
+            }
+
+
+        });
 
     }
 
@@ -138,5 +233,45 @@ public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
     @Override
     public void showSignUpFailureSnack(String message) {
         Snackbar.make(getCurrentFocus(), message, Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void showPasswordResetSnack(String message) {
+        Snackbar.make(getCurrentFocus(), message, Snackbar.LENGTH_LONG).show();
+        hideForgotPwCard();
+    }
+
+    private void hideForgotPwCard() {
+        mForgotPasswordCard.startAnimation(cardExitAnim);
+        cardExitAnim.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mForgotPasswordCard.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        mLoginCard.startAnimation(cardAppearAnim);
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if(mForgotPasswordCard.getVisibility() == View.VISIBLE) {
+            hideForgotPwCard();
+        }
+        //todo: if signup card is visible
+        else {
+            finish();
+        }
     }
 }

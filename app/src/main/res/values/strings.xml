@@ -17,6 +17,7 @@
     <string name="action_logout">Logout</string>
 
     <string name="missing_field">Missing email or password</string>
+    <string name="missing_email">Missing email</string>
     <string name="auth_failed">Your email or password was not recognized</string>
     <string name="signup_success">You\'ve been successfully signed up!</string>
     <string name="signup_eror">There was an error signing you up</string>
@@ -60,9 +61,11 @@
     <string name="passwords_no_match">Your passwords must match</string>
     <string name="go">GO</string>
     <string name="forgot_password">Forgot your password?</string>
-
+    <string name="send_reset_pw">Send Reset Email</string>
 
     <string name="feedback">Feedback</string>
     <string name="venue_empty_state">Nothing is near by. Are you lost?</string>
+    <string name="pw_reset">Well, this is embarrassing.  Enter your email and we\'ll help you sort it out.</string>
+    <string name="pw_reset_success">We\'ve sent you an email.  Check it out yo!</string>
 
 </resources>

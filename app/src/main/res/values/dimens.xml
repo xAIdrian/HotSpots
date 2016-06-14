@@ -22,6 +22,7 @@
     <dimen name="login_card_size">300dp</dimen>
     <dimen name="forgotPw_card_size">200dp</dimen>
     <dimen name="card_elevation">2dp</dimen>
+    <dimen name="card_elevation_hover">8dp</dimen>
 
     <dimen name="tight_margin">4dp</dimen>
     <dimen name="default_margin">8dp</dimen>

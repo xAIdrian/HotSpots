@@ -19,8 +19,14 @@ public interface LoginMvp {
             void onSignUpFailure();
         }
 
+        interface OnPasswordFinishedListener {
+            void onPasswordSuccess();
+        }
+
         void authenticateLogin(String email, String password, OnLoginFinishedListener listener);
         void createAuthenticatedUser(String email, String password, OnSignUpFinishedListener listener);
+
+        void resetPassword(String email, OnPasswordFinishedListener listener);
     }
 
     interface View extends MvpView {
@@ -30,6 +36,8 @@ public interface LoginMvp {
 
         void showSignUpSuccessDialog();
         void showSignUpFailureSnack(String message);
+
+        void showPasswordResetSnack(String message);
 
         void showLoginFragment();
         void showSignUpFragment();
@@ -44,6 +52,8 @@ public interface LoginMvp {
 
         void authenticateLogin(String email, String password);
         void createAuthenticatedUser(String email, String password);
+
+        void resetPassword(String email);
 
     }
 }

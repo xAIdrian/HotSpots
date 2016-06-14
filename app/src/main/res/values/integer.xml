@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer name="pop_anim_count">250</integer>
+    <integer name="login_anim_duration">300</integer>
 
 </resources>

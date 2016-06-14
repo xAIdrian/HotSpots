@@ -4,8 +4,6 @@ package com.androidtitan.spotscore.main.settings.ui;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +14,6 @@ import android.widget.TextView;
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.main.App;
 import com.androidtitan.spotscore.main.data.User;
-import com.androidtitan.spotscore.main.play.presenter.ScorePresenter;
 import com.androidtitan.spotscore.main.settings.CredentialsFragmentInterface;
 import com.androidtitan.spotscore.main.settings.presenter.SettingsPresenter;
 
@@ -68,7 +65,7 @@ public class CredentialsFragmentDialog extends DialogFragment implements Credent
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         getDialog().setTitle("Change Login Info");
-        View v = inflater.inflate(R.layout.fragment_password_change_fragment_dialog, container, false);
+        View v = inflater.inflate(R.layout.fragment_dialog_password_change, container, false);
         ButterKnife.bind(this, v);
 
         mEmailEdit.setText(mUser.getEmail(), TextView.BufferType.EDITABLE);

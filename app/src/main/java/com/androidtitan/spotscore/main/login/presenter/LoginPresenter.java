@@ -17,7 +17,7 @@ import javax.inject.Inject;
  * Created by amohnacs on 4/21/16.
  */
 public class LoginPresenter extends BasePresenter<LoginMvp.View> implements LoginMvp.Presenter,
-        LoginMvp.Model.OnLoginFinishedListener, LoginMvp.Model.OnSignUpFinishedListener{
+        LoginMvp.Model.OnLoginFinishedListener, LoginMvp.Model.OnSignUpFinishedListener, LoginMvp.Model.OnPasswordFinishedListener{
     private final String TAG = getClass().getSimpleName();
 
     private Context mContext;
@@ -86,6 +86,11 @@ public class LoginPresenter extends BasePresenter<LoginMvp.View> implements Logi
     }
 
     @Override
+    public void resetPassword(String email) {
+        mInteractor.resetPassword(email, this);
+    }
+
+    @Override
     public void onSignUpSuccess() {
         getMvpView().showSignUpSuccessDialog();
     }
@@ -93,6 +98,11 @@ public class LoginPresenter extends BasePresenter<LoginMvp.View> implements Logi
     @Override
     public void onSignUpFailure() {
         getMvpView().showSignUpFailureSnack(mContext.getResources().getString(R.string.signup_eror));
+    }
+
+    @Override
+    public void onPasswordSuccess() {
+        getMvpView().showPasswordResetSnack(mContext.getResources().getString(R.string.pw_reset_success));
     }
 
 

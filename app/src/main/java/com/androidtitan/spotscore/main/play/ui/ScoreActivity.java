@@ -25,6 +25,7 @@ import android.widget.TextView;
 
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.data.Constants;
+import com.androidtitan.spotscore.common.views.SnappingRecyclerView;
 import com.androidtitan.spotscore.main.App;
 import com.androidtitan.spotscore.main.data.User;
 import com.androidtitan.spotscore.main.login.ui.LoginActivity;

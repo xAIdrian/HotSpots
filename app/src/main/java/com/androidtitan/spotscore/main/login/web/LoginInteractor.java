@@ -89,4 +89,19 @@ public class LoginInteractor implements LoginMvp.Model {
             }
         });
     }
+
+    @Override
+    public void resetPassword(String email, OnPasswordFinishedListener listener) {
+        mRef.resetPassword(email, new Firebase.ResultHandler() {
+            @Override
+            public void onSuccess() {
+                listener.onPasswordSuccess();
+            }
+
+            @Override
+            public void onError(FirebaseError firebaseError) {
+                Log.e(TAG, "Password reset failed");
+            }
+        });
+    }
 }
