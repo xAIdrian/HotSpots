@@ -39,16 +39,11 @@ public interface LoginMvp {
 
         void showPasswordResetSnack(String message);
 
-        void showLoginFragment();
-        void showSignUpFragment();
     }
 
     interface Presenter {
         void attachView(View mvpView);
         void detachView();
-
-        void showLoginFragment();
-        void showSignUpFragment();
 
         void authenticateLogin(String email, String password);
         void createAuthenticatedUser(String email, String password);

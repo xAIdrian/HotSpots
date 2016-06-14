@@ -28,7 +28,7 @@ public class LoginPresenter extends BasePresenter<LoginMvp.View> implements Logi
 
     //todo////////////////////////////////
 
-    /* todo
+     /*
             Upon login we need to pull information from shared preferences and firbase and populate
             our user objects.
      */
@@ -50,16 +50,6 @@ public class LoginPresenter extends BasePresenter<LoginMvp.View> implements Logi
     public void detachView() {
         super.detachView();
         //if (mSubscription != null) mSubscription.unsubscribe();
-    }
-
-    @Override
-    public void showLoginFragment() {
-        getMvpView().showLoginFragment();
-    }
-
-    @Override
-    public void showSignUpFragment() {
-        getMvpView().showSignUpFragment();
     }
 
     @Override

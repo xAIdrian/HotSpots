@@ -55,6 +55,7 @@ public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
 
     @Bind(R.id.signupTextView) TextView mSignupText;
 
+
     Animation cardEntryAnim;
     Animation cardExitAnim;
     Animation cardHideAnim;
@@ -113,6 +114,8 @@ public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
 
         mForgotPwText.setOnClickListener(v -> {
 
+            signupTextVisibility(true);
+
             mForgotPasswordCard.setVisibility(View.VISIBLE);
             mForgotPasswordCard.startAnimation(cardEntryAnim);
             mLoginCard.startAnimation(cardHideAnim);
@@ -154,29 +157,41 @@ public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
 
         //this is our signup card
 
+        mSignupSendText.setOnClickListener(v -> {
 
+            final String email = mSignupEmailEditText.getText().toString(); //todo: need to account for special chars
+            String password = mSignupPasswordEditText.getText().toString();
 
+            email.trim();
+            password.trim();
 
-        mSignupText.setOnClickListener(v -> {
+            if(email.isEmpty() || password.isEmpty()) {
 
-            AlphaAnimation alphaAnimation = new AlphaAnimation(1, 0);
-            alphaAnimation.setDuration(ANIM_DURATION);
-            mSignupText.startAnimation(alphaAnimation);
-            mSignupText.setVisibility(View.INVISIBLE);
-
-            if(mForgotPasswordCard.getVisibility() == View.VISIBLE) {
-                mSignupCard.setVisibility(View.VISIBLE);
-                mSignupCard.startAnimation(cardEntryAnim);
-                mLoginCard.startAnimation(cardHideAnim);
-                mForgotPasswordCard.startAnimation(cardHideAnim);
+                Snackbar.make(v, getResources().getString(R.string.missing_field), Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
 
             } else {
 
-                mSignupCard.setVisibility(View.VISIBLE);
-                mSignupCard.startAnimation(cardEntryAnim);
-                mLoginCard.startAnimation(cardHideAnim);
+                mPresenter.createAuthenticatedUser(email, password);
             }
+        });
 
+
+        mCancelSignupText.setOnClickListener(v -> {
+
+            hideSignupCard();
+
+        });
+
+        //errything else
+
+        mSignupText.setOnClickListener(v -> {
+
+            signupTextVisibility(true);
+
+            mSignupCard.setVisibility(View.VISIBLE);
+            mSignupCard.startAnimation(cardEntryAnim);
+            mLoginCard.startAnimation(cardHideAnim);
 
         });
 
@@ -189,15 +204,6 @@ public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
         mPresenter = null;
     }
 
-    @Override
-    public void showLoginFragment() {
-
-    }
-
-    @Override
-    public void showSignUpFragment() {
-
-    }
 
     @Override
     public void launchScoreActivity() {
@@ -223,7 +229,8 @@ public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        mPresenter.showLoginFragment();
+                        dialog.dismiss();
+                        hideSignupCard();
                     }
                 });
         AlertDialog dialog = builder.create();
@@ -261,6 +268,43 @@ public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
         });
 
         mLoginCard.startAnimation(cardAppearAnim);
+        signupTextVisibility(false);
+    }
+
+    private void hideSignupCard() {
+        mSignupCard.startAnimation(cardExitAnim);
+        cardExitAnim.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mSignupCard.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        mLoginCard.startAnimation(cardAppearAnim);
+        signupTextVisibility(false);
+    }
+
+    private void signupTextVisibility(boolean removeVisibility) {
+        if(removeVisibility) {
+            AlphaAnimation alphaAnimation = new AlphaAnimation(1, 0);
+            alphaAnimation.setDuration(ANIM_DURATION);
+            mSignupText.startAnimation(alphaAnimation);
+            mSignupText.setVisibility(View.INVISIBLE);
+        } else {
+            mSignupText.setVisibility(View.VISIBLE);
+            AlphaAnimation alphaAnimation = new AlphaAnimation(0, 1);
+            alphaAnimation.setDuration(ANIM_DURATION);
+            mSignupText.startAnimation(alphaAnimation);
+        }
     }
 
     @Override
@@ -268,9 +312,11 @@ public class LoginActivity extends AppCompatActivity implements LoginMvp.View {
 
         if(mForgotPasswordCard.getVisibility() == View.VISIBLE) {
             hideForgotPwCard();
-        }
-        //todo: if signup card is visible
-        else {
+
+        } else if(mSignupCard.getVisibility() == View.VISIBLE) {
+            hideSignupCard();
+
+        } else {
             finish();
         }
     }

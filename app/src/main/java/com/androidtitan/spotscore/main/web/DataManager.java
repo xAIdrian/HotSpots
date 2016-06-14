@@ -170,7 +170,7 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
 
-                    if (dataSnapshot != null) {
+                    if (dataSnapshot.getValue() != null) {
                         String temper = dataSnapshot.getValue().toString();
                         mUser.setEmail(temper);
                     }
@@ -190,7 +190,7 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
             mRefUserBase.child("profile_location").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot != null) {
+                    if (dataSnapshot.getValue() != null) {
                         String temper = dataSnapshot.getValue().toString();
                         mUser.setLocation(temper);
                     }
@@ -211,7 +211,7 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
             mRefUserBase.child("profile_name").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot != null) {
+                    if (dataSnapshot.getValue() != null) {
                         String temper = dataSnapshot.getValue().toString();
                         mUser.setName(temper);
 
@@ -236,7 +236,7 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
             mRefUserBase.child("profile_username").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot != null) {
+                    if (dataSnapshot.getValue() != null) {
                         String temper = dataSnapshot.getValue().toString();
                         mUser.setUsername(temper);
                     }
