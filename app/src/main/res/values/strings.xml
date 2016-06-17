@@ -68,4 +68,6 @@
     <string name="pw_reset">Well, this is embarrassing.  Enter your email and we\'ll help you sort it out.</string>
     <string name="pw_reset_success">We\'ve sent you an email.  Check it out yo!</string>
 
+    <string name="note">Note</string>
+
 </resources>

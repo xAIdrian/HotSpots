@@ -1,12 +1,16 @@
-package com.androidtitan.spotscore.main.data;
+package com.androidtitan.spotscore.main.data.foursquare;
 
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Generated;
+
+import com.androidtitan.spotscore.main.data.foursquare.BestPhoto;
+import com.androidtitan.spotscore.main.data.foursquare.Category;
+import com.androidtitan.spotscore.main.data.foursquare.Contact;
+import com.androidtitan.spotscore.main.data.foursquare.Hours;
+import com.androidtitan.spotscore.main.data.foursquare.Location;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 

@@ -1,13 +1,11 @@
 package com.androidtitan.spotscore.main.play;
 
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.widget.ImageView;
 
 import com.androidtitan.spotscore.common.MvpView;
-import com.androidtitan.spotscore.main.data.Venue;
-import com.androidtitan.spotscore.main.play.presenter.ScorePresenter;
+import com.androidtitan.spotscore.main.data.Score;
+import com.androidtitan.spotscore.main.data.foursquare.Venue;
 import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -24,12 +22,16 @@ public interface PlayMvp {
 
         interface ScoreViewListener {
             void onUserProfileSetFinished();
+            void onScoreSavedFinished();
+            void onScoreSaveFail();
         }
+
 
         Observable<Venue> getVenuesOneByOne(double latitude, double longitude);
         Observable<Venue> getAdditionalVenueInfo(String venueIdentifier);
 
         void setUserProfile(ScoreViewListener listener);
+        void storeUserScore(Score score, ScoreViewListener listner);
 
     }
 
@@ -39,6 +41,7 @@ public interface PlayMvp {
         void showFragment(Fragment fragment);
 
         void onUserProfileSetFinished();
+        void onScoreSavedFinish(String message);
     }
 
     interface Presenter {
@@ -60,6 +63,8 @@ public interface PlayMvp {
         void calculateAndSetScore();
 
         ArrayList<Venue> getNearbyVenuesList();
+        
+        void saveUserScore(Score score);
 
     }
 }

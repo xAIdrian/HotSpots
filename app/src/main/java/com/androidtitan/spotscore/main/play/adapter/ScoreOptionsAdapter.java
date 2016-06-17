@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.main.play.PlayMvp;
+import com.androidtitan.spotscore.main.play.ui.SaveScoreFragDialog;
+import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
 import com.androidtitan.spotscore.main.play.ui.VenueListFragment;
 
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ import butterknife.ButterKnife;
 /**
  * Created by amohnacs on 5/28/16.
  */
-public class ScoreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class ScoreOptionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final String TAG = getClass().getSimpleName();
 
     private Context mContext;
@@ -31,7 +33,7 @@ public class ScoreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private ArrayList<String> mOptionsList = new ArrayList<>();
     private ArrayList<String> mOptionsDescList = new ArrayList<>();
 
-    public ScoreAdapter(Context context, PlayMvp.Presenter playPresenter) {
+    public ScoreOptionsAdapter(Context context, PlayMvp.Presenter playPresenter) {
         mContext = context;
         mPlayPresenter = playPresenter;
 
@@ -90,7 +92,9 @@ public class ScoreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 switch (position) {
 
                     case 0:
-                        //
+
+                        ((ScoreActivity)mContext).showScoreDialog();
+
                         break;
 
                     case 1:

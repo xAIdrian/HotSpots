@@ -1,4 +1,4 @@
-package com.androidtitan.spotscore.main.data;
+package com.androidtitan.spotscore.main.data.foursquare;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;

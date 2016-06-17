@@ -3,6 +3,8 @@ package com.androidtitan.spotscore.main.data;
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import java.util.ArrayList;
+
 /**
  * Created by amohnacs on 5/2/16.
  */
@@ -16,6 +18,7 @@ public class User {
     private String mName;
     private String mLocation;
     private Bitmap mProfileImage;
+    private ArrayList<Score> mScores;
 
     public static User getInstance() {
         if(mInstance == null)
@@ -79,5 +82,13 @@ public class User {
 
     public void setProfileImage(Bitmap mProfileImage) {
         this.mProfileImage = mProfileImage;
+    }
+
+    public ArrayList<Score> getScores() {
+        return mScores;
+    }
+
+    public void setScores(ArrayList<Score> mScores) {
+        this.mScores = mScores;
     }
 }

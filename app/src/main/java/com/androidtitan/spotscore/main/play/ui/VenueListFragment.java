@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.BaseFragment;
-import com.androidtitan.spotscore.main.data.Venue;
+import com.androidtitan.spotscore.main.data.foursquare.Venue;
 import com.androidtitan.spotscore.main.play.PlayMvp;
 import com.androidtitan.spotscore.main.play.adapter.VenueListAdapter;
 

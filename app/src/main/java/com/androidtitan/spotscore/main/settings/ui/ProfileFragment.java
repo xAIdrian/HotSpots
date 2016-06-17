@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -95,8 +96,9 @@ public class ProfileFragment extends Fragment {
         mChangePasswordText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CredentialsFragmentDialog fragDag = new CredentialsFragmentDialog();
-                fragDag.show(getFragmentManager(), "CredentialsFragmentDialog");
+                CredentialsFragmentDialog credFrag = new CredentialsFragmentDialog();
+                credFrag.setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogStyle);
+                credFrag.show(getFragmentManager(), "CredentialsFragmentDialog");
             }
         });
 

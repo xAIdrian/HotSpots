@@ -1,14 +1,11 @@
 package com.androidtitan.spotscore.main.web.deserializers;
 
-import android.util.Log;
-
-import com.androidtitan.spotscore.main.data.BestPhoto;
-import com.androidtitan.spotscore.main.data.Category;
-import com.androidtitan.spotscore.main.data.Contact;
-import com.androidtitan.spotscore.main.data.DetailedVenueResponse;
-import com.androidtitan.spotscore.main.data.Hours;
-import com.androidtitan.spotscore.main.data.Location;
-import com.androidtitan.spotscore.main.data.Venue;
+import com.androidtitan.spotscore.main.data.foursquare.BestPhoto;
+import com.androidtitan.spotscore.main.data.foursquare.Category;
+import com.androidtitan.spotscore.main.data.foursquare.Contact;
+import com.androidtitan.spotscore.main.data.foursquare.Hours;
+import com.androidtitan.spotscore.main.data.foursquare.Location;
+import com.androidtitan.spotscore.main.data.foursquare.Venue;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;

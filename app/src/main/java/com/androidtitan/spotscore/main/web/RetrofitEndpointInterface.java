@@ -1,9 +1,8 @@
 package com.androidtitan.spotscore.main.web;
 
-import com.androidtitan.spotscore.main.data.DetailedVenueResponse;
-import com.androidtitan.spotscore.main.data.VenueResponse;
+import com.androidtitan.spotscore.main.data.foursquare.DetailedVenueResponse;
+import com.androidtitan.spotscore.main.data.foursquare.VenueResponse;
 
-import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;

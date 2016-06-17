@@ -55,9 +55,6 @@ public class SettingsActivity extends AppCompatActivity implements SettingsMvp.V
 
         }
 
-        //todo: this needs to be replaced with a simple GET!
-        //mSettingsPresenter.getStoredProfileImageFromFirebase();
-
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.androidtitan.spotscore.main.data;
+package com.androidtitan.spotscore.main.data.foursquare;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

@@ -22,8 +22,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.androidtitan.spotscore.R;
-import com.androidtitan.spotscore.main.data.BestPhoto;
-import com.androidtitan.spotscore.main.data.Venue;
+import com.androidtitan.spotscore.main.data.foursquare.BestPhoto;
+import com.androidtitan.spotscore.main.data.foursquare.Venue;
 import com.androidtitan.spotscore.main.play.PlayMvp;
 import com.bumptech.glide.Glide;
 
@@ -50,8 +50,6 @@ public class VenueListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     public static class VenueViewHolder extends RecyclerView.ViewHolder {
-
-        //TODO :: we need to add categories top left!!!
 
         @Bind(R.id.venueListBgImageView) ImageView mBackgroundImage;
         @Bind(R.id.venueIconImageView) ImageView mIconImage;
@@ -80,7 +78,7 @@ public class VenueListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View v1 = inflater.inflate(R.layout.venue_list_row, parent, false);
+        View v1 = inflater.inflate(R.layout.row_venue_list, parent, false);
         RecyclerView.ViewHolder viewHolder = new VenueViewHolder(v1);
         return viewHolder;
     }
@@ -148,10 +146,12 @@ public class VenueListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         holder.mCallImage.setVisibility(View.VISIBLE);
                         holder.mMapImage.setVisibility(View.VISIBLE);
                         holder.mFoursqareImage.setVisibility(View.VISIBLE);
+                        holder.mIconImage.setVisibility(View.VISIBLE);
 
                         holder.mCallImage.startAnimation(alphaAnimation);
                         holder.mMapImage.startAnimation(alphaAnimation);
                         holder.mFoursqareImage.startAnimation(alphaAnimation);
+                        holder.mIconImage.startAnimation(alphaAnimation);
                     }
                 }, anim.getDuration());
 

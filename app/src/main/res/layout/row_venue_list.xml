@@ -78,7 +78,8 @@
             android:layout_alignParentStart="true"
             android:layout_margin="@dimen/default_margin"
             android:padding="8dp"
-            android:src="@drawable/ic_city"/>
+            android:src="@drawable/ic_city"
+            android:visibility="invisible"/>
 
         <ImageView
             android:id="@+id/venueCallImageView"

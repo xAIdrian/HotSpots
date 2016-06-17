@@ -1,7 +1,7 @@
 package com.androidtitan.spotscore.main.web.deserializers;
 
-import com.androidtitan.spotscore.main.data.Venue;
-import com.androidtitan.spotscore.main.data.VenueResponse;
+import com.androidtitan.spotscore.main.data.foursquare.Venue;
+import com.androidtitan.spotscore.main.data.foursquare.VenueResponse;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;

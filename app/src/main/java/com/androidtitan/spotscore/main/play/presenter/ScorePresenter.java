@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -12,14 +11,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.widget.ImageView;
 
 import com.androidtitan.spotscore.common.BasePresenter;
-import com.androidtitan.spotscore.main.data.Venue;
+import com.androidtitan.spotscore.main.data.Score;
+import com.androidtitan.spotscore.main.data.foursquare.Venue;
 import com.androidtitan.spotscore.main.play.PlayMvp;
 import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -138,7 +135,6 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(TAG, "Location services have been successfully connected");
 
-        getLastKnownLocation();
         calculateAndSetScore();
     }
 
@@ -160,6 +156,16 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onScoreSavedFinished() {
+        getMvpView().onScoreSavedFinish("Save successful yo!");
+    }
+
+    @Override
+    public void onScoreSaveFail() {
+        getMvpView().onScoreSavedFinish("Can\'t save");
     }
 /*
     @Override
@@ -245,7 +251,7 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
                         // All location settings are satisfied. The client can
                         // initialize location requests here.
                         Log.d(TAG, "LocationSettingsStatusCodes.SUCCESS");
-//                        latLng = getLastKnownLocation();
+
                         calculateAndSetScore();
 
                         break;
@@ -283,38 +289,43 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
     @Override
     public void calculateAndSetScore() {
 
-        getLastKnownLocation();
-        mVenueList = new ArrayList<Venue>();
+        if(mGoogleApiClient.isConnected()) {
+            getLastKnownLocation();
+            mVenueList = new ArrayList<Venue>();
 
-        mDataManager.getVenuesOneByOne(latLng.latitude, latLng.longitude)
-                .flatMap(venue -> mDataManager.getAdditionalVenueInfo(venue.getId()))
-                .filter(detailedVenue -> detailedVenue.getRating() > 0.0)
-                .subscribe(new Subscriber<Venue>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.d(TAG, "Observable complete");
+            mDataManager.getVenuesOneByOne(latLng.latitude, latLng.longitude)
+                    .flatMap(venue -> mDataManager.getAdditionalVenueInfo(venue.getId()))
+                    .filter(detailedVenue -> detailedVenue.getRating() > 0.0)
+                    .subscribe(new Subscriber<Venue>() {
+                        @Override
+                        public void onCompleted() {
+                            Log.d(TAG, "Observable complete");
 
-                        try {
-                            getMvpView().updateScore(calcAverage / calcCount);
-                        } catch (NullPointerException e) {
-                            e.printStackTrace();
+                            try {
+                                getMvpView().updateScore(calcAverage / calcCount);
+                            } catch (NullPointerException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(TAG, "RxJava Error :: " + e.toString());
-                    }
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(TAG, "RxJava Error :: " + e.toString());
+                        }
 
-                    @Override
-                    public void onNext(Venue venue) {
+                        @Override
+                        public void onNext(Venue venue) {
 
-                        mVenueList.add(venue);
+                            mVenueList.add(venue);
 
-                        calcAverage += venue.getRating();
-                        calcCount ++;
-                    }
-                });
+                            calcAverage += venue.getRating();
+                            calcCount ++;
+                        }
+                    });
+        } else {
+            setupLocationRequest();
+        }
+
     }
 
     @Override
@@ -325,6 +336,11 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
         return mVenueList;
     }
 
+    @Override
+    public void saveUserScore(Score score) {
+
+        mDataManager.storeUserScore(score, this);
+    }
 
 
 }

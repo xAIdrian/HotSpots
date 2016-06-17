@@ -8,10 +8,11 @@ import android.util.Log;
 
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.data.Constants;
-import com.androidtitan.spotscore.main.data.DetailedVenueResponse;
+import com.androidtitan.spotscore.main.data.Score;
+import com.androidtitan.spotscore.main.data.foursquare.DetailedVenueResponse;
 import com.androidtitan.spotscore.main.data.User;
-import com.androidtitan.spotscore.main.data.Venue;
-import com.androidtitan.spotscore.main.data.VenueResponse;
+import com.androidtitan.spotscore.main.data.foursquare.Venue;
+import com.androidtitan.spotscore.main.data.foursquare.VenueResponse;
 import com.androidtitan.spotscore.main.play.PlayMvp;
 import com.androidtitan.spotscore.main.settings.SettingsMvp;
 import com.androidtitan.spotscore.main.web.deserializers.DetailedResponseDeserializer;
@@ -25,9 +26,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -252,6 +255,44 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    public void storeUserScore(Score score, ScoreViewListener listner) {
+
+        //todo: we might be able to remove this once we have an array created and score loaded when the user logs in
+        if(mUser.getScores() == null) {
+            ArrayList<Score> scores = new ArrayList();
+            mUser.setScores(scores);
+        }
+
+        if(mUser.getScores().size() <= 3) {
+
+            mUser.getScores().add(score);
+
+            Map<String, Object> scoreSaver = new HashMap<>();
+            scoreSaver.put("latitude", score.getLatLng().latitude);
+            scoreSaver.put("longitude", score.getLatLng().longitude);
+            scoreSaver.put("note", score.getNote());
+            scoreSaver.put("score", score.getScore());
+
+
+            mRefUserBase.push().setValue(scoreSaver, new Firebase.CompletionListener() {
+                @Override
+                public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+                    if (firebaseError != null) {
+                        Log.e(TAG, "Error saving data");
+                        listner.onScoreSaveFail();
+                    } else {
+                        Log.e(TAG, "Success saving data");
+                        //todo: callback down to close dialog and notify user
+                        listner.onScoreSavedFinished();
+                    }
+                }
+            });
+        } else {
+            listner.onScoreSaveFail();
+        }
     }
 
     private String getVersion() {

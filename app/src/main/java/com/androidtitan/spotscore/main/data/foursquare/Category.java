@@ -1,6 +1,4 @@
-package com.androidtitan.spotscore.main.data;
-
-import android.graphics.drawable.Icon;
+package com.androidtitan.spotscore.main.data.foursquare;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

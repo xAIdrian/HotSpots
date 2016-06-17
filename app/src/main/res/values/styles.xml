@@ -25,7 +25,7 @@
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <style name="LoginTheme" parent="AppTheme">
-        <item name="colorControlNormal">@color/colorPrimary</item>
+        <item name="colorControlNormal">@color/colorAccent</item>
         <item name="colorControlActivated">@color/colorPrimary</item>
         <item name="colorControlHighlight">@color/colorPrimary</item>
 
@@ -39,6 +39,15 @@
     <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
         <item name="spinBars">true</item>
         <item name="color">@android:color/white</item>
+    </style>
+
+    <style name="DialogStyle" parent="@style/Theme.AppCompat.Light.Dialog">
+
+        <item name="android:windowNoTitle">false</item>
+
+        <item name="colorControlNormal">@color/colorAccent</item> <!-- underline when not selected -->
+        <item name="colorControlActivated">@color/colorPrimary</item> <!-- text and line when selected -->
+
     </style>
 
 

@@ -1,4 +1,4 @@
-package com.androidtitan.spotscore.main.data;
+package com.androidtitan.spotscore.main.data.foursquare;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.annotations.Expose;

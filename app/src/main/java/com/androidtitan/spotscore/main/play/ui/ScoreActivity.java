@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -25,12 +27,11 @@ import android.widget.TextView;
 
 import com.androidtitan.spotscore.R;
 import com.androidtitan.spotscore.common.data.Constants;
-import com.androidtitan.spotscore.common.views.SnappingRecyclerView;
 import com.androidtitan.spotscore.main.App;
 import com.androidtitan.spotscore.main.data.User;
 import com.androidtitan.spotscore.main.login.ui.LoginActivity;
 import com.androidtitan.spotscore.main.play.PlayMvp;
-import com.androidtitan.spotscore.main.play.adapter.ScoreAdapter;
+import com.androidtitan.spotscore.main.play.adapter.ScoreOptionsAdapter;
 import com.androidtitan.spotscore.main.settings.ui.SettingsActivity;
 import com.firebase.client.Firebase;
 
@@ -43,14 +44,19 @@ import io.doorbell.android.Doorbell;
 public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
     private final String TAG = getClass().getSimpleName();
 
-    public static String LAUNCH_SETTINGS_EXTRA = "scoreactivity.launchsettingsextra";
-    public static int LAUNCH_SETTINGS = 1;
+    public static final String LAUNCH_SETTINGS_EXTRA = "scoreactivity.launchsettingsextra";
+    public static final String SAVE_DIALOG_DISPLAY_SCORE = " scoreactivity.savedialogdisplayscore";
+
+    public static final int LAUNCH_SETTINGS = 1;
+
 
     @Inject
     PlayMvp.Presenter mPlayPresenter;
 
     private Firebase mRef = new Firebase(Constants.FIREBASE_URL);
     private User mUser;
+
+    private SaveScoreFragDialog saveFrag;
 
     private ActionBarDrawerToggle mActionToggle;
 
@@ -64,7 +70,7 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
 
     @Bind(R.id.locationFab) FloatingActionButton mLocationFab;
     @Bind(R.id.scoreList) RecyclerView mRecyclerView;
-    private ScoreAdapter mAdapter;
+    private ScoreOptionsAdapter mAdapter;
 
     private boolean mScoreIsLoaded = false;
 
@@ -93,7 +99,7 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
-        mAdapter = new ScoreAdapter(this, mPlayPresenter);
+        mAdapter = new ScoreOptionsAdapter(this, mPlayPresenter);
         mRecyclerView.setAdapter(mAdapter);
 
         mActionToggle = new ActionBarDrawerToggle(
@@ -324,6 +330,12 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
         mProfileText.setText(mUser.getName());
     }
 
+    @Override
+    public void onScoreSavedFinish(String message) {
+        Snackbar.make(getCurrentFocus(), message, Snackbar.LENGTH_LONG).show();
+        saveFrag.getDialog().dismiss();
+    }
+
 
     private void loadLoginView() {
         Intent intent = new Intent(this, LoginActivity.class);
@@ -333,4 +345,22 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
         startActivity(intent);
     }
 
+    public void showScoreDialog() {
+
+        if(mScoreIsLoaded) {
+
+            Bundle args = new Bundle();
+            args.putString(SAVE_DIALOG_DISPLAY_SCORE, mScoreText.getText().toString());
+
+            saveFrag = new SaveScoreFragDialog();
+            saveFrag.setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogStyle);
+            saveFrag.setArguments(args);
+
+            saveFrag.show(getSupportFragmentManager(), "saveFrag");
+
+        } else {
+            Snackbar.make(getCurrentFocus(), "Patience padowon.  The score is loading", Snackbar.LENGTH_LONG).show();
+
+        }
+    }
 }
