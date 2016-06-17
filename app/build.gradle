@@ -34,6 +34,15 @@ android {
         }
 
     }
+
+    buildTypes.each {
+
+        it.buildConfigField 'String', 'UNIQUE_FIREBASE_ROOT_URL', UniqueFirebaseRootUrl
+        it.buildConfigField 'String', 'UNIQUE_FOURSQUARE_CLIENT_ID', UniqueFoursquareClientId
+        it.buildConfigField 'String', 'UNIQUE_FOURSQUARE_CLIENT_SECRET', UniqueFoursquareClientSecret
+        it.buildConfigField 'String', 'UNIQUE_DOORBELLIO_API_KEY', UniqueDoorbellioApiKey
+    }
+
     sourceSets { main { java.srcDirs = ['src/main/java', 'src/test/java/'] } }
     productFlavors {
     }

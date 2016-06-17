@@ -141,7 +141,7 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
 
                             case R.id.nav_drawer_feedback:
                                 new Doorbell(ScoreActivity.this, 3836,
-                                        ScoreActivity.this.getResources().getString(R.string.doorbellio_api_key))
+                                        Constants.DOORBELLIO_API_KEY)
                                         .setEmail(mUser.getEmail())
                                         .show();
                                 break;
@@ -331,7 +331,7 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
     }
 
     @Override
-    public void onScoreSavedFinish(String message) {
+    public void onScoreSavedFinish (String message) {
         Snackbar.make(getCurrentFocus(), message, Snackbar.LENGTH_LONG).show();
         saveFrag.getDialog().dismiss();
     }

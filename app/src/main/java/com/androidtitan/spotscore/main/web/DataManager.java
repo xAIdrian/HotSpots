@@ -113,8 +113,8 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
     public Observable<Venue> getVenuesOneByOne(double latitude, double longitude) {
 
         Observable<VenueResponse> call = newsService.getVenues(
-                mContext.getResources().getString(R.string.foursquare_client_id),
-                mContext.getResources().getString(R.string.foursquare_client_secret),
+                Constants.FOURSQUARE_CLIENT_ID,
+                Constants.FOURSQUARE_CLIENT_SECRET,
                 getVersion(),
                 latitude + "," + longitude);
 
@@ -128,8 +128,8 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
 
         Observable<DetailedVenueResponse> call = newsService.getDetailedVenue(
                 venueIdentifier,
-                mContext.getResources().getString(R.string.foursquare_client_id),
-                mContext.getResources().getString(R.string.foursquare_client_secret),
+                Constants.FOURSQUARE_CLIENT_ID,
+                Constants.FOURSQUARE_CLIENT_SECRET,
                 getVersion());
 
         return call.compose(applySchedulers())
@@ -266,7 +266,7 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
             mUser.setScores(scores);
         }
 
-        if(mUser.getScores().size() <= 3) {
+        if(mUser.getScores().size() < 3) {
 
             mUser.getScores().add(score);
 
@@ -292,6 +292,16 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
             });
         } else {
             listner.onScoreSaveFail();
+        }
+    }
+
+    @Override
+    public int getUserSaves() {
+
+        if(mUser.getScores() != null) {
+            return mUser.getScores().size();
+        } else {
+            return 0;
         }
     }
 

@@ -14,7 +14,6 @@
     <dimen name="navigation_drawer_width">240dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
 
-
     <dimen name="landing_title_text">40dp</dimen>
     <dimen name="score_number_text">64dp</dimen>
     <dimen name="venue_rating_text">35dp</dimen>

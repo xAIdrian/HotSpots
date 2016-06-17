@@ -24,6 +24,7 @@ public interface PlayMvp {
             void onUserProfileSetFinished();
             void onScoreSavedFinished();
             void onScoreSaveFail();
+
         }
 
 
@@ -31,7 +32,9 @@ public interface PlayMvp {
         Observable<Venue> getAdditionalVenueInfo(String venueIdentifier);
 
         void setUserProfile(ScoreViewListener listener);
-        void storeUserScore(Score score, ScoreViewListener listner);
+        void storeUserScore(Score score, ScoreViewListener listener);
+
+        int getUserSaves();
 
     }
 
@@ -66,5 +69,6 @@ public interface PlayMvp {
         
         void saveUserScore(Score score);
 
+        int getRemainingSaves();
     }
 }

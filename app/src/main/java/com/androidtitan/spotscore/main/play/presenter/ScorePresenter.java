@@ -342,5 +342,29 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
         mDataManager.storeUserScore(score, this);
     }
 
+    @Override
+    public int getRemainingSaves() {
+
+        switch (mDataManager.getUserSaves()) { //this is the size of Saves
+
+            case 0 :
+                return 3;
+
+            case 1:
+                return 2;
+
+            case 2:
+                return 1;
+
+            case 3:
+                return 0;
+
+            default:
+                return 0;
+
+        }
+
+    }
+
 
 }

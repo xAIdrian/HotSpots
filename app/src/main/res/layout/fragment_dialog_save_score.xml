@@ -12,7 +12,8 @@
         android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"
         android:padding="@dimen/fab_margin"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginTop="@dimen/fab_margin"
+        android:textSize="@dimen/venue_rating_text"
         android:text="0"/>
 
     <android.support.design.widget.TextInputLayout
@@ -28,15 +29,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/note"
-            android:imeOptions="actionNext"
-            android:singleLine="false"/>
+            android:singleLine="true"
+            android:imeOptions="actionDone"/>
 
     </android.support.design.widget.TextInputLayout>
+
+    <TextView
+        android:id="@+id/remainingSavesTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/saveScore_layout"
+        android:padding="@dimen/default_margin"
+        android:gravity="center"
+        android:text="Here are your remaining saves"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/saveScore_layout"
+        android:layout_below="@+id/remainingSavesTextView"
         android:paddingTop="@dimen/fab_margin"
         android:paddingStart="@dimen/fab_margin"
         android:paddingEnd="@dimen/fab_margin">

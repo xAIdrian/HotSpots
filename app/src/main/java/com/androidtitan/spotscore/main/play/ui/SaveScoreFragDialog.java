@@ -34,6 +34,7 @@ public class SaveScoreFragDialog extends DialogFragment {
 
     @Bind(R.id.saveScoreTextView) TextView mScoreToSaveText;
     @Bind(R.id.saveScoreEditText) EditText mNoteEdit;
+    @Bind(R.id.remainingSavesTextView) TextView mRemainingText;
     @Bind(R.id.sendSaveTextView) TextView mSendText;
     @Bind(R.id.cancelTextView) TextView mCancelText;
 
@@ -71,6 +72,7 @@ public class SaveScoreFragDialog extends DialogFragment {
         mScoreToSaveText.setText(mScore);
         mNoteEdit.setText("Saved on " + formattedDate);
 
+        mRemainingText.setText("You have " + mPresenter.getRemainingSaves() + " saves remaining.");
 
         mCancelText.setOnClickListener(v -> {
             getDialog().dismiss();
