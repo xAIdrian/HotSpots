@@ -102,7 +102,7 @@ public class ScoreOptionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                         break;
 
                     case 2:
-                        mPlayPresenter.showFragment(new VenueListFragment(), null);
+                        mPlayPresenter.showFragment(VenueListFragment.newInstance(), null);
                         break;
                 }
         });

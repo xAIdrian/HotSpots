@@ -277,7 +277,7 @@ public class DataManager implements PlayMvp.Model, SettingsMvp.Model {
             scoreSaver.put("score", score.getScore());
 
 
-            mRefUserBase.push().setValue(scoreSaver, new Firebase.CompletionListener() {
+            mRefUserBase.child("savedScore").push().setValue(scoreSaver, new Firebase.CompletionListener() {
                 @Override
                 public void onComplete(FirebaseError firebaseError, Firebase firebase) {
                     if (firebaseError != null) {

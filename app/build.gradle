@@ -51,9 +51,7 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile files('src/main/res/libs/swipeactionadapter-1.4.3.jar')
     // Injection
-    apt 'com.google.dagger:dagger-compiler:2.0'
-    provided 'com.google.dagger:dagger-compiler:2.0'
-    provided 'org.glassfish:javax.annotation:10.0-b28'
+    
 
     compile 'io.doorbell:android-sdk:0.2.6@aar'
     compile 'com.android.support:appcompat-v7:23.4.0'
@@ -77,6 +75,11 @@ dependencies {
     compile 'com.jakewharton.rxbinding:rxbinding-design:0.4.0'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'de.hdodenhof:circleimageview:2.0.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha2'
+
+    apt 'com.google.dagger:dagger-compiler:2.0'
+    provided 'com.google.dagger:dagger-compiler:2.0'
+    provided 'org.glassfish:javax.annotation:10.0-b28'
 }
 /*
 If we wanted to be selective with our Google Play Services in order to limit the size of our application,

@@ -19,9 +19,11 @@ import com.androidtitan.spotscore.main.play.PlayMvp;
 import com.androidtitan.spotscore.main.play.ui.ScoreActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -42,8 +44,7 @@ import rx.Subscriber;
 public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayMvp.Presenter,
         PlayMvp.Model.ScoreViewListener,
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks,
-        ActivityCompat.OnRequestPermissionsResultCallback
-{
+        ActivityCompat.OnRequestPermissionsResultCallback {
     private final String TAG = getClass().getSimpleName();
 
     private static final int REQUEST_LOCATION = 1;
@@ -56,9 +57,13 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
     private GoogleApiClient mGoogleApiClient;
     private ScoreActivity mActivity;
 
+    private LocationRequest mLocationRequest;
+
     private Location mLastLocation;
-    private LatLng latLng;
-    private ArrayList<Venue> mVenueList;
+    //private LatLng latLng;
+    public ArrayList<Venue> mVenueList;
+
+    private boolean mRequestingLocationUpdates = true;
 
     private double calcAverage;
     private int calcCount;
@@ -76,6 +81,7 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
                     .build();
         }
         setupLocationRequest();
+
     }
 
     @Override
@@ -109,7 +115,7 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
     @Override
     public boolean googleApiIsConnected() {
 
-        if(mGoogleApiClient.isConnected()) {
+        if (mGoogleApiClient.isConnected()) {
             return true;
         } else {
             return false;
@@ -119,7 +125,7 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
     @Override
     public void showFragment(Fragment fragment, Bundle args) {
 
-        if(args != null) {
+        if (args != null) {
             fragment.setArguments(args);
         }
 
@@ -195,13 +201,12 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
 
         } else {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
             if(mLastLocation != null) {
                 tempLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
             }
         }
 
-
-        latLng = tempLatLng;
         return tempLatLng;
     }
 
@@ -216,6 +221,7 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
                 Log.d(TAG, "onRequestPermissionResult : StatusCode.SUCCESS");
 
                 calculateAndSetScore();
+                Log.e(TAG, "onRequestPermissionsResult");
 
             } else {
                 //todo: Permission was denied or request was cancelled // kick them out of this activity
@@ -252,8 +258,6 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
                         // initialize location requests here.
                         Log.d(TAG, "LocationSettingsStatusCodes.SUCCESS");
 
-                        calculateAndSetScore();
-
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         // Location settings are not satisfied, but this can be fixed
@@ -289,11 +293,14 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
     @Override
     public void calculateAndSetScore() {
 
-        if(mGoogleApiClient.isConnected()) {
-            getLastKnownLocation();
-            mVenueList = new ArrayList<Venue>();
+        Log.e(TAG, "calculateAndSetScore called");
 
-            mDataManager.getVenuesOneByOne(latLng.latitude, latLng.longitude)
+
+        if(mGoogleApiClient.isConnected()) {
+            mVenueList = new ArrayList<Venue>();
+            getLastKnownLocation();
+
+            mDataManager.getVenuesOneByOne(mLastLocation.getLatitude(), mLastLocation.getLongitude())
                     .flatMap(venue -> mDataManager.getAdditionalVenueInfo(venue.getId()))
                     .filter(detailedVenue -> detailedVenue.getRating() > 0.0)
                     .subscribe(new Subscriber<Venue>() {
@@ -317,6 +324,7 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
                         public void onNext(Venue venue) {
 
                             mVenueList.add(venue);
+                            Log.e(TAG, venue.getName());
 
                             calcAverage += venue.getRating();
                             calcCount ++;
@@ -330,8 +338,6 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
 
     @Override
     public ArrayList<Venue> getNearbyVenuesList() {
-
-        ArrayList<Venue> tempVenues = new ArrayList<>();
 
         return mVenueList;
     }
@@ -365,6 +371,5 @@ public class ScorePresenter extends BasePresenter<PlayMvp.View> implements PlayM
         }
 
     }
-
 
 }

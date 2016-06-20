@@ -232,9 +232,6 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
     protected void onStart() {
         mPlayPresenter.connectGoogleApiClient();
 
-//        mPlayPresenter.getLastKnownLocation();
-        mPlayPresenter.calculateAndSetScore();
-
         super.onStart();
     }
 
@@ -245,7 +242,8 @@ public class ScoreActivity extends AppCompatActivity implements PlayMvp.View {
         if (!mPlayPresenter.googleApiIsConnected()) {
             mPlayPresenter.connectGoogleApiClient();
         }
-//        mPlayPresenter.getLastKnownLocation();
+
+        mPlayPresenter.getLastKnownLocation();
         mPlayPresenter.calculateAndSetScore();
     }
 
