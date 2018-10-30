@@ -27,6 +27,7 @@ thread a ThreadPoolExecutor executes an AsyncTask for each Venue initially retur
 a value greater than 0 it is insterted into the database via content provider.
 
 <br>
+
 ![venueandfoursquare](https://user-images.githubusercontent.com/7444521/47698847-2f69aa00-dbce-11e8-8aa6-c11eb5ac6ea8.gif)
 
 The FAB with the "next" arrow will appear only once all background processes are completed.  Clicking the FAB once will slide in another
@@ -37,6 +38,7 @@ Clicking a list item will highlight it.  Subsequently clicking the Foursquare ic
 to the Foursquare website or their native Android app.
 
 <br>
+
 ![previtems4real](https://user-images.githubusercontent.com/7444521/47698902-50ca9600-dbce-11e8-9dea-bc1c6284c104.gif)
 
 After getting their score the user will be able to view previous locations via markers or list contained in the navigation drawer.
