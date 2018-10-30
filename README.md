@@ -1,6 +1,4 @@
-## Spot Score App (formerly know as HotSpots)
-
-# Hotspot
+# Hotspots
 
 If you dig into the code for this project you can see that it could, uh, be done better.  In the next week I am going to change the purpose of this README from explanation to examination as we tear apart this project and analyze what should be changed to make the project scalable, maintanable, a bit more modular.  Stay tuned!
 
